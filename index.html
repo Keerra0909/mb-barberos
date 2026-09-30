@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+
+<script>
+window.addEventListener('error', function(e) {
+    document.body.innerHTML = '<div style="color:red; background:white; position:fixed; z-index:9999; top:0; left:0; width:100%; padding:20px;">' + e.message + '<br>' + e.filename + ':' + e.lineno + '</div>' + document.body.innerHTML;
+});
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberOS - Studio MB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        zinc: { 950: '#09090b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #050505; color: #e5e7eb; }
+        .glass-panel { background: #09090b; border: 1px solid #27272a; }
+        .silver-text { background: linear-gradient(to right, #ffffff, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-silver { background: linear-gradient(to bottom, #e5e7eb, #9ca3af); color: #000; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.2s; border: 1px solid #ffffff; }
+        .btn-silver:hover { background: linear-gradient(to bottom, #ffffff, #d1d5db); transform: translateY(-1px); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+        .btn-silver:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .input-dark { background-color: #000000; border: 1px solid #3f3f46; color: #f4f4f5; }
+        .input-dark:focus { border-color: #a1a1aa; outline: none; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #71717a; }
+        html.light-theme { filter: invert(1) hue-rotate(180deg); }
+        html.light-theme img { filter: invert(1) hue-rotate(180deg); }
+    </style>
+    <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:red; color:white; padding:10px; z-index:99999; font-size:12px; font-family:monospace; word-break:break-all;';
+            errDiv.innerText = 'JS Error: ' + msg + '\\nAt: ' + (url ? url.split('/').pop() : '') + ':' + lineNo + ':' + columnNo;
+            document.body.appendChild(errDiv);
+            return false;
+        };
+    </script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body class="min-h-screen font-sans relative selection:bg-zinc-700">
+    
+    <!-- PANTALLA DE LOGIN -->
+    <div id="pantalla-login" class="fixed inset-0 bg-[#050505] z-[100] flex flex-col items-center justify-center p-4">
+        <div class="absolute inset-0 opacity-30 pointer-events-none" style="background: radial-gradient(circle at center, #27272a 0%, transparent 60%);"></div>
+        
+        <div class="text-center mb-10 relative z-10">
+            <div class="flex items-center justify-center mb-4">
+                <img src="logo_cropped.png" alt="MB BarberOS" class="h-52 object-contain mix-blend-screen" style="-webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 75%); mask-image: radial-gradient(circle at center, black 40%, transparent 75%);">
+            </div>
+            <h1 class="text-sm font-sans font-bold text-zinc-400 tracking-[0.3em] uppercase">The Gentleman's House</h1>
+            <div class="w-16 h-px bg-zinc-600 mx-auto my-6"></div>
+            <p class="text-zinc-600 text-xs tracking-widest uppercase">Sistema Administrativo</p>
+        </div>
+        
+        <div id="login-roles" class="w-full max-w-sm space-y-4 relative z-10">
+            <!-- Renderizado desde JS -->
+        </div>
+
+        <div id="login-pin" class="w-full max-w-sm space-y-4 hidden glass-panel p-8 rounded-sm text-center relative z-10">
+            <h2 class="text-zinc-300 font-sans font-bold text-sm tracking-widest mb-6 uppercase">Ingresa tu código</h2>
+            <input type="password" id="pin-input" maxlength="4" placeholder="· · · ·" class="w-full text-center text-3xl tracking-[1em] p-4 bg-black border border-zinc-700 text-white focus:border-zinc-400 focus:outline-none transition-colors" onkeydown="if(event.key === 'Enter') verificarPin()">
+            <div class="flex gap-4 mt-8">
+                <button onclick="cancelarPin()" class="flex-1 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-400 py-3 transition-colors text-xs uppercase tracking-widest">Volver</button>
+                <button onclick="verificarPin()" class="flex-1 btn-silver py-3 text-xs">Entrar</button>
+            </div>
+            <p id="pin-error" class="text-red-400 text-xs mt-4 hidden tracking-widest uppercase">Código Incorrecto</p>
+        </div>
+        
+        <div class="absolute bottom-8 text-zinc-700 text-xs tracking-widest font-sans font-bold uppercase">Cuidamos Tu Estilo</div>
+    </div>
+
+    <!-- MAIN APP CONTENEDOR -->
+    <div id="main-app" class="hidden flex flex-col h-screen overflow-hidden bg-[#050505]">
+        
+        <nav class="glass-panel border-x-0 border-t-0 border-zinc-800 p-4 flex justify-between items-center z-10 shrink-0">
+            <div class="flex items-center gap-6">
+                <img src="logo_cropped.png" alt="MB" class="h-16 object-contain mix-blend-screen">
+                <div class="w-px h-6 bg-zinc-800 hidden md:block"></div>
+                <h1 class="text-xs font-medium tracking-[0.2em] uppercase text-zinc-500 hidden md:block">Panel de Control</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div id="etiqueta-rol" class="hidden border border-zinc-800 bg-black rounded-sm px-3 py-1.5 text-xs uppercase tracking-widest text-zinc-400">
+                    <span id="texto-rol">Caja</span>
+                </div>
+
+                <!-- Fixed title for non-admin branches -->
+                <h2 id="titulo-sucursal-fija" class="hidden text-xl md:text-2xl font-bold font-sans text-emerald-500 tracking-widest uppercase mr-4 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]"></h2>
+                
+                <!-- Fixed title for non-admin branches -->
+                <h2 id="titulo-sucursal-fija" class="hidden text-xl md:text-2xl font-bold font-sans text-emerald-500 tracking-widest uppercase mr-4 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]"></h2>
+                
+                <div id="contenedor-sucursal" class="border border-zinc-700 bg-black rounded-sm px-3 py-1.5 flex items-center">
+                    <select id="sucursal-select" class="bg-transparent text-zinc-300 text-xs uppercase tracking-widest focus:outline-none cursor-pointer">
+                        <!-- Opciones JS -->
+                    </select>
+                </div>
+                
+                <button id="btn-config" class="text-zinc-500 hover:text-white transition-colors ml-2" title="Configurar Sistema">
+                    <i class="fa-solid fa-sliders text-lg"></i>
+                </button>
+                <div class="w-px h-4 bg-zinc-800 mx-2"></div>
+                <button onclick="cerrarSesion()" class="text-zinc-500 hover:text-white text-xs uppercase tracking-widest transition-colors flex items-center gap-2">
+                    Salir <i class="fa-solid fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </nav>
+
+        <div id="contenedor-tabs" class="border-b border-zinc-800 bg-[#09090b] shrink-0">
+            <div class="container mx-auto px-4 max-w-7xl flex gap-8">
+                <button id="tab-pos" class="py-4 text-[11px] tracking-[0.15em] uppercase border-b border-zinc-300 text-zinc-200 transition-colors">
+                    Bitácora & POS
+                </button>
+                <button id="tab-reportes" class="py-4 text-[11px] tracking-[0.15em] uppercase border-b border-transparent text-zinc-600 hover:text-zinc-300 transition-colors">
+                    Administración
+                </button>
+                <button onclick="toggleTheme()" class="ml-auto text-zinc-400 hover:text-white transition-colors" title="Cambiar Tema">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+            <div class="container mx-auto max-w-7xl">
+                
+                <!-- VISTA 1: PUNTO DE VENTA -->
+                <div id="vista-pos" class="grid grid-cols-1 lg:grid-cols-3 gap-8 block">
+                    <!-- Formulario Nuevo Servicio -->
+                    <div class="glass-panel p-6 rounded-sm lg:col-span-1 h-fit relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-zinc-800 opacity-20 rounded-bl-full pointer-events-none"></div>
+                        <div class="flex flex-wrap gap-2 justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-sm font-sans font-bold silver-text tracking-widest uppercase">Nuevo Ticket</h2>
+                                <button type="button" onclick="abrirModalGasto()" class="text-[9px] bg-red-950 text-red-400 border border-red-900 hover:bg-red-900 px-2 py-1.5 rounded-sm transition-colors uppercase tracking-widest font-bold">+ GASTO</button>
+                                <button type="button" onclick="abrirModalCorteCaja()" class="text-[9px] bg-yellow-950 text-yellow-400 border border-yellow-900 hover:bg-yellow-900 px-2 py-1.5 rounded-sm transition-colors uppercase tracking-widest font-bold">CORTE CAJA</button>
+                            </div>
+                            <span id="label-sucursal-form" class="text-[11px] uppercase tracking-widest border border-zinc-700 bg-black text-zinc-400 px-2 py-1 rounded-sm">Sucursal</span>
+                        </div>
+                        <form id="registro-form" class="space-y-5">
+                            <div>
+                                <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Barbero Asignado</label>
+                                <select id="barbero" class="w-full input-dark rounded-sm p-3 text-sm" required></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Servicio</label>
+                                    <select id="servicio" class="w-full input-dark rounded-sm p-3 text-sm" onchange="agregarServicio()"></select>
+                                    <div id="servicios-seleccionados" class="flex flex-wrap gap-2 mt-2 hidden"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Productos</label>
+                                    <select id="producto-item" class="w-full input-dark rounded-sm p-3 text-xs font-bold text-zinc-300" onchange="agregarProducto()">
+                                        <option value="">+ Añadir Producto</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Monto ($)</label>
+                                    <input type="number" id="monto" value="380" class="w-full input-dark rounded-sm p-3 text-sm font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Propina ($)</label>
+                                    <input type="number" id="propina" value="0" class="w-full input-dark rounded-sm p-3 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Cortesía</label>
+                                    <select id="bebida" class="w-full input-dark rounded-sm p-3 text-sm text-zinc-300" onchange="agregarBebida()"></select>
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Forma de Pago</label>
+                                <div class="flex gap-2">
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="pago" value="Efectivo" class="peer hidden" checked onchange="toggleMixto(false)">
+                                        <div class="text-center p-3 border border-zinc-700 rounded-sm peer-checked:bg-zinc-200 peer-checked:text-black peer-checked:border-zinc-200 text-zinc-500 transition-colors text-xs font-bold uppercase tracking-widest">
+                                            Efectivo
+                                        </div>
+                                    </label>
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="pago" value="Tarjeta" class="peer hidden" onchange="toggleMixto(false)">
+                                        <div class="text-center p-3 border border-zinc-700 rounded-sm peer-checked:bg-zinc-200 peer-checked:text-black peer-checked:border-zinc-200 text-zinc-500 transition-colors text-xs font-bold uppercase tracking-widest">
+                                            Tarjeta
+                                        </div>
+                                    </label>
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="pago" value="Mixto" class="peer hidden" onchange="toggleMixto(true)">
+                                        <div class="text-center p-3 border border-zinc-700 rounded-sm peer-checked:bg-zinc-200 peer-checked:text-black peer-checked:border-zinc-200 text-zinc-500 transition-colors text-xs font-bold uppercase tracking-widest">
+                                            Mixto
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="panel-mixto" class="hidden bg-black p-4 rounded-sm border border-zinc-800 space-y-4">
+                                <p class="text-xs text-zinc-400 font-semibold uppercase tracking-widest text-center">Total: <span id="total-mixto-label" class="font-bold text-zinc-200 text-sm">$380</span></p>
+                                <div>
+                                    <label class="block text-xs text-zinc-400 mb-2 uppercase tracking-widest text-center">Efectivo Recibido</label>
+                                    <div class="flex items-center">
+                                        <span class="bg-zinc-900 px-3 py-2 rounded-l-sm border border-zinc-800 border-r-0 text-zinc-500">$</span>
+                                        <input type="number" id="monto-efectivo-mixto" value="0" class="w-full input-dark rounded-r-sm p-2 text-center text-sm focus:outline-none" oninput="calcularRestanteMixto()">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-zinc-400 uppercase tracking-widest text-center">A Terminal: <span id="restante-tarjeta-label" class="font-bold text-zinc-300 text-sm">$380</span></p>
+                            </div>
+                            <button type="submit" class="w-full btn-silver py-4 text-xs mt-4">
+                                Registrar
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- DASHBOARD POS -->
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="flex justify-between items-center glass-panel p-4 rounded-sm">
+                            <h2 class="text-sm font-sans font-bold silver-text tracking-widest uppercase">Operación Diaria</h2>
+                            <div class="flex items-center gap-3">
+                                <label class="text-xs text-zinc-400 font-semibold uppercase tracking-widest">Fecha:</label>
+                                <input type="date" id="filtro-fecha-pos" class="text-xs input-dark rounded-sm px-2 py-1 focus:border-zinc-500 cursor-pointer">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="glass-panel p-5 rounded-sm text-center relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-[1px] bg-zinc-300"></div><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-2">Ingresos</p><h3 class="text-2xl font-sans font-bold text-white" id="total-ingresos">$0</h3></div>
+                            <div class="glass-panel p-5 rounded-sm text-center relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-[1px] bg-zinc-500"></div><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-2">Caja (Efvo)</p><h3 class="text-2xl font-sans font-bold text-zinc-300" id="total-efectivo">$0</h3></div>
+                            <div class="glass-panel p-5 rounded-sm text-center relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-[1px] bg-zinc-700"></div><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-2">Terminal</p><h3 class="text-2xl font-sans font-bold text-zinc-400" id="total-tarjeta">$0</h3></div>
+                            <div class="glass-panel p-5 rounded-sm text-center relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-[1px] bg-zinc-800"></div><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-2">Tickets</p><h3 class="text-2xl font-sans font-bold text-zinc-500" id="total-cortes">0</h3></div>
+                        </div>
+
+                        <div id="panel-comisiones" class="glass-panel p-6 rounded-sm">
+                            <h2 class="text-[11px] font-sans font-bold silver-text tracking-widest uppercase mb-6 text-center">Desempeño Barberos</h2>
+                            <div id="barberos-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6"></div>
+                        </div>
+
+                        <div class="glass-panel rounded-sm overflow-hidden">
+                            <div class="p-4 border-b border-zinc-800 bg-black flex justify-between items-center">
+                                <h2 class="text-[11px] font-sans font-bold silver-text tracking-widest uppercase">Bitácora <span id="label-bitacora-sucursal" class="text-[11px] font-sans text-zinc-600 ml-2 tracking-widest"></span></h2>
+                                <button id="btn-limpiar" class="text-[11px] uppercase tracking-widest text-zinc-600 hover:text-red-400 transition-colors">Borrar Día</button>
+                            </div>
+                            <div class="overflow-x-auto max-h-96">
+                                <table class="w-full text-left text-[11px]">
+                                    <thead class="bg-[#050505] text-zinc-600 uppercase tracking-widest sticky top-0 z-10 border-b border-zinc-800">
+                                        <tr><th class="p-3 font-normal">Local</th><th class="p-3 font-normal">Hora</th><th class="p-3 font-normal">Barbero</th><th class="p-3 font-normal">Servicio</th><th class="p-3 font-normal">Monto</th><th class="p-3 font-normal">Propina</th><th class="p-3 font-normal">Pago</th><th class="p-3 text-right col-accion font-normal"></th></tr>
+                                    </thead>
+                                    <tbody id="tabla-registros" class="divide-y divide-zinc-900"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA 2: REPORTES Y Nómina -->
+                <div id="vista-reportes" class="hidden space-y-8">
+                    <!-- FILTRO -->
+                    <div class="glass-panel p-5 rounded-sm flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                        <h2 class="text-sm font-sans font-bold silver-text tracking-widest uppercase shrink-0">Reporte Financiero</h2>
+                        <div class="flex flex-wrap items-end xl:items-center gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[11px] text-zinc-400 text-shadow-sm uppercase tracking-widest">Filtro Rápido</label>
+                                <select id="quick-date-select" class="text-xs input-dark rounded-sm px-3 py-2 cursor-pointer border-zinc-800" onchange="applyQuickDate()">
+                                    <option value="custom">Personalizado...</option>
+                                    <option value="esta_semana">Esta Semana</option>
+                                    <option value="semana_pasada">Semana Pasada</option>
+                                    <option value="este_mes" selected>Mes Actual</option>
+                                    <option value="mes_pasado">Mes Pasado</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[11px] text-zinc-400 text-shadow-sm uppercase tracking-widest">Desde</label>
+                                <input type="date" id="reporte-desde" class="text-xs input-dark rounded-sm px-3 py-2 cursor-pointer border-zinc-800">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[11px] text-zinc-400 text-shadow-sm uppercase tracking-widest">Hasta</label>
+                                <input type="date" id="reporte-hasta" class="text-xs input-dark rounded-sm px-3 py-2 cursor-pointer border-zinc-800">
+                            </div>
+                            <button id="btn-filtrar-reportes" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-600 px-6 py-2 rounded-sm text-xs uppercase tracking-widest transition-colors">Generar</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="glass-panel p-6 rounded-sm text-center"><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-3">Ingresos Periodo</p><h3 class="text-3xl font-sans font-bold text-white" id="rep-ingresos-periodo">$0</h3></div>
+                        <div class="glass-panel p-6 rounded-sm text-center"><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-3">Tickets Totales</p><h3 class="text-3xl font-sans font-bold text-zinc-300" id="rep-cortes-periodo">0</h3></div>
+                        <div class="glass-panel p-6 rounded-sm text-center"><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-3">Propina Promedio</p><h3 class="text-3xl font-sans font-bold text-zinc-400" id="rep-propina-promedio">$0</h3></div>
+                        <div class="glass-panel p-6 rounded-sm text-center"><p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-3">Nómina Pagada</p><h3 class="text-3xl font-sans font-bold text-zinc-500" id="rep-pagos-periodo">$0</h3></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-sm"><h2 class="text-xs font-sans font-bold text-zinc-400 tracking-widest uppercase mb-6 text-center border-b border-zinc-800 pb-4">Tendencia de Ingresos</h2><div class="relative h-64 w-full"><canvas id="chartTendencia"></canvas></div></div>
+                        <div class="glass-panel p-6 rounded-sm"><h2 class="text-xs font-sans font-bold text-zinc-400 tracking-widest uppercase mb-6 text-center border-b border-zinc-800 pb-4">Productividad</h2><div class="relative h-64 w-full"><canvas id="chartBarberos"></canvas></div></div>
+                    </div>
+
+                    <!-- Nómina -->
+                    <div class="glass-panel rounded-sm overflow-hidden">
+                        <div class="p-6 border-b border-zinc-800 bg-black text-center">
+                            <h2 class="text-xs font-sans font-bold silver-text tracking-widest uppercase mb-2">Control de Nómina</h2>
+                            <p class="text-[11px] text-zinc-400 text-shadow-sm uppercase tracking-widest">Balances del periodo seleccionado</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-xs">
+                                <thead class="bg-[#050505] text-zinc-600 text-[11px] uppercase tracking-widest border-b border-zinc-800">
+                                    <tr>
+                                        <th class="p-4 font-normal text-left">Barbero</th>
+                                        <th class="p-4 font-normal text-zinc-500" title="Ventas Totales">Ventas Brutas</th>
+                                        <th class="p-4 font-normal text-emerald-500 font-bold" title="50% Servicio + Propina">Comisión / Propina</th>
+                                        <th class="p-4 font-normal text-blue-500">Pagado</th>
+                                        <th class="p-4 font-normal text-right text-red-500">Saldo a Pagar</th>
+                                        <th class="p-4 font-normal">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-nomina-barberos" class="divide-y divide-zinc-900"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Historial de Tickets -->
+                    <div class="glass-panel rounded-sm overflow-hidden">
+                        <div class="p-4 border-b border-zinc-800 bg-black text-center">
+                            <h2 class="text-xs font-sans font-bold text-zinc-400 tracking-widest uppercase">Historial de Pagos Emitidos</h2>
+                        </div>
+                                                  <div class="overflow-x-auto max-h-64">
+                              <table class="w-full text-center text-[11px]">
+                                  <thead class="bg-[#050505] text-zinc-600 text-[11px] uppercase tracking-widest sticky top-0 border-b border-zinc-800">
+                                      <tr><th class="p-3 font-normal text-left pl-6">Fecha</th><th class="p-3 font-normal">Barbero</th><th class="p-3 font-normal">Monto</th><th class="p-3 font-normal text-right pr-6">Método</th></tr>
+                                  </thead>
+                                  <tbody id="tabla-historial-pagos" class="divide-y divide-zinc-900"></tbody>
+                              </table>
+                          </div>
+                          </div>
+                    <!-- Historial de Ediciones -->
+                    <div class="glass-panel rounded-sm overflow-hidden mt-8 border border-orange-900/30">
+                        <div class="p-4 border-b border-zinc-800 bg-black text-center">
+                            <h2 class="text-xs font-sans font-bold text-orange-500 tracking-widest uppercase"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Auditoría de Modificaciones</h2>
+                        </div>
+                        <div class="overflow-x-auto max-h-64">
+                            <table class="w-full text-left text-[11px]">
+                                <thead class="bg-[#050505] text-zinc-600 uppercase tracking-widest sticky top-0 border-b border-zinc-800">
+                                    <tr>
+                                        <th class="p-3 font-normal pl-6">Fecha Edición</th>
+                                        <th class="p-3 font-normal">Ticket Afectado</th>
+                                        <th class="p-3 font-normal">Antes</th>
+                                        <th class="p-3 font-normal">Después</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-historial-ediciones" class="divide-y divide-zinc-900"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                      </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURACION -->
+    <div id="modal-config" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-sm w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-black">
+                <h3 class="font-sans font-bold silver-text text-sm tracking-widest uppercase">Ajustes del Sistema</h3>
+                <button id="btn-cerrar-modal" class="text-zinc-600 hover:text-zinc-300 transition-colors"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Productos -->
+                <div class="flex flex-col">
+                    <h4 class="text-xs text-zinc-400 font-semibold uppercase tracking-widest mb-4 text-center border-b border-zinc-800 pb-2">Productos</h4>
+                    <form id="form-nuevo-producto" class="flex flex-col gap-2 mb-4">
+                        <input type="text" id="nuevo-producto-nombre" placeholder="Nombre (ej. Cera)" class="w-full text-xs input-dark rounded-sm p-2 border-zinc-800" required>
+                        <div class="flex gap-2">
+                            <input type="number" id="nuevo-producto-precio" placeholder="Precio $" class="w-full text-xs input-dark rounded-sm p-2 border-zinc-800" required>
+                            <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 rounded-sm border border-zinc-700 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                        </div>
+                    </form>
+                    <div class="border border-zinc-800 bg-[#050505] rounded-sm flex-1 min-h-[200px] overflow-y-auto" id="lista-productos-modal"></div>
+                </div>
+
+                <!-- Barberos -->
+                <div class="flex flex-col">
+                    <h4 class="text-xs text-zinc-400 font-semibold uppercase tracking-widest mb-4 text-center border-b border-zinc-800 pb-2">Barberos</h4>
+                    <form id="form-nuevo-barbero" class="flex gap-2 mb-4">
+                        <input type="text" id="nuevo-barbero-nombre" placeholder="Nombre" class="flex-1 text-xs input-dark rounded-sm p-2 border-zinc-800" required><select id="nuevo-barbero-sucursal" class="w-28 text-xs input-dark rounded-sm p-2 border-zinc-800"></select>
+                        <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 rounded-sm border border-zinc-700 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </form>
+                    <div class="border border-zinc-800 bg-[#050505] rounded-sm flex-1 min-h-[200px] overflow-y-auto" id="lista-barberos-modal"></div>
+                </div>
+                <!-- Servicios -->
+                <div class="flex flex-col">
+                    <h4 class="text-xs text-zinc-400 font-semibold uppercase tracking-widest mb-4 text-center border-b border-zinc-800 pb-2">Servicios</h4>
+                    <form id="form-nuevo-servicio" class="flex gap-2 mb-4">
+                        <input type="text" id="nuevo-servicio-nombre" placeholder="Añadir..." class="flex-1 text-xs input-dark rounded-sm p-2 border-zinc-800" required>
+                        <input type="number" id="nuevo-servicio-precio" placeholder="$" class="w-16 text-xs input-dark rounded-sm p-2 border-zinc-800 text-center" required min="0">
+                        <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 rounded-sm border border-zinc-700 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </form>
+                    <div class="border border-zinc-800 bg-[#050505] rounded-sm flex-1 min-h-[200px] overflow-y-auto" id="lista-servicios-modal"></div>
+                </div>
+                <!-- Bebidas -->
+                <div class="flex flex-col">
+                    <h4 class="text-xs text-zinc-400 font-semibold uppercase tracking-widest mb-4 text-center border-b border-zinc-800 pb-2">Cortesías</h4>
+                    <form id="form-nueva-bebida" class="flex gap-2 mb-4">
+                        <input type="text" id="nueva-bebida-nombre" placeholder="Añadir..." class="w-full text-xs input-dark rounded-sm p-2 border-zinc-800" required>
+                        <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 rounded-sm border border-zinc-700 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </form>
+                    <div class="border border-zinc-800 bg-[#050505] rounded-sm flex-1 min-h-[200px] overflow-y-auto" id="lista-bebidas-modal"></div>
+                </div>
+            </div>
+            <div class="p-4 bg-black text-center text-[11px] text-zinc-400 text-shadow-sm border-t border-zinc-800 uppercase tracking-widest">
+                Los cambios se guardan automáticamente
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PAGO -->
+    <div id="modal-pago" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-sm w-full max-w-sm overflow-hidden">
+            <div class="p-5 border-b border-zinc-800 text-center bg-black">
+                <h3 class="font-sans font-bold silver-text text-sm tracking-widest uppercase">Emitir Pago</h3>
+            </div>
+            <form id="form-pago-barbero" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Receptor</label>
+                    <input type="text" id="pago-barbero-nombre" class="w-full bg-[#050505] border border-zinc-800 rounded-sm p-3 text-zinc-300 text-sm font-bold text-center" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Monto a Liquidar</label>
+                    <input type="number" id="pago-monto" class="w-full input-dark rounded-sm p-3 text-center text-lg font-sans font-bold" required>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Vía de Pago</label>
+                    <select id="pago-metodo" class="w-full input-dark rounded-sm p-3 text-sm text-center" onchange="toggleMixtoNomina(this.value)">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Mixto">Mixto</option>
+                    </select>
+                </div>
+                <div id="panel-mixto-nomina" class="hidden bg-black p-4 rounded-sm border border-zinc-800 space-y-3">
+                    <p class="text-xs text-zinc-500 uppercase tracking-widest text-center">Desglose del Pago</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] text-zinc-500 mb-1 uppercase tracking-widest text-center">Efectivo</label>
+                            <div class="flex items-center">
+                                <span class="bg-zinc-900 px-2 py-2 border border-zinc-800 border-r-0 text-zinc-500 text-xs">$</span>
+                                <input type="number" id="pago-efectivo-mixto" value="0" min="0" class="w-full input-dark p-2 text-center text-sm focus:outline-none" oninput="calcularTransferenciaNomina()">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-zinc-500 mb-1 uppercase tracking-widest text-center">Transferencia</label>
+                            <div class="flex items-center">
+                                <span class="bg-zinc-900 px-2 py-2 border border-zinc-800 border-r-0 text-zinc-500 text-xs">$</span>
+                                <input type="number" id="pago-transferencia-mixto" value="0" class="w-full input-dark p-2 text-center text-sm focus:outline-none bg-zinc-950" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-zinc-400 text-center uppercase tracking-widest">La transferencia se calcula automáticamente</p>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="cerrarModalPago()" class="flex-1 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-400 py-3 text-xs uppercase tracking-widest rounded-sm transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-silver py-3 text-xs rounded-sm">Abonar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMACION -->
+    <div id="modal-confirm" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-sm w-full max-w-sm p-8 text-center border-t-2 border-t-zinc-400">
+            <h3 class="font-sans font-bold silver-text text-sm tracking-widest uppercase mb-4" id="confirm-title">Confirmación</h3>
+            <p class="text-xs text-zinc-400 mb-8" id="confirm-message">¿Estás seguro?</p>
+            <div class="flex gap-4">
+                <button id="btn-confirm-cancel" class="flex-1 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-400 py-3 text-xs uppercase tracking-widest rounded-sm transition-colors">Cancelar</button>
+                <button id="btn-confirm-ok" class="flex-1 btn-silver py-3 text-xs rounded-sm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR TICKET -->
+    <div id="modal-editar" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-sm w-full max-w-md overflow-hidden relative border-t-2 border-t-zinc-400">
+            <div class="p-5 border-b border-zinc-800 flex justify-between items-center bg-black">
+                <h3 class="font-sans font-bold silver-text text-sm tracking-widest uppercase">Modificar Ticket</h3>
+                <button onclick="cerrarModalEditar()" class="text-zinc-600 hover:text-zinc-300 transition-colors"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <form id="form-editar-ticket" class="p-6 space-y-5 bg-[#09090b]">
+                <input type="hidden" id="edit-ticket-id">
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Barbero</label>
+                    <select id="edit-barbero" class="w-full input-dark rounded-sm p-3 text-sm" required></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Servicio</label>
+                        <select id="edit-servicio" class="w-full input-dark rounded-sm p-3 text-sm"></select>
+<div id="edit-servicios-seleccionados" class="flex flex-wrap gap-2 mt-2 hidden"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Cortesía</label>
+                        <select id="edit-bebida" class="w-full input-dark rounded-sm p-3 text-sm"></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Monto ($)</label>
+                        <input type="number" id="edit-monto" class="w-full input-dark rounded-sm p-3 text-sm font-bold" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Propina ($)</label>
+                        <input type="number" id="edit-propina" class="w-full input-dark rounded-sm p-3 text-sm">
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Forma de Pago</label>
+                    <select id="edit-pago" class="w-full input-dark rounded-sm p-3 text-sm text-center font-bold" onchange="toggleMixtoEdit()">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Mixto">Mixto</option>
+                    </select>
+                </div>
+                <div id="edit-panel-mixto" class="hidden bg-black p-4 rounded-sm border border-zinc-800 space-y-4 mt-4">
+                    <p class="text-xs text-zinc-400 font-semibold uppercase tracking-widest text-center">Total a Cobrar: <span id="edit-total-mixto-label" class="font-bold text-zinc-200 text-sm">$0</span></p>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-2 uppercase tracking-widest text-center">Efectivo Recibido</label>
+                        <div class="flex items-center">
+                            <span class="bg-zinc-900 px-3 py-2 rounded-l-sm border border-zinc-800 border-r-0 text-zinc-500">$</span>
+                            <input type="number" id="edit-monto-efectivo-mixto" value="0" class="w-full input-dark rounded-r-sm p-2 text-center text-sm focus:outline-none" oninput="calcularRestanteMixtoEdit()">
+                        </div>
+                    </div>
+                    <p class="text-xs text-zinc-400 uppercase tracking-widest text-center">A Terminal: <span id="edit-restante-tarjeta-label" class="font-bold text-zinc-300 text-sm">$0</span></p>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="cerrarModalEditar()" class="flex-1 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-400 py-3 text-xs uppercase tracking-widest rounded-sm transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-silver py-3 text-xs rounded-sm">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+    <!-- Modal Gasto -->
+    <div id="modal-gasto" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-sm p-6 relative">
+            <h3 class="text-lg font-sans font-bold text-red-500 tracking-widest uppercase mb-4 border-b border-zinc-800 pb-3">Registrar Gasto</h3>
+            <form id="form-gasto" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Concepto (¿En qué se gastó?)</label>
+                    <input type="text" id="gasto-concepto" class="w-full input-dark rounded-sm p-3 text-sm" placeholder="Ej. Garrafones de agua" required>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Monto ($)</label>
+                    <input type="number" id="gasto-monto" class="w-full input-dark rounded-sm p-3 text-sm font-bold text-red-400" required>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="cerrarModalGasto()" class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white p-3 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white p-3 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors shadow-lg">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Corte de Caja -->
+    <div id="modal-corte" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-sm p-6 relative border-t-2 border-yellow-500">
+            <h3 class="text-lg font-sans font-bold text-yellow-500 tracking-widest uppercase mb-4 border-b border-zinc-800 pb-3">Corte de Caja (Fin de Turno)</h3>
+            <div class="space-y-4 mb-6">
+                <div class="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-2">
+                    <span class="text-zinc-400 uppercase tracking-widest text-xs">Ingresos en Efectivo:</span>
+                    <span id="corte-ingresos-efvo" class="font-mono text-emerald-400 font-bold"></span>
+                </div>
+                <div class="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-2">
+                    <span class="text-zinc-400 uppercase tracking-widest text-xs">Gastos Totales (-):</span>
+                    <span id="corte-gastos" class="font-mono text-red-400 font-bold"></span>
+                </div>
+                <div class="flex justify-between items-center text-sm border-b border-zinc-700 pb-2">
+                    <span class="text-zinc-200 uppercase tracking-widest text-[11px] font-bold">Total Esperado en Cajón:</span>
+                    <span id="corte-esperado" class="font-mono text-white text-lg font-bold"></span>
+                </div>
+            </div>
+            
+            <form id="form-corte" class="space-y-4">
+                <div class="bg-yellow-950/20 border border-yellow-900/50 p-4 rounded-sm">
+                    <label class="block text-[11px] text-yellow-500 font-semibold mb-2 uppercase tracking-widest">¿Cuánto efectivo hay físicamente?</label>
+                    <input type="number" id="corte-real" class="w-full bg-black border border-yellow-700/50 rounded-sm p-3 text-lg font-bold text-white text-center" placeholder="$0.00" required>
+                </div>
+                <div id="corte-diferencia-box" class="hidden text-center text-sm font-bold uppercase tracking-widest p-2 rounded-sm border"></div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="cerrarModalCorteCaja()" class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white p-3 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors shadow-lg">Cerrar Turno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Modal de Éxito -->
+    <div id="modal-exito" class="fixed inset-0 bg-[#050505]/95 backdrop-blur-md z-[60] hidden flex flex-col items-center justify-center p-4 transition-opacity duration-300">
+        <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
+            <i class="fa-solid fa-check text-4xl text-emerald-400"></i>
+        </div>
+        <h2 class="text-2xl font-sans font-bold text-white tracking-widest uppercase mb-2">¡Corte Registrado!</h2>
+        <p class="text-zinc-400 text-center max-w-sm text-sm mb-8">El cajón ha sido cerrado correctamente. Preparando el reporte de WhatsApp para el administrador...</p>
+    </div>
+
+
+<script src="app.js?v=1790726218"></script>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+        .then(() => console.log("MB BarberOS: Offline listo."))
+        .catch(e => console.error("SW:", e));
+}
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+

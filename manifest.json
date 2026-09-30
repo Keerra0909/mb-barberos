@@ -1,0 +1,17 @@
+{
+  "name": "MB BarberOS",
+  "short_name": "MB Barbers",
+  "description": "Sistema de punto de venta para MB The Gentleman's House",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

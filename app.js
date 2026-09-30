@@ -1,0 +1,1129 @@
+// ==========================================
+// ESTADO GLOBAL
+// ==========================================
+let registros = JSON.parse(localStorage.getItem('mb_registros')) || [];
+let pagosNomina = JSON.parse(localStorage.getItem('mb_pagos')) || [];
+let historialEdiciones = JSON.parse(localStorage.getItem('mb_ediciones')) || [];
+let sucursalesActivas = ['La Morena', 'La Quemada', 'Nativitas'];
+
+window.guardarDatos = function() {
+    localStorage.setItem('mb_registros', JSON.stringify(registros));
+    localStorage.setItem('mb_pagos', JSON.stringify(pagosNomina));
+    localStorage.setItem('mb_ediciones', JSON.stringify(historialEdiciones));
+};
+let barberosActivos = [
+    {nombre: 'David', sucursal: 'La Morena'},
+    {nombre: 'Brandon', sucursal: 'La Morena'},
+    {nombre: 'Mario', sucursal: 'La Quemada'},
+    {nombre: 'Gabo', sucursal: 'Nativitas'},
+    {nombre: 'Carlos', sucursal: 'La Morena'}
+];
+let productosActivos = ['Pomada Mate', 'Pomada Brillo', 'Polvo Texturizador', 'Minoxidil', 'Aceite para Barba'];
+
+let catalog = [
+    { cat: 'Clásicos', items: ['Corte de Cabello', 'Corte de Barba (Ritual)', 'Corte y Barba', 'Servicio Express', 'Servicio Luxury'] },
+    { cat: 'Spa y Faciales', items: ['Limpieza Facial', 'Facial y Corte', 'Facial, Corte y Barba', 'Facial y Barba', 'Corte y Masaje', 'Corte, Barba y Masaje', 'Corte y Reflexoterapia', 'Corte, Barba y Reflexoterapia'] },
+    { cat: 'Extras', items: ['Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas'] }
+];
+let preciosBase = {
+    'Corte de Cabello': 220, 'Corte de Barba (Ritual)': 220, 'Corte y Barba': 380, 'Servicio Express': 120, 'Servicio Luxury': 550,
+    'Limpieza Facial': 180, 'Facial y Corte': 330, 'Facial, Corte y Barba': 480, 'Facial y Barba': 330,
+    'Corte y Masaje': 600, 'Corte, Barba y Masaje': 750, 'Corte y Reflexoterapia': 580, 'Corte, Barba y Reflexoterapia': 730,
+    'Tinte de Barba': 120, 'Grecas': 80, 'Perfilado de Cejas': 80, 'Planchado de Cejas': 150,
+    'Pomada Mate': 250, 'Pomada Brillo': 250, 'Polvo Texturizador': 180, 'Minoxidil': 350, 'Aceite para Barba': 150
+};
+let serviciosActivos = ['Corte de Cabello', 'Corte de Barba (Ritual)', 'Corte y Barba', 'Servicio Express', 'Servicio Luxury',
+    'Limpieza Facial', 'Facial y Corte', 'Facial, Corte y Barba', 'Facial y Barba',
+    'Corte y Masaje', 'Corte, Barba y Masaje', 'Corte y Reflexoterapia', 'Corte, Barba y Reflexoterapia',
+    'Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas'];
+let bebidasActivas = ['-', 'Agua', 'Coca Cola', 'Cerveza', 'Jugo'];
+
+let sucursalActual = 'La Morena';
+let rolActual = null;
+const formatoDinero = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+let chartTendenciaInst = null;
+let chartBarberosInst = null;
+let serviciosActuales = [];
+let editServiciosActuales = [];
+let ticketEnEdicion = null;
+
+// ==========================================
+// 1. SISTEMA DE ROLES Y PIN
+// ==========================================
+let rolPendiente = null;
+
+function renderizarBotonesLogin() {
+    const container = document.getElementById('login-roles');
+    if(!container) return;
+    container.innerHTML = `
+        <button onclick="promptPin('admin')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-6 rounded-xl transition-transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg">
+            <i class="fa-solid fa-user-tie text-xl"></i> Acceso Dueño / Admin
+        </button>
+        <div class="h-px bg-zinc-800 my-4"></div>
+    `;
+    [...sucursalesActivas].sort().forEach(suc => {
+        container.innerHTML += `
+            <button onclick="promptPin('caja_${suc}')" class="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-bold py-3 px-6 rounded-xl transition-transform hover:scale-105 flex justify-between items-center border border-zinc-700 mb-3">
+                <span><i class="fa-solid fa-desktop text-zinc-500 mr-2"></i> Tienda ${suc}</span>
+                <i class="fa-solid fa-chevron-right text-zinc-500"></i>
+            </button>
+        `;
+    });
+}
+
+function promptPin(rol) {
+    rolPendiente = rol;
+    const loginRoles = document.getElementById('login-roles');
+    const loginPin = document.getElementById('login-pin');
+    if(loginRoles) loginRoles.classList.add('hidden');
+    if(loginPin) loginPin.classList.remove('hidden');
+    const pinErr = document.getElementById('pin-error');
+    if(pinErr) pinErr.classList.add('hidden');
+    const input = document.getElementById('pin-input');
+    if(input) { input.value = ''; setTimeout(() => input.focus(), 100); }
+}
+
+function cancelarPin() {
+    rolPendiente = null;
+    const loginRoles = document.getElementById('login-roles');
+    const loginPin = document.getElementById('login-pin');
+    if(loginRoles) loginRoles.classList.remove('hidden');
+    if(loginPin) loginPin.classList.add('hidden');
+}
+
+function verificarPin() {
+    const input = document.getElementById('pin-input');
+    if(!input) return;
+    const val = input.value;
+    if(val === '9999') {
+        iniciarSesion(rolPendiente);
+        cancelarPin();
+    } else {
+        const err = document.getElementById('pin-error');
+        if(err) err.classList.remove('hidden');
+        input.value = '';
+    }
+}
+
+function iniciarSesion(rol) {
+    rolActual = rol;
+    const loginScreen = document.getElementById('pantalla-login');
+    const mainApp = document.getElementById('main-app');
+    if(loginScreen) loginScreen.classList.add('hidden');
+    if(mainApp) { mainApp.classList.remove('hidden'); mainApp.classList.add('flex'); }
+
+    const tabs = document.getElementById('contenedor-tabs');
+    const selectorSuc = document.getElementById('contenedor-sucursal');
+    const btnConfig = document.getElementById('btn-config');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    const etiquetaRol = document.getElementById('etiqueta-rol');
+    const textoRol = document.getElementById('texto-rol');
+    const labelBitacora = document.getElementById('label-bitacora-sucursal');
+    const panelComisiones = document.getElementById('panel-comisiones');
+
+    if(tabs) tabs.classList.add('hidden');
+    if(selectorSuc) selectorSuc.classList.add('hidden');
+    if(btnConfig) btnConfig.classList.add('hidden');
+    if(btnLimpiar) btnLimpiar.classList.add('hidden');
+    if(etiquetaRol) etiquetaRol.classList.remove('hidden');
+    if(panelComisiones) panelComisiones.classList.add('hidden');
+
+    if(rol === 'admin') {
+        if(tabs) tabs.classList.remove('hidden');
+        if(selectorSuc) selectorSuc.classList.remove('hidden');
+        if(btnConfig) btnConfig.classList.remove('hidden');
+        if(btnLimpiar) btnLimpiar.classList.remove('hidden');
+        if(etiquetaRol) etiquetaRol.classList.add('hidden');
+        if(panelComisiones) panelComisiones.classList.remove('hidden');
+        if(labelBitacora) labelBitacora.textContent = '(Todas)';
+
+        const selSucursal = document.getElementById('sucursal-select');
+        if(selSucursal) {
+            selSucursal.innerHTML = '<option value="Todas" class="bg-zinc-900 text-zinc-300">Sucursal: Todas</option>';
+            [...sucursalesActivas].sort().forEach(s => {
+                selSucursal.innerHTML += `<option value="${s}" class="bg-zinc-900 text-zinc-300">Sucursal: ${s}</option>`;
+            });
+            sucursalActual = 'Todas';
+        }
+    } else {
+        sucursalActual = rol.replace('caja_', '');
+        if(textoRol) textoRol.textContent = 'Tienda: ' + sucursalActual;
+        const labelSucForm = document.getElementById('label-sucursal-form');
+        if(labelSucForm) labelSucForm.textContent = sucursalActual;
+        if(labelBitacora) labelBitacora.textContent = `(Solo ${sucursalActual})`;
+    }
+
+    const hoyLocal = new Date();
+    const tOffset = hoyLocal.getTimezoneOffset() * 60000;
+    const hoyIso = new Date(hoyLocal - tOffset).toISOString().split('T')[0];
+    const fechaInput = document.getElementById('filtro-fecha-pos');
+    if(fechaInput) fechaInput.value = hoyIso;
+
+    // FORZAR VISTA POS AL INICIAR SESIÓN
+    const vistaPos = document.getElementById('vista-pos');
+    const vistaRep = document.getElementById('vista-reportes');
+    if(vistaPos) vistaPos.classList.remove('hidden');
+    if(vistaRep) vistaRep.classList.add('hidden');
+    
+    // Y resetear el tab visualmente si existe
+    const tabPos = document.getElementById('tab-pos');
+    const tabRep = document.getElementById('tab-reportes');
+    if(tabPos) tabPos.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
+    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
+
+    actualizarTodasLasListas();
+    actualizarVistaHoy();
+}
+
+function cerrarSesion() {
+    rolActual = null;
+    const loginScreen = document.getElementById('pantalla-login');
+    const mainApp = document.getElementById('main-app');
+    if(loginScreen) loginScreen.classList.remove('hidden');
+    if(mainApp) { mainApp.classList.add('hidden'); mainApp.classList.remove('flex'); }
+    renderizarBotonesLogin();
+}
+
+// ==========================================
+// 2. MODAL CONFIRMACIÓN
+// ==========================================
+let confirmCallback = null;
+function mostrarConfirmacion(titulo, mensaje, onConfirm) {
+    const modalConfirm = document.getElementById('modal-confirm');
+    if(!modalConfirm) { if(confirm(mensaje)) onConfirm(); return; }
+    const t = document.getElementById('confirm-title');
+    const m = document.getElementById('confirm-message');
+    if(t) t.textContent = titulo;
+    if(m) m.textContent = mensaje;
+    confirmCallback = onConfirm;
+    modalConfirm.classList.remove('hidden');
+}
+const btnCancel = document.getElementById('btn-confirm-cancel');
+const btnOk = document.getElementById('btn-confirm-ok');
+if(btnCancel) btnCancel.addEventListener('click', () => { document.getElementById('modal-confirm').classList.add('hidden'); confirmCallback = null; });
+if(btnOk) btnOk.addEventListener('click', () => { document.getElementById('modal-confirm').classList.add('hidden'); if(confirmCallback) confirmCallback(); });
+
+// ==========================================
+// 3. CONFIGURACION MODAL
+// ==========================================
+const modalConfig = document.getElementById('modal-config');
+const btnCfg = document.getElementById('btn-config');
+const btnCerrar = document.getElementById('btn-cerrar-modal');
+if(btnCfg) btnCfg.addEventListener('click', () => { if(modalConfig) modalConfig.classList.remove('hidden'); });
+if(btnCerrar) btnCerrar.addEventListener('click', () => { if(modalConfig) modalConfig.classList.add('hidden'); });
+
+window.actualizarPrecioServicio = function(nombre, valor) {
+    preciosBase[nombre] = parseFloat(valor) || 0;
+};
+
+function actualizarSelectsForm() {
+    const sBarbero = document.getElementById('barbero');
+    const sServicio = document.getElementById('servicio');
+    const sBebida = document.getElementById('bebida');
+    const eBarbero = document.getElementById('edit-barbero');
+    const eServicio = document.getElementById('edit-servicio');
+    const eBebida = document.getElementById('edit-bebida');
+    const selProd = document.getElementById('producto-item');
+
+    const barberosLocal = barberosActivos
+        .filter(b => sucursalActual === 'Todas' || b.sucursal === sucursalActual)
+        .map(b => b.nombre).sort();
+
+    let optBarberos = '<option value="">Selecciona un barbero...</option>';
+    barberosLocal.forEach(n => optBarberos += `<option value="${n}">${n}</option>`);
+
+    let optBebidas = '<option value="-">Sin cortesía</option>';
+    bebidasActivas.forEach(b => { if(b !== '-') optBebidas += `<option value="${b}">${b}</option>`; });
+
+    let optServicios = '<option value="">Selecciona un servicio...</option>';
+    catalog.forEach(grupo => {
+        optServicios += `<optgroup label="${grupo.cat}">`;
+        grupo.items.forEach(s => {
+            if(serviciosActivos.includes(s)) optServicios += `<option value="${s}">${s} — $${preciosBase[s] || 0}</option>`;
+        });
+        optServicios += `</optgroup>`;
+    });
+    const custom = serviciosActivos.filter(s => !catalog.flatMap(g => g.items).includes(s));
+    if(custom.length > 0) {
+        optServicios += `<optgroup label="Otros">`;
+        custom.forEach(s => optServicios += `<option value="${s}">${s} — $${preciosBase[s] || 0}</option>`);
+        optServicios += `</optgroup>`;
+    }
+
+    if(sBarbero) sBarbero.innerHTML = optBarberos;
+    if(eBarbero) eBarbero.innerHTML = optBarberos;
+    if(sServicio) sServicio.innerHTML = optServicios;
+    if(eServicio) eServicio.innerHTML = optServicios;
+    if(sBebida) sBebida.innerHTML = optBebidas;
+    if(eBebida) eBebida.innerHTML = optBebidas;
+
+    if(selProd) {
+        selProd.innerHTML = '<option value="">+ Añadir Producto...</option>';
+        productosActivos.sort().forEach(p => selProd.innerHTML += `<option value="${p}">${p} — $${preciosBase[p] || 0}</option>`);
+    }
+}
+
+function actualizarMenuSucursalesHeader() {
+    const sel = document.getElementById('sucursal-select');
+    if(!sel) return;
+    const current = sel.value || sucursalActual;
+    sel.innerHTML = '';
+    const optTodas = document.createElement('option');
+    optTodas.value = 'Todas'; optTodas.textContent = 'Sucursal: Todas';
+    optTodas.className = 'bg-zinc-900 text-zinc-300';
+    if('Todas' === current) optTodas.selected = true;
+    sel.appendChild(optTodas);
+    [...sucursalesActivas].sort().forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = 'Sucursal: ' + s;
+        opt.className = 'bg-zinc-900 text-zinc-300';
+        if(s === current) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+
+function renderizarListaModal(contenedorId, arrayOriginal, fnEliminar) {
+    const container = document.getElementById(contenedorId);
+    if(!container) return;
+    container.innerHTML = '';
+    if(arrayOriginal.length === 0) {
+        container.innerHTML = '<div class="p-4 text-xs text-zinc-600 text-center uppercase tracking-widest">Vacío</div>';
+        return;
+    }
+    let items = [...arrayOriginal];
+    if(items.length > 0 && typeof items[0] === 'object') items.sort((a,b) => a.nombre.localeCompare(b.nombre));
+    else items.sort();
+
+    items.forEach(item => {
+        const isObj = typeof item === 'object';
+        const val = isObj ? item.nombre : item;
+        const sub = isObj ? item.sucursal : '';
+        let pr = '';
+        if(contenedorId === 'lista-servicios-modal' || contenedorId === 'lista-productos-modal') {
+            pr = `<div class="flex items-center gap-1 mt-1 text-xs"><span class="text-emerald-500">$</span><input type="number" value="${preciosBase[val] || 0}" onchange="actualizarPrecioServicio('${val}', this.value)" class="bg-transparent text-emerald-400 font-mono w-16 focus:outline-none focus:border-b border-zinc-600 px-1"></div>`;
+        } else if(sub) {
+            pr = `<span class="text-[10px] text-zinc-500 tracking-widest uppercase">${sub}</span>`;
+        }
+        container.innerHTML += `<div class="p-3 border-b border-zinc-800 flex justify-between items-center group"><div class="flex flex-col"><span class="text-xs text-zinc-300 font-bold tracking-widest uppercase">${val}</span>${pr}</div><button type="button" onclick="${fnEliminar}('${val}')" class="text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><i class="fa-solid fa-times"></i></button></div>`;
+    });
+}
+
+function actualizarTodasLasListas() {
+    renderizarListaModal('lista-productos-modal', productosActivos, 'eliminarProducto');
+    renderizarListaModal('lista-barberos-modal', barberosActivos, 'eliminarBarbero');
+    renderizarListaModal('lista-servicios-modal', serviciosActivos, 'eliminarServicio');
+    renderizarListaModal('lista-bebidas-modal', bebidasActivas, 'eliminarBebida');
+    const nsuc = document.getElementById('nuevo-barbero-sucursal');
+    if(nsuc) nsuc.innerHTML = sucursalesActivas.map(s => `<option value="${s}">${s}</option>`).join('');
+    actualizarMenuSucursalesHeader();
+    actualizarSelectsForm();
+}
+
+// Delete functions
+window.eliminarProducto = function(n) { mostrarConfirmacion('Eliminar Producto', `¿Eliminar ${n}?`, () => { productosActivos = productosActivos.filter(p => p !== n); actualizarTodasLasListas(); }); };
+window.eliminarBarbero = function(n) { mostrarConfirmacion('Eliminar Barbero', `¿Eliminar a ${n}?`, () => { barberosActivos = barberosActivos.filter(b => b.nombre !== n); actualizarTodasLasListas(); }); };
+window.eliminarServicio = function(n) { mostrarConfirmacion('Eliminar Servicio', `¿Eliminar ${n}?`, () => { serviciosActivos = serviciosActivos.filter(s => s !== n); actualizarTodasLasListas(); }); };
+window.eliminarBebida = function(n) { mostrarConfirmacion('Eliminar Bebida', `¿Eliminar ${n}?`, () => { bebidasActivas = bebidasActivas.filter(b => b !== n); actualizarTodasLasListas(); }); };
+
+// Add forms
+if(document.getElementById('form-nuevo-producto')) {
+    document.getElementById('form-nuevo-producto').addEventListener('submit', e => {
+        e.preventDefault();
+        const v = document.getElementById('nuevo-producto-nombre').value.trim();
+        const p = parseFloat(document.getElementById('nuevo-producto-precio').value) || 0;
+        if(v && !productosActivos.includes(v)) {
+            preciosBase[v] = p; productosActivos.push(v);
+            document.getElementById('nuevo-producto-nombre').value = '';
+            document.getElementById('nuevo-producto-precio').value = '';
+            actualizarTodasLasListas();
+        }
+    });
+}
+if(document.getElementById('form-nuevo-barbero')) {
+    document.getElementById('form-nuevo-barbero').addEventListener('submit', e => {
+        e.preventDefault();
+        const v = document.getElementById('nuevo-barbero-nombre').value.trim();
+        const suc = document.getElementById('nuevo-barbero-sucursal') ? document.getElementById('nuevo-barbero-sucursal').value : sucursalesActivas[0];
+        if(v && !barberosActivos.some(b => b.nombre === v)) {
+            barberosActivos.push({nombre: v, sucursal: suc});
+            document.getElementById('nuevo-barbero-nombre').value = '';
+            actualizarTodasLasListas();
+        }
+    });
+}
+if(document.getElementById('form-nuevo-servicio')) {
+    document.getElementById('form-nuevo-servicio').addEventListener('submit', e => {
+        e.preventDefault();
+        const v = document.getElementById('nuevo-servicio-nombre').value.trim();
+        const pEl = document.getElementById('nuevo-servicio-precio');
+        const p = parseFloat(pEl ? pEl.value : '0') || 0;
+        if(v && !serviciosActivos.includes(v)) {
+            preciosBase[v] = p; serviciosActivos.push(v);
+            document.getElementById('nuevo-servicio-nombre').value = '';
+            if(pEl) pEl.value = '';
+            actualizarTodasLasListas();
+        }
+    });
+}
+if(document.getElementById('form-nueva-bebida')) {
+    document.getElementById('form-nueva-bebida').addEventListener('submit', e => {
+        e.preventDefault();
+        const v = document.getElementById('nueva-bebida-nombre').value.trim();
+        if(v && !bebidasActivas.includes(v)) {
+            bebidasActivas.push(v);
+            document.getElementById('nueva-bebida-nombre').value = '';
+            actualizarTodasLasListas();
+        }
+    });
+}
+
+// ==========================================
+// 4. PUNTO DE VENTA
+// ==========================================
+const selSuc = document.getElementById('sucursal-select');
+if(selSuc) selSuc.addEventListener('change', e => {
+    sucursalActual = e.target.value;
+    const lbl = document.getElementById('label-sucursal-form');
+    if(lbl) lbl.textContent = sucursalActual;
+    actualizarVistaHoy();
+    actualizarSelectsForm();
+    const vistaRep = document.getElementById('vista-reportes');
+    if(vistaRep && !vistaRep.classList.contains('hidden')) {
+        actualizarReportes();
+    }
+});
+
+const fechaInput = document.getElementById('filtro-fecha-pos');
+if(fechaInput) fechaInput.addEventListener('change', actualizarVistaHoy);
+
+// Multi-servicio
+window.agregarBebida = function() {
+    const sel = document.getElementById('bebida');
+    if(!sel || !sel.value || sel.value === '-' || sel.value === 'Sin cortesía') return;
+    const s = sel.value;
+    const tag = "🍹 " + s;
+    if(!serviciosActuales.includes(tag)) {
+        serviciosActuales.push(tag);
+        actualizarUISeleccion();
+    }
+    sel.value = 'Sin cortesía';
+};
+
+window.agregarServicio = function() {
+    const sel = document.getElementById('servicio');
+    if(!sel || !sel.value) return;
+    const s = sel.value;
+    if(!serviciosActuales.includes(s)) {
+        serviciosActuales.push(s);
+        // Auto-update monto
+        const montoEl = document.getElementById('monto');
+        if(montoEl) montoEl.value = (parseFloat(montoEl.value) || 0) + (preciosBase[s] || 0);
+        actualizarUISeleccion();
+        calcularRestanteMixto();
+    }
+    sel.value = '';
+};
+
+window.quitarServicio = function(s) {
+    serviciosActuales = serviciosActuales.filter(x => x !== s);
+    actualizarUISeleccion();
+};
+
+function actualizarUISeleccion() {
+    const div = document.getElementById('servicios-seleccionados');
+    if(!div) return;
+    if(serviciosActuales.length === 0) { div.classList.add('hidden'); return; }
+    div.classList.remove('hidden');
+    div.innerHTML = serviciosActuales.map(s => `<span class="inline-flex items-center gap-1 px-2 py-1 bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-sm">${s} <button type="button" onclick="quitarServicio('${s}')" class="text-zinc-500 hover:text-red-400 ml-1">×</button></span>`).join('');
+}
+
+window.agregarProducto = function() {
+    const sel = document.getElementById('producto-item');
+    if(!sel || !sel.value) return;
+    const s = sel.value;
+    if(!serviciosActuales.includes(s)) {
+        serviciosActuales.push(s);
+        const montoEl = document.getElementById('monto');
+        if(montoEl) montoEl.value = (parseFloat(montoEl.value) || 0) + (preciosBase[s] || 0);
+        actualizarUISeleccion();
+        calcularRestanteMixto();
+    }
+    sel.value = '';
+};
+
+function toggleMixto(isMixto) {
+    const panel = document.getElementById('panel-mixto');
+    if(panel) { if(isMixto) { panel.classList.remove('hidden'); calcularRestanteMixto(); } else panel.classList.add('hidden'); }
+}
+window.toggleMixto = toggleMixto;
+
+const montoEl = document.getElementById('monto');
+const propinaEl = document.getElementById('propina');
+if(montoEl) montoEl.addEventListener('input', calcularRestanteMixto);
+if(propinaEl) propinaEl.addEventListener('input', calcularRestanteMixto);
+
+function calcularRestanteMixto() {
+    const panel = document.getElementById('panel-mixto');
+    if(!panel || panel.classList.contains('hidden')) return;
+    const total = (parseFloat(document.getElementById('monto').value) || 0) + (parseFloat(document.getElementById('propina').value) || 0);
+    const lbl = document.getElementById('total-mixto-label');
+    if(lbl) lbl.textContent = formatoDinero.format(total);
+    const ef = parseFloat(document.getElementById('monto-efectivo-mixto')?.value) || 0;
+    const rest = Math.max(0, total - ef);
+    const rlbl = document.getElementById('restante-tarjeta-label');
+    if(rlbl) rlbl.textContent = formatoDinero.format(rest);
+}
+window.calcularRestanteMixto = calcularRestanteMixto;
+
+const regForm = document.getElementById('registro-form');
+if(regForm) regForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fechaFiltro = document.getElementById('filtro-fecha-pos').value;
+    const now = new Date();
+    const monto = parseFloat(document.getElementById('monto').value) || 0;
+    const propina = parseFloat(document.getElementById('propina').value) || 0;
+    const total = monto + propina;
+    let tipoPago = document.querySelector('input[name="pago"]:checked')?.value || 'Efectivo';
+    let valEfectivo = 0, valTarjeta = 0;
+    if(tipoPago === 'Efectivo') valEfectivo = total;
+    else if(tipoPago === 'Tarjeta') valTarjeta = total;
+    else { valEfectivo = parseFloat(document.getElementById('monto-efectivo-mixto')?.value) || 0; valTarjeta = Math.max(0, total - valEfectivo); }
+
+    
+    // Si dejaron algo seleccionado pero no le dieron +, lo sumamos
+    const valServ = document.getElementById('servicio')?.value;
+    if (valServ && !serviciosActuales.includes(valServ)) { serviciosActuales.push(valServ); }
+    const valProd = document.getElementById('producto-item')?.value;
+    if (valProd && !serviciosActuales.includes(valProd)) { serviciosActuales.push(valProd); }
+    const valBeb = document.getElementById('bebida')?.value;
+    if (valBeb && valBeb !== '-' && valBeb !== 'Sin cortesía' && !serviciosActuales.includes("🍹 " + valBeb)) { serviciosActuales.push("🍹 " + valBeb); }
+
+    const servicioStr = serviciosActuales.join(' + ') || 'Servicio';
+    const bebida = '-';
+    const barbero = document.getElementById('barbero')?.value || '';
+
+    registros.unshift({
+        id: Date.now(), fechaObj: new Date(fechaFiltro + 'T12:00:00'), fechaCorta: fechaFiltro,
+        hora: now.toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit'}),
+        sucursal: sucursalActual, barbero, servicio: servicioStr, bebida,
+        monto, propina, pagoTxt: tipoPago, valEfectivo, valTarjeta, editado: false
+    });
+
+    // Reset
+    serviciosActuales = [];
+    actualizarUISeleccion();
+    if(document.getElementById('barbero')) document.getElementById('barbero').value = '';
+    if(document.getElementById('propina')) document.getElementById('propina').value = '0';
+    if(document.getElementById('monto')) document.getElementById('monto').value = '220';
+    if(tipoPago === 'Mixto' && document.getElementById('monto-efectivo-mixto')) document.getElementById('monto-efectivo-mixto').value = '0';
+    calcularRestanteMixto();
+    guardarDatos();
+    actualizarVistaHoy();
+});
+
+function actualizarVistaHoy() {
+    const fechaEl = document.getElementById('filtro-fecha-pos');
+    if(!fechaEl) return;
+    const fechaFiltro = fechaEl.value;
+    let regsHoy = registros.filter(r => r.fechaCorta === fechaFiltro && r.tipo !== 'Gasto');
+    if(sucursalActual !== 'Todas') regsHoy = regsHoy.filter(r => r.sucursal === sucursalActual);
+    let gastosHoy = registros.filter(r => r.fechaCorta === fechaFiltro && r.tipo === 'Gasto');
+    if(sucursalActual !== 'Todas') gastosHoy = gastosHoy.filter(r => r.sucursal === sucursalActual);
+
+    const tbody = document.getElementById('tabla-registros');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+
+    if(regsHoy.length === 0 && gastosHoy.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-zinc-600 text-[10px] uppercase tracking-widest">No hay registros para este día.</td></tr>`;
+    }
+
+    let tIngresos = 0, tEfectivo = 0, tTarjeta = 0, tPropinas = 0;
+    const resBarb = {};
+
+    // Gastos first
+    gastosHoy.forEach(r => {
+        tbody.innerHTML += `<tr class="hover:bg-zinc-900/50 transition-colors bg-red-950/10">
+            <td class="p-3 text-zinc-600 text-[10px] uppercase tracking-widest pl-4">${r.sucursal}</td>
+            <td class="p-3 text-zinc-600 font-mono text-xs">${r.hora}</td>
+            <td class="p-3 text-red-400 font-bold text-xs">—</td>
+            <td class="p-3 text-red-400 text-xs uppercase tracking-wider">Gasto: ${r.servicio}</td>
+            <td class="p-3 text-red-500 font-mono text-xs">- ${formatoDinero.format(r.monto)}</td>
+            <td class="p-3 text-zinc-600 text-xs">—</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-widest border bg-red-900/20 text-red-400 border-red-800/50">Gasto</span></td>
+            <td class="p-3 text-right"><button onclick="abrirModalEditar(${r.id})" class="text-zinc-600 hover:text-red-400 transition-colors"><i class="fa-solid fa-pen text-[11px]"></i></button></td>
+        </tr>`;
+    });
+
+    // Tickets
+    [...regsHoy].sort((a,b) => b.id - a.id).forEach((r, i) => {
+        tIngresos += r.monto; tEfectivo += r.valEfectivo; tTarjeta += r.valTarjeta; tPropinas += (r.propina || 0);
+        if(!resBarb[r.barbero]) resBarb[r.barbero] = { cortes: 0, comision: 0, propinas: 0 };
+        resBarb[r.barbero].cortes++;
+        resBarb[r.barbero].comision += r.monto * 0.5;
+        resBarb[r.barbero].propinas += (r.propina || 0);
+
+        let bPago = '';
+        if(r.pagoTxt === 'Efectivo') bPago = `<span class="px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-widest border bg-emerald-900/20 text-emerald-400 border-emerald-800/50">Efectivo</span>`;
+        else if(r.pagoTxt === 'Tarjeta') bPago = `<span class="px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-widest border bg-blue-900/20 text-blue-400 border-blue-800/50">Tarjeta</span>`;
+        else bPago = `<span class="px-2 py-0.5 rounded-sm text-[9px] uppercase tracking-widest border bg-purple-900/20 text-purple-400 border-purple-800/50">Mixto</span>`;
+
+        const editBtn = `<button onclick="abrirModalEditar(${r.id})" class="text-zinc-600 hover:text-white transition-colors"><i class="fa-solid fa-pen text-[11px]"></i></button>`;
+        const badgeEdit = r.editado ? `<span class="ml-1 text-[9px] uppercase tracking-widest text-orange-400 bg-orange-900/20 border border-orange-800/50 px-1 rounded-sm">Editado</span>` : '';
+        const rowClass = i === 0 ? 'hover:bg-zinc-900 transition-colors bg-yellow-900/10' : 'hover:bg-zinc-900 transition-colors';
+
+        let strServicio = (r.servicio || 'Servicio') + badgeEdit;
+        if(r.bebida && r.bebida !== '-' && r.bebida !== 'Sin cortesía') {
+            // Only add legacy bebida if it's not already in the servicio string
+            if(!strServicio.includes(r.bebida)) {
+                strServicio += `<div class="text-[9px] text-zinc-500 uppercase tracking-widest mt-1">🍹 Cortesía: ${r.bebida}</div>`;
+            }
+        }
+        tbody.innerHTML += `<tr class="${rowClass}">
+            <td class="p-3 text-zinc-400 text-[10px] uppercase tracking-widest pl-4 font-bold">${r.sucursal}</td>
+            <td class="p-3 text-zinc-500 font-mono text-xs">${r.hora}</td>
+            <td class="p-3 font-medium text-zinc-200 text-sm">${r.barbero}</td>
+            <td class="p-3 text-zinc-300 text-xs">${strServicio}</td>
+            <td class="p-3 text-emerald-400 font-mono tracking-wider text-sm">${formatoDinero.format(r.monto)}</td>
+            <td class="p-3 text-emerald-300 font-mono text-xs">${r.propina > 0 ? '+' + formatoDinero.format(r.propina) : '—'}</td>
+            <td class="p-3">${bPago}</td>
+            <td class="p-3 text-right">${editBtn}</td>
+        </tr>`;
+    });
+
+    // Totals
+    const tot = document.getElementById('total-ingresos'); if(tot) tot.textContent = formatoDinero.format(tIngresos);
+    const totEf = document.getElementById('total-efectivo'); if(totEf) totEf.textContent = formatoDinero.format(tEfectivo);
+    const totTar = document.getElementById('total-tarjeta'); if(totTar) totTar.textContent = formatoDinero.format(tTarjeta);
+    const totC = document.getElementById('total-cortes'); if(totC) totC.textContent = regsHoy.length;
+
+    // Panel comisiones
+    if(rolActual === 'admin') {
+        const grid = document.getElementById('barberos-grid');
+        if(grid) {
+            grid.innerHTML = '';
+            Object.keys(resBarb).sort().forEach(n => {
+                const s = resBarb[n];
+                grid.innerHTML += `<div class="border border-zinc-800 rounded-sm p-3 bg-zinc-950 flex flex-col">
+                    <div class="flex justify-between items-center mb-2"><span class="font-bold text-zinc-200 text-sm">${n}</span><span class="text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded-sm">${s.cortes} serv.</span></div>
+                    <p class="text-xs text-zinc-500 flex justify-between">Comisión: <span class="text-emerald-400">${formatoDinero.format(s.comision)}</span></p>
+                    <p class="text-xs text-zinc-500 flex justify-between">Propinas: <span class="text-emerald-300">${formatoDinero.format(s.propinas)}</span></p>
+                    <div class="border-t border-zinc-800 mt-2 pt-2 flex justify-between font-bold"><span class="text-zinc-300 text-xs">Total:</span><span class="text-emerald-400">${formatoDinero.format(s.comision + s.propinas)}</span></div>
+                </div>`;
+            });
+        }
+    }
+
+    // Update global vars for corte de caja
+    window.totalIngresosDia = tIngresos;
+    window.totalPropinasDia = tPropinas;
+    window.ingresosEfvoActuales = tEfectivo;
+    window.ingresosTarjetaActuales = tTarjeta;
+    window.totalTicketsDia = regsHoy.length;
+    const gastoTotal = gastosHoy.reduce((s, r) => s + r.monto, 0);
+    window.gastosTotalesActuales = gastoTotal;
+    window.cajaEfectivoActual = tEfectivo - gastoTotal;
+}
+
+function eliminarRegistro(id) {
+    if(rolActual !== 'admin') return;
+    mostrarConfirmacion('Eliminar Registro', '¿Borrar este registro? Afectará la caja y reportes.', () => {
+        registros = registros.filter(r => r.id !== id);
+        actualizarVistaHoy();
+        if(document.getElementById('vista-reportes') && !document.getElementById('vista-reportes').classList.contains('hidden')) actualizarReportes();
+    });
+}
+
+const btnLimpiar = document.getElementById('btn-limpiar');
+if(btnLimpiar) btnLimpiar.addEventListener('click', () => {
+    if(rolActual !== 'admin') return;
+    const fecha = document.getElementById('filtro-fecha-pos')?.value;
+    mostrarConfirmacion('Limpiar Bitácora', `¿Borrar TODOS los registros de ${fecha}? No se puede deshacer.`, () => {
+        registros = registros.filter(r => r.fechaCorta !== fecha);
+        actualizarVistaHoy();
+    });
+});
+
+// ==========================================
+// 5. TABS (POS / REPORTES)
+// ==========================================
+const tabPos = document.getElementById('tab-pos');
+const tabRep = document.getElementById('tab-reportes');
+const vistaPos = document.getElementById('vista-pos');
+const vistaRep = document.getElementById('vista-reportes');
+
+if(tabPos) tabPos.addEventListener('click', () => {
+    if(vistaPos) vistaPos.classList.remove('hidden');
+    if(vistaRep) vistaRep.classList.add('hidden');
+    tabPos.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
+    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
+});
+if(tabRep) tabRep.addEventListener('click', () => {
+    if(vistaPos) vistaPos.classList.add('hidden');
+    if(vistaRep) vistaRep.classList.remove('hidden');
+    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
+    if(tabPos) tabPos.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
+    if(!document.getElementById('reporte-desde')?.value) {
+        document.getElementById('quick-date-select') && (document.getElementById('quick-date-select').value = 'este_mes');
+        applyQuickDate();
+    } else actualizarReportes();
+});
+
+// ==========================================
+// 6. REPORTES
+// ==========================================
+function applyQuickDate() {
+    const sel = document.getElementById('quick-date-select');
+    if(!sel || sel.value === 'custom') return;
+    const val = sel.value;
+    const now = new Date();
+    let desde = new Date(), hasta = new Date();
+    if(val === 'este_mes') { desde = new Date(now.getFullYear(), now.getMonth(), 1); hasta = new Date(now.getFullYear(), now.getMonth() + 1, 0); }
+    else if(val === 'mes_pasado') { desde = new Date(now.getFullYear(), now.getMonth()-1, 1); hasta = new Date(now.getFullYear(), now.getMonth(), 0); }
+    else if(val === 'esta_semana') { const d = now.getDay()||7; desde = new Date(now); desde.setDate(now.getDate()-d+1); hasta = new Date(desde); hasta.setDate(desde.getDate()+6); }
+    else if(val === 'semana_pasada') { const d = now.getDay()||7; hasta = new Date(now); hasta.setDate(now.getDate()-d); desde = new Date(hasta); desde.setDate(hasta.getDate()-6); }
+    const tOff = desde.getTimezoneOffset()*60000;
+    const dEl = document.getElementById('reporte-desde');
+    const hEl = document.getElementById('reporte-hasta');
+    if(dEl) dEl.value = new Date(desde-tOff).toISOString().split('T')[0];
+    if(hEl) hEl.value = new Date(hasta-tOff).toISOString().split('T')[0];
+    actualizarReportes();
+}
+
+const desdEl = document.getElementById('reporte-desde');
+const hastaEl = document.getElementById('reporte-hasta');
+const btnFilt = document.getElementById('btn-filtrar-reportes');
+const qSel = document.getElementById('quick-date-select');
+if(desdEl) desdEl.addEventListener('change', () => { if(qSel) qSel.value='custom'; });
+if(hastaEl) hastaEl.addEventListener('change', () => { if(qSel) qSel.value='custom'; });
+if(btnFilt) btnFilt.addEventListener('click', actualizarReportes);
+
+function actualizarReportes() {
+    if(rolActual !== 'admin') return;
+    const dEl = document.getElementById('reporte-desde');
+    const hEl = document.getElementById('reporte-hasta');
+    if(!dEl || !hEl || !dEl.value || !hEl.value) return;
+    const dateDesde = new Date(dEl.value + 'T00:00:00');
+    const dateHasta = new Date(hEl.value + 'T23:59:59');
+    let regsPeriodo = registros.filter(r => r.tipo !== 'Gasto' && r.fechaObj >= dateDesde && r.fechaObj <= dateHasta);
+    if(sucursalActual !== 'Todas') regsPeriodo = regsPeriodo.filter(r => r.sucursal === sucursalActual);
+    const pagosPeriodo = pagosNomina.filter(p => p.fechaObj >= dateDesde && p.fechaObj <= dateHasta);
+
+    const tIng = regsPeriodo.reduce((s,r) => s+r.monto, 0);
+    const tPag = pagosPeriodo.reduce((s,p) => s+p.monto, 0);
+    const repIng = document.getElementById('rep-ingresos-periodo'); if(repIng) repIng.textContent = formatoDinero.format(tIng);
+    const repC = document.getElementById('rep-cortes-periodo'); if(repC) repC.textContent = regsPeriodo.length;
+    const repProp = document.getElementById('rep-propina-promedio'); if(repProp) repProp.textContent = formatoDinero.format(regsPeriodo.length > 0 ? regsPeriodo.reduce((s,r)=>s+(r.propina||0),0)/regsPeriodo.length : 0);
+    const repPagos = document.getElementById('rep-pagos-periodo'); if(repPagos) repPagos.textContent = formatoDinero.format(tPag);
+
+    // Tendencia
+    const mapFechas = {};
+    regsPeriodo.forEach(r => { if(!mapFechas[r.fechaCorta]) mapFechas[r.fechaCorta]=0; mapFechas[r.fechaCorta]+=r.monto; });
+    const labelsTend = Object.keys(mapFechas).sort();
+    const datosTend = labelsTend.map(f => mapFechas[f]);
+
+    // Nómina
+    const barberosLocal = barberosActivos
+        .filter(b => sucursalActual === 'Todas' || b.sucursal === sucursalActual)
+        .map(b => typeof b === 'string' ? b : b.nombre);
+    const mapBarberos = {};
+    const mapNomina = {};
+    barberosLocal.forEach(b => mapNomina[b] = { ventasBrutas: 0, sueldo: 0, propinasTotal: 0, pagado: 0 });
+
+    regsPeriodo.forEach(r => {
+        let montoProductos = 0;
+        (r.servicio || '').split(' + ').forEach(item => {
+            if(productosActivos.includes(item)) montoProductos += (preciosBase[item] || 0);
+        });
+        const montoComisionable = Math.max(0, r.monto - montoProductos);
+        const prop = r.propina || 0;
+        const comision = montoComisionable * 0.5;
+        if(!mapBarberos[r.barbero]) mapBarberos[r.barbero] = 0;
+        mapBarberos[r.barbero] += comision + prop;
+        if(mapNomina[r.barbero]) {
+            mapNomina[r.barbero].ventasBrutas += r.monto;
+            mapNomina[r.barbero].sueldo += comision;
+            mapNomina[r.barbero].propinasTotal += prop;
+        }
+    });
+    pagosPeriodo.forEach(p => { if(mapNomina[p.barbero]) mapNomina[p.barbero].pagado += p.monto; });
+
+    const tbodyNom = document.getElementById('tabla-nomina-barberos');
+    if(tbodyNom) {
+        tbodyNom.innerHTML = '';
+        let totV=0, totS=0, totPr=0, totPag=0, totSaldo=0;
+        Object.keys(mapNomina).sort().forEach(b => {
+            const st = mapNomina[b];
+            const saldo = (st.sueldo + st.propinasTotal) - st.pagado;
+            if(st.ventasBrutas === 0 && st.sueldo === 0 && st.propinasTotal === 0 && st.pagado === 0) return;
+            totV += st.ventasBrutas; totS += st.sueldo; totPr += st.propinasTotal; totPag += st.pagado; totSaldo += saldo;
+            tbodyNom.innerHTML += `<tr class="hover:bg-zinc-900 transition-colors">
+                <td class="p-4 font-medium text-left text-zinc-200">${b}</td>
+                <td class="p-4 text-center border-l border-zinc-900 text-zinc-500 font-mono">${formatoDinero.format(st.ventasBrutas)}</td>
+                <td class="p-4 text-center border-l border-zinc-900 bg-emerald-950/10">
+                    <div class="flex flex-col items-center">
+                        <span class="text-emerald-400 font-mono font-bold">${formatoDinero.format(st.sueldo)}</span>
+                        <span class="text-[10px] text-zinc-500 uppercase tracking-widest">+ ${formatoDinero.format(st.propinasTotal)} prop.</span>
+                    </div>
+                </td>
+                <td class="p-4 text-center border-l border-zinc-900 text-blue-400 font-mono">${formatoDinero.format(st.pagado)}</td>
+                <td class="p-4 text-right border-l border-zinc-900 font-mono ${saldo > 0 ? 'text-red-400 font-bold' : 'text-zinc-500'}">${formatoDinero.format(saldo)}</td>
+                <td class="p-4 text-center"><button onclick="abrirModalLiquidacion('${b}', ${saldo})" class="bg-emerald-950 text-emerald-500 border border-emerald-900 hover:bg-emerald-900 px-3 py-1 rounded-sm text-[10px] tracking-widest uppercase">Liquidar</button></td>
+            </tr>`;
+        });
+        if(totV > 0) tbodyNom.innerHTML += `<tr class="bg-zinc-950 border-t border-zinc-800 font-bold">
+            <td class="p-4 text-zinc-300 text-[10px] tracking-widest uppercase">Totales</td>
+            <td class="p-4 text-center border-l border-zinc-900 text-zinc-500 font-mono">${formatoDinero.format(totV)}</td>
+            <td class="p-4 text-center border-l border-zinc-900 text-emerald-500 font-mono"><div class="flex flex-col items-center"><span>${formatoDinero.format(totS)}</span><span class="text-[10px] text-zinc-500">+${formatoDinero.format(totPr)}</span></div></td>
+            <td class="p-4 text-center border-l border-zinc-900 text-blue-500 font-mono">${formatoDinero.format(totPag)}</td>
+            <td class="p-4 text-right border-l border-zinc-900 text-red-500 font-mono">${formatoDinero.format(totSaldo)}</td>
+            <td class="p-4"></td>
+        </tr>`;
+    }
+
+    const tbodyPagos = document.getElementById('tabla-historial-pagos');
+    if(tbodyPagos) {
+        tbodyPagos.innerHTML = '';
+        if(pagosPeriodo.length === 0) { tbodyPagos.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-600">No hay pagos en este periodo.</td></tr>`; }
+        let totalPagadoHistorial = 0;
+        [...pagosPeriodo].sort((a,b) => b.fechaObj-a.fechaObj).forEach(p => {
+            totalPagadoHistorial += p.monto;
+            tbodyPagos.innerHTML += `<tr class="hover:bg-zinc-900 transition-colors"><td class="p-3 text-zinc-500">${p.fechaStr}</td><td class="p-3 font-bold text-zinc-200">${p.barbero}</td><td class="p-3 text-emerald-400 font-mono font-bold">${formatoDinero.format(p.monto)}</td><td class="p-3 text-zinc-400">${p.metodo}</td></tr>`;
+        });
+        if(pagosPeriodo.length > 0) {
+            tbodyPagos.innerHTML += `<tr class="bg-zinc-950 border-t border-zinc-800 font-bold"><td colspan="2" class="p-3 text-right text-zinc-300 text-[10px] tracking-widest uppercase">Total Pagado:</td><td class="p-3 text-emerald-400 font-mono font-bold text-left">${formatoDinero.format(totalPagadoHistorial)}</td><td></td></tr>`;
+        }
+    }
+
+    // Tabla Ediciones
+    const tbodyEdiciones = document.getElementById('tabla-historial-ediciones');
+    if(tbodyEdiciones) {
+        tbodyEdiciones.innerHTML = '';
+        const edicsPeriodo = historialEdiciones.filter(e => {
+            const fd = e.fecha.split(',')[0].split('/'); // DD/MM/YYYY
+            const d = new Date(fd[2], fd[1]-1, fd[0]);
+            return d >= dateDesde && d <= dateHasta;
+        });
+        if(edicsPeriodo.length === 0) {
+            tbodyEdiciones.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-zinc-600">No hay modificaciones en este periodo.</td></tr>`;
+        } else {
+            edicsPeriodo.forEach(e => {
+                tbodyEdiciones.innerHTML += `<tr class="hover:bg-zinc-900 transition-colors">
+                    <td class="p-3 text-zinc-500 whitespace-nowrap">${e.fecha}<br><span class="text-orange-400 text-[9px] uppercase">${e.usuario}</span></td>
+                    <td class="p-3 text-zinc-300 font-bold">${e.ticketInfo}</td>
+                    <td class="p-3 text-red-400 text-xs">${e.antes}</td>
+                    <td class="p-3 text-emerald-400 text-xs">${e.despues}</td>
+                </tr>`;
+            });
+        }
+    }
+
+    // Charts
+    const isDark = true;
+    const cT = '#9ca3af'; const cG = '#27272a';
+    const chartTend = document.getElementById('chartTendencia');
+    const chartBarb = document.getElementById('chartBarberos');
+    if(chartTend && typeof Chart !== 'undefined') {
+        if(chartTendenciaInst) chartTendenciaInst.destroy();
+        chartTendenciaInst = new Chart(chartTend.getContext('2d'), { type: 'line', data: { labels: labelsTend, datasets: [{ data: datosTend, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', borderWidth: 3, tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: cG }, ticks: { color: cT } }, x: { grid: { display: false }, ticks: { color: cT } } } } });
+    }
+    if(chartBarb && typeof Chart !== 'undefined') {
+        if(chartBarberosInst) chartBarberosInst.destroy();
+        chartBarberosInst = new Chart(chartBarb.getContext('2d'), { type: 'bar', data: { labels: Object.keys(mapBarberos), datasets: [{ data: Object.values(mapBarberos), backgroundColor: '#eab308', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: cG }, ticks: { color: cT } }, x: { grid: { display: false }, ticks: { color: cT } } } } });
+    }
+}
+
+// ==========================================
+// 7. PAGOS A BARBEROS / LIQUIDACIÓN
+// ==========================================
+const modalPago = document.getElementById('modal-pago');
+window.toggleMixtoNomina = function(val) {
+    const p = document.getElementById('panel-mixto-nomina');
+    if(p) {
+        if(val === 'Mixto') {
+            p.classList.remove('hidden');
+            calcularTransferenciaNomina();
+        } else {
+            p.classList.add('hidden');
+        }
+    }
+};
+
+window.calcularTransferenciaNomina = function() {
+    const m = parseFloat(document.getElementById('pago-monto')?.value) || 0;
+    const ef = parseFloat(document.getElementById('pago-efectivo-mixto')?.value) || 0;
+    const tf = document.getElementById('pago-transferencia-mixto');
+    if(tf) tf.value = Math.max(0, m - ef);
+};
+
+window.abrirModalLiquidacion = function(barbero, saldo) { abrirModalPago(barbero, Math.max(0, saldo)); };
+function abrirModalPago(barbero, saldoPendiente) {
+    if(!modalPago) return;
+    const bn = document.getElementById('pago-barbero-nombre'); if(bn) bn.value = barbero;
+    const bm = document.getElementById('pago-monto'); if(bm) { bm.value = saldoPendiente; bm.addEventListener('input', calcularTransferenciaNomina); }
+    const bmet = document.getElementById('pago-metodo'); if(bmet) bmet.value = 'Efectivo';
+    const pmn = document.getElementById('panel-mixto-nomina'); if(pmn) pmn.classList.add('hidden');
+    modalPago.classList.remove('hidden');
+}
+window.cerrarModalPago = function() { if(modalPago) modalPago.classList.add('hidden'); };
+
+const formPago = document.getElementById('form-pago-barbero');
+if(formPago) formPago.addEventListener('submit', e => {
+    e.preventDefault();
+    const now = new Date();
+    const barbero = document.getElementById('pago-barbero-nombre')?.value;
+    const monto = parseFloat(document.getElementById('pago-monto')?.value) || 0;
+    const metodo = document.getElementById('pago-metodo')?.value || 'Efectivo';
+    const hastaStr = document.getElementById('reporte-hasta')?.value || now.toISOString().split('T')[0];
+    const fechaPago = new Date(hastaStr + 'T12:00:00');
+    
+    if (metodo === 'Mixto') {
+        const mEf = parseFloat(document.getElementById('pago-efectivo-mixto')?.value) || 0;
+        const mTr = parseFloat(document.getElementById('pago-transferencia-mixto')?.value) || 0;
+        if(mEf > 0) pagosNomina.unshift({ id: Date.now(), fechaObj: fechaPago, fechaStr: fechaPago.toLocaleString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}), barbero, monto: mEf, metodo: 'Efectivo' });
+        if(mTr > 0) pagosNomina.unshift({ id: Date.now()+1, fechaObj: fechaPago, fechaStr: fechaPago.toLocaleString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}), barbero, monto: mTr, metodo: 'Transferencia' });
+    } else {
+        pagosNomina.unshift({ id: Date.now(), fechaObj: fechaPago, fechaStr: fechaPago.toLocaleString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}), barbero, monto, metodo });
+    }
+    
+    guardarDatos();
+    window.cerrarModalPago();
+    actualizarReportes();
+});
+
+// ==========================================
+// 8. EDITAR / BORRAR TICKETS
+// ==========================================
+const modalEditar = document.getElementById('modal-editar');
+window.abrirModalEditar = function(id) {
+    const reg = registros.find(r => r.id === id);
+    if(!reg || !modalEditar) return;
+    ticketEnEdicion = reg.id;
+    const btnDel = document.getElementById('btn-delete-ticket');
+    if(btnDel) { if(rolActual === 'admin') btnDel.classList.remove('hidden'); else btnDel.classList.add('hidden'); }
+    const ftx = document.getElementById('edit-fields-ticket');
+    const fgas = document.getElementById('edit-fields-gasto');
+    if(reg.tipo === 'Gasto') {
+        if(ftx) ftx.classList.add('hidden'); if(fgas) fgas.classList.remove('hidden');
+        const egc = document.getElementById('edit-gasto-concepto'); if(egc) egc.value = reg.servicio;
+        const egm = document.getElementById('edit-gasto-monto'); if(egm) egm.value = reg.monto;
+    } else {
+        if(ftx) ftx.classList.remove('hidden'); if(fgas) fgas.classList.add('hidden');
+        const eb = document.getElementById('edit-barbero'); if(eb) eb.value = reg.barbero;
+        editServiciosActuales = reg.servicio ? reg.servicio.split(' + ').filter(s => s !== 'Ninguno') : [];
+        actualizarUISeleccionEdit();
+        const ebed = document.getElementById('edit-bebida'); if(ebed) ebed.value = reg.bebida === '-' ? '' : (reg.bebida || '');
+        const em = document.getElementById('edit-monto'); if(em) em.value = reg.monto;
+        const ep = document.getElementById('edit-propina'); if(ep) ep.value = reg.propina || 0;
+        const epago = document.getElementById('edit-pago'); if(epago) { epago.value = reg.pagoTxt; epago.addEventListener('change', window.toggleMixtoEdit); window.toggleMixtoEdit(); }
+    }
+    modalEditar.classList.remove('hidden');
+};
+window.cerrarModalEditar = function() { ticketEnEdicion = null; if(modalEditar) modalEditar.classList.add('hidden'); };
+
+window.toggleMixtoEdit = function() {
+    const pagoSel = document.getElementById('edit-pago');
+    const p = document.getElementById('edit-panel-mixto');
+    if(p && pagoSel) {
+        if(pagoSel.value === 'Mixto') {
+            p.classList.remove('hidden');
+            window.calcularRestanteMixtoEdit();
+        } else {
+            p.classList.add('hidden');
+        }
+    }
+};
+
+window.calcularRestanteMixtoEdit = function() {
+    const p = document.getElementById('edit-panel-mixto');
+    if(!p || p.classList.contains('hidden')) return;
+    const m = parseFloat(document.getElementById('edit-monto')?.value) || 0;
+    const pr = parseFloat(document.getElementById('edit-propina')?.value) || 0;
+    const total = m + pr;
+    const lbl = document.getElementById('edit-total-mixto-label');
+    if(lbl) lbl.textContent = formatoDinero.format(total);
+    
+    const ef = parseFloat(document.getElementById('edit-monto-efectivo-mixto')?.value) || 0;
+    const rest = Math.max(0, total - ef);
+    const rlbl = document.getElementById('edit-restante-tarjeta-label');
+    if(rlbl) rlbl.textContent = formatoDinero.format(rest);
+};
+window.borrarTicketEnEdicion = function() {
+    if(rolActual !== 'admin') return;
+    mostrarConfirmacion('Borrar Registro', '¿Estás seguro? Esta acción no se puede deshacer.', () => {
+        registros = registros.filter(r => r.id !== ticketEnEdicion);
+        window.cerrarModalEditar(); actualizarVistaHoy();
+        if(vistaRep && !vistaRep.classList.contains('hidden')) actualizarReportes();
+    });
+};
+
+function actualizarUISeleccionEdit() {
+    const div = document.getElementById('edit-servicios-seleccionados');
+    if(!div) return;
+    if(editServiciosActuales.length === 0) { div.classList.add('hidden'); return; }
+    div.classList.remove('hidden');
+    div.innerHTML = editServiciosActuales.map(s => `<span class="inline-flex items-center gap-1 px-2 py-1 bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-sm">${s} <button type="button" onclick="quitarServicioEdit('${s}')" class="text-zinc-500 hover:text-red-400">×</button></span>`).join('');
+}
+window.quitarServicioEdit = function(s) { editServiciosActuales = editServiciosActuales.filter(x => x !== s); actualizarUISeleccionEdit(); };
+window.agregarServicioEdit = function() {
+    const sel = document.getElementById('edit-servicio');
+    if(sel && sel.value && !editServiciosActuales.includes(sel.value)) { editServiciosActuales.push(sel.value); actualizarUISeleccionEdit(); }
+};
+
+const formEdit = document.getElementById('form-editar-ticket');
+if(formEdit) formEdit.addEventListener('submit', e => {
+    e.preventDefault();
+    if(!ticketEnEdicion) return;
+    const reg = registros.find(r => r.id === ticketEnEdicion);
+    if(reg) {
+        let oldStr = reg.tipo === 'Gasto' 
+            ? `Gasto: ${reg.servicio} | $${reg.monto}` 
+            : `${reg.barbero} | $${reg.monto} | Pago: ${reg.pagoTxt}`;
+
+        if(reg.tipo === 'Gasto') {
+            const egc = document.getElementById('edit-gasto-concepto'); if(egc) reg.servicio = egc.value;
+            const egm = document.getElementById('edit-gasto-monto'); if(egm) reg.monto = parseFloat(egm.value) || 0;
+        } else {
+            const eb = document.getElementById('edit-barbero'); if(eb) reg.barbero = eb.value;
+            reg.servicio = editServiciosActuales.join(' + ') || 'Ninguno';
+            const ebed = document.getElementById('edit-bebida'); if(ebed) reg.bebida = ebed.value || '-';
+            const em = document.getElementById('edit-monto'); if(em) reg.monto = parseFloat(em.value) || 0;
+            const ep = document.getElementById('edit-propina'); if(ep) reg.propina = parseFloat(ep.value) || 0;
+            const epago = document.getElementById('edit-pago'); if(epago) reg.pagoTxt = epago.value;
+            reg.valEfectivo = reg.pagoTxt === 'Efectivo' ? reg.monto : (reg.pagoTxt === 'Mixto' ? (parseFloat(document.getElementById('edit-monto-efectivo-mixto')?.value)||0) : 0);
+            reg.valTarjeta = reg.pagoTxt === 'Tarjeta' ? reg.monto : (reg.pagoTxt === 'Mixto' ? Math.max(0, reg.monto - reg.valEfectivo) : 0);
+        }
+        reg.editado = true;
+        
+        let newStr = reg.tipo === 'Gasto' 
+            ? `Gasto: ${reg.servicio} | $${reg.monto}` 
+            : `${reg.barbero} | $${reg.monto} | Pago: ${reg.pagoTxt}`;
+
+        historialEdiciones.unshift({
+            id: Date.now(),
+            fecha: new Date().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}),
+            ticketInfo: `[${reg.sucursal}] ${reg.fechaCorta} ${reg.hora} - ${reg.tipo === 'Gasto' ? 'Gasto' : 'Ticket'}`,
+            antes: oldStr,
+            despues: newStr,
+            usuario: rolActual === 'admin' ? 'Admin' : reg.sucursal
+        });
+        
+        if (typeof guardarDatos === 'function') guardarDatos();
+    }
+    window.cerrarModalEditar(); actualizarVistaHoy();
+    const vistaRep = document.getElementById('vista-reportes');
+    if(vistaRep && !vistaRep.classList.contains('hidden')) actualizarReportes();
+});
+
+// ==========================================
+// 9. GASTOS Y CORTE DE CAJA
+// ==========================================
+window.abrirModalGasto = function() { const m = document.getElementById('modal-gasto'); if(m) m.classList.remove('hidden'); };
+window.cerrarModalGasto = function() { const m = document.getElementById('modal-gasto'); if(m) { m.classList.add('hidden'); const f = document.getElementById('form-gasto'); if(f) f.reset(); } };
+
+const formGasto = document.getElementById('form-gasto');
+if(formGasto) formGasto.addEventListener('submit', e => {
+    e.preventDefault();
+    const c = document.getElementById('gasto-concepto')?.value || 'Gasto';
+    const m = parseFloat(document.getElementById('gasto-monto')?.value) || 0;
+    const now = new Date();
+    const hoyLocal = new Date(); const tOffset = hoyLocal.getTimezoneOffset()*60000;
+    const hoyIso = new Date(hoyLocal-tOffset).toISOString().split('T')[0];
+    registros.unshift({ id: Date.now(), fechaObj: now, fechaCorta: hoyIso, hora: now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}), sucursal: sucursalActual, barbero: '-', servicio: c, bebida: '-', monto: m, propina: 0, pagoTxt: 'Efectivo', valEfectivo: 0, valTarjeta: 0, editado: false, tipo: 'Gasto' });
+    window.cerrarModalGasto(); actualizarVistaHoy();
+});
+
+window.abrirModalCorteCaja = function() {
+    const m = document.getElementById('modal-corte'); if(!m) return;
+    const ci = document.getElementById('corte-ingresos-efvo'); if(ci) ci.textContent = formatoDinero.format(window.ingresosEfvoActuales||0);
+    const cg = document.getElementById('corte-gastos'); if(cg) cg.textContent = formatoDinero.format(window.gastosTotalesActuales||0);
+    const ce = document.getElementById('corte-esperado'); if(ce) ce.textContent = formatoDinero.format(window.cajaEfectivoActual||0);
+    const cr = document.getElementById('corte-real'); if(cr) cr.value = '';
+    const db = document.getElementById('corte-diferencia-box'); if(db) db.classList.add('hidden');
+    m.classList.remove('hidden');
+};
+window.cerrarModalCorteCaja = function() { const m = document.getElementById('modal-corte'); if(m) m.classList.add('hidden'); };
+
+const corteReal = document.getElementById('corte-real');
+if(corteReal) corteReal.addEventListener('input', e => {
+    const r = parseFloat(e.target.value) || 0;
+    const esp = window.cajaEfectivoActual || 0;
+    const dif = r - esp;
+    const box = document.getElementById('corte-diferencia-box');
+    if(!box) return;
+    box.classList.remove('hidden','bg-emerald-950','text-emerald-400','border-emerald-800','bg-red-950','text-red-400','border-red-800');
+    if(dif === 0) { box.textContent='CAJA CUADRADA'; box.classList.add('bg-emerald-950','text-emerald-400','border-emerald-800'); }
+    else if(dif > 0) { box.textContent='SOBRANTE: '+formatoDinero.format(dif); box.classList.add('bg-emerald-950','text-emerald-400','border-emerald-800'); }
+    else { box.textContent='FALTANTE: '+formatoDinero.format(Math.abs(dif)); box.classList.add('bg-red-950','text-red-400','border-red-800'); }
+});
+
+const formCorte = document.getElementById('form-corte');
+if(formCorte) formCorte.addEventListener('submit', e => {
+    e.preventDefault();
+    const r = parseFloat(document.getElementById('corte-real')?.value) || 0;
+    const esp = window.cajaEfectivoActual || 0;
+    const dif = r - esp;
+    window.cerrarModalCorteCaja();
+    const modalExito = document.getElementById('modal-exito');
+    if(modalExito) modalExito.classList.remove('hidden');
+    let difText = dif===0 ? '✅ CAJA CUADRADA' : (dif>0 ? `⚠️ SOBRANTE: ${formatoDinero.format(dif)}` : `🚨 FALTANTE: ${formatoDinero.format(Math.abs(dif))}`);
+    let msg = `💈 CORTE DE CAJA - MB BARBEROS 💈\n📍 Sucursal: ${sucursalActual}\n📅 Fecha: ${new Date().toLocaleDateString('es-MX')}\n\n`;
+    msg += `✂️ Tickets: ${window.totalTicketsDia||0}\n💵 Efectivo: ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n💳 Tarjeta: ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
+    msg += `🚀 TOTAL: ${formatoDinero.format(window.totalIngresosDia||0)}\n💸 Gastos: -${formatoDinero.format(window.gastosTotalesActuales||0)}\n📊 Esperado: ${formatoDinero.format(esp)}\n💰 Contado: ${formatoDinero.format(r)}\n\n${difText}\n\n_BarberOS_`;
+    setTimeout(() => {
+        if(modalExito) modalExito.classList.add('hidden');
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }, 2500);
+});
+
+// WhatsApp daily summary
+window.enviarResumenWhatsApp = function() {
+    actualizarVistaHoy();
+    const fecha = document.getElementById('filtro-fecha-pos')?.value || new Date().toLocaleDateString('es-MX');
+    let msg = `💈 *RESUMEN DEL DÍA - ${sucursalActual}*\n📅 ${fecha}\n\n`;
+    msg += `✂️ *Tickets:* ${window.totalTicketsDia||0}\n`;
+    msg += `💵 *Efectivo:* ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n`;
+    msg += `💳 *Tarjeta:* ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
+    msg += `🌟 *Propinas:* ${formatoDinero.format(window.totalPropinasDia||0)}\n`;
+    msg += `🚀 *TOTAL:* ${formatoDinero.format(window.totalIngresosDia||0)}\n`;
+    msg += `\n_BarberOS_`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+// ==========================================
+// 10. DATOS DE DEMO Y ARRANQUE
+// ==========================================
+function generarDatosDemo() {
+    const barbs = barberosActivos.map(b => b.nombre);
+    for(let i=0; i<200; i++) {
+        const d = new Date(); d.setDate(d.getDate() - Math.floor(Math.random()*60));
+        const propina = Math.random() > 0.5 ? 20 : 0;
+        const monto = [220, 380, 120, 330][Math.floor(Math.random()*4)];
+        const pago = Math.random() > 0.6 ? 'Tarjeta' : 'Efectivo';
+        const valEf = pago === 'Efectivo' ? monto + propina : 0;
+        const valTar = pago === 'Tarjeta' ? monto + propina : 0;
+        const suc = sucursalesActivas[Math.floor(Math.random()*sucursalesActivas.length)];
+        registros.push({
+            id: Date.now() + i, fechaObj: d, fechaCorta: d.toISOString().split('T')[0],
+            hora: d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+            sucursal: suc, barbero: barbs[Math.floor(Math.random()*barbs.length)],
+            servicio: 'Corte de Cabello', bebida: '-', monto, propina, pagoTxt: pago, valEfectivo: valEf, valTarjeta: valTar, editado: false
+        });
+    }
+    registros.sort((a,b) => b.fechaObj - a.fechaObj);
+    const ayer = new Date(); ayer.setDate(ayer.getDate()-1);
+    pagosNomina.push({ id:1, fechaObj: ayer, fechaStr: ayer.toLocaleString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}), barbero: 'David', monto: 1500, metodo: 'Transferencia' });
+}
+
+generarDatosDemo();
+renderizarBotonesLogin();
+
+
+// TEMA CLARO/OSCURO
+window.toggleTheme = function() {
+    document.documentElement.classList.toggle('light-theme');
+    localStorage.setItem('mb_theme', document.documentElement.classList.contains('light-theme') ? 'light' : 'dark');
+};
+if(localStorage.getItem('mb_theme') === 'light') {
+    document.documentElement.classList.add('light-theme');
+}

@@ -1,0 +1,16 @@
+/* Estilos base adicionales si se requieren, 
+   aunque Tailwind cubre la mayoría. */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animación para filas nuevas */
+@keyframes highlight {
+    0% { background-color: #fef08a; }
+    100% { background-color: transparent; }
+}
+
+.new-row {
+    animation: highlight 1.5s ease-out;
+}
