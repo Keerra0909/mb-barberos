@@ -11,4 +11,7 @@ test_*.js
 analyze_*.js
 build_*.js
 extract_*.js
+capture_*.js
+fix_*.js
+patch_*.js
 mitarjeta_dump.html
