@@ -176,8 +176,13 @@ window.addEventListener('error', function(e) {
                                     </label>
                                     <span id="badge-lealtad-cliente" class="hidden text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-sm bg-yellow-950 text-yellow-400 border border-yellow-800"></span>
                                 </div>
+                                <div>
+                                    <select id="cliente-select-existente" onchange="seleccionarClienteDesdeLista(this.value)" class="w-full input-dark rounded-sm p-2 text-xs text-zinc-300 font-medium">
+                                        <option value="">👤 Seleccionar cliente registrado...</option>
+                                    </select>
+                                </div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input type="tel" id="cliente-telefono" placeholder="Teléfono (10 dígitos)" maxlength="10" class="w-full input-dark rounded-sm p-2 text-xs" oninput="buscarClienteLealtad()">
+                                    <input type="tel" id="cliente-telefono" placeholder="Teléfono (10 dígitos)" maxlength="10" class="w-full input-dark rounded-sm p-2 text-xs font-mono" oninput="buscarClienteLealtad()">
                                     <input type="text" id="cliente-nombre" placeholder="Nombre cliente" class="w-full input-dark rounded-sm p-2 text-xs">
                                 </div>
                                 <div id="banner-recompensa-lealtad" class="hidden p-2 rounded-sm bg-yellow-500/10 border border-yellow-500/40 text-yellow-300 text-[11px] flex items-center justify-between">

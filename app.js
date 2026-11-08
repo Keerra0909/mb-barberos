@@ -284,7 +284,44 @@ function actualizarSelectsForm() {
             selProd.innerHTML += `<option value="${p}"${disabled}>${p} — $${preciosBase[p] || 0}${stockTxt}</option>`;
         });
     }
+
+    actualizarSelectClientesPOS();
 }
+
+function actualizarSelectClientesPOS() {
+    const sel = document.getElementById('cliente-select-existente');
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">👤 Seleccionar cliente registrado...</option>';
+    clientesLealtad.forEach(c => {
+        const s = c.sellos || 0;
+        const icon = s >= 5 ? '👑' : '⭐';
+        const promo = s >= 5 ? ' - ¡Corte Gratis!' : '';
+        const telFmt = c.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+        sel.innerHTML += `<option value="${c.telefono}">${c.nombre} — ${telFmt} (${icon} ${s}/5${promo})</option>`;
+    });
+    if (currentVal) sel.value = currentVal;
+}
+
+window.seleccionarClienteDesdeLista = function(tel) {
+    const telInput = document.getElementById('cliente-telefono');
+    const nomInput = document.getElementById('cliente-nombre');
+    if(!tel) {
+        if(telInput) telInput.value = '';
+        if(nomInput) nomInput.value = '';
+        const badge = document.getElementById('badge-lealtad-cliente');
+        if(badge) badge.classList.add('hidden');
+        const banner = document.getElementById('banner-recompensa-lealtad');
+        if(banner) banner.classList.add('hidden');
+        return;
+    }
+    const cli = clientesLealtad.find(c => c.telefono === tel);
+    if(cli) {
+        if(telInput) telInput.value = cli.telefono;
+        if(nomInput) nomInput.value = cli.nombre;
+        buscarClienteLealtad();
+    }
+};
 
 function actualizarMenuSucursalesHeader() {
     const sel = document.getElementById('sucursal-select');
@@ -589,6 +626,7 @@ if(regForm) regForm.addEventListener('submit', function(e) {
     if(document.getElementById('monto')) document.getElementById('monto').value = '220';
     if(document.getElementById('cliente-telefono')) document.getElementById('cliente-telefono').value = '';
     if(document.getElementById('cliente-nombre')) document.getElementById('cliente-nombre').value = '';
+    if(document.getElementById('cliente-select-existente')) document.getElementById('cliente-select-existente').value = '';
     const badgeCli = document.getElementById('badge-lealtad-cliente');
     if(badgeCli) badgeCli.classList.add('hidden');
     const bannerRec = document.getElementById('banner-recompensa-lealtad');
@@ -791,15 +829,18 @@ window.buscarClienteLealtad = function() {
     if (!telInput) return;
 
     const val = telInput.value.trim();
+    const selRapido = document.getElementById('cliente-select-existente');
     if (val.length < 3) {
         if(badge) badge.classList.add('hidden');
         if(banner) banner.classList.add('hidden');
+        if(selRapido && !val) selRapido.value = '';
         return;
     }
 
     const match = clientesLealtad.find(c => c.telefono.includes(val) || (c.nombre && c.nombre.toLowerCase().includes(val.toLowerCase())));
     if (match) {
         if(nomInput && !nomInput.value) nomInput.value = match.nombre;
+        if(selRapido) selRapido.value = match.telefono;
         if(badge) {
             badge.textContent = `⭐ ${match.sellos || 0}/5 SELLOS`;
             badge.classList.remove('hidden');
@@ -989,6 +1030,7 @@ window.guardarClienteModal = function(e) {
     guardarDatos();
     cerrarModalCliente();
     actualizarUILealtad();
+    actualizarSelectClientesPOS();
 };
 
 window.eliminarClienteModal = function() {
@@ -999,6 +1041,7 @@ window.eliminarClienteModal = function() {
         guardarDatos();
         cerrarModalCliente();
         actualizarUILealtad();
+        actualizarSelectClientesPOS();
     });
 };
 
