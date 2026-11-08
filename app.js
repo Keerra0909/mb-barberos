@@ -873,15 +873,132 @@ window.filtrarClientesUI = function() {
                 </td>
                 <td class="p-3.5 font-mono text-zinc-300 font-bold">${c.visitas || 0}</td>
                 <td class="p-3.5 font-mono text-zinc-500 text-xs">${c.ultimaVisita || '-'}</td>
-                <td class="p-3.5 text-right space-x-2">
-                    <button onclick="abrirModalTarjeta('${c.telefono}')" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-yellow-950/40 text-yellow-400 border border-yellow-800/60 rounded hover:bg-yellow-900/50 transition-colors">
+                <td class="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                    <button onclick="abrirModalTarjeta('${c.telefono}')" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-yellow-950/40 text-yellow-400 border border-yellow-800/60 rounded hover:bg-yellow-900/50 transition-colors" title="Ver Pase Digital">
                         <i class="fa-solid fa-id-card mr-1"></i> Tarjeta
                     </button>
-                    <button onclick="abrirModalTarjeta('${c.telefono}'); setTimeout(compartirTarjetaWhatsApp, 300)" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-800/60 rounded hover:bg-emerald-900/50 transition-colors">
+                    <button onclick="abrirModalTarjeta('${c.telefono}'); setTimeout(compartirTarjetaWhatsApp, 300)" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-800/60 rounded hover:bg-emerald-900/50 transition-colors" title="Compartir WhatsApp">
                         <i class="fa-brands fa-whatsapp mr-1"></i> WA
+                    </button>
+                    <button onclick="abrirModalEditarCliente('${c.telefono}')" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-600 rounded transition-colors" title="Editar Información">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Editar
                     </button>
                 </td>
             </tr>`;
+    });
+};
+
+window.abrirModalNuevoCliente = function() {
+    const m = document.getElementById('modal-cliente');
+    if(!m) return;
+    document.getElementById('modal-cliente-titulo').innerHTML = `<i class="fa-solid fa-user-plus text-yellow-500"></i> Añadir Nuevo Cliente`;
+    document.getElementById('cli-modal-tel-original').value = '';
+    document.getElementById('cli-modal-nombre').value = '';
+    document.getElementById('cli-modal-telefono').value = '';
+    document.getElementById('cli-modal-sellos').value = '1';
+    document.getElementById('cli-modal-visitas').value = '1';
+
+    const selSuc = document.getElementById('cli-modal-sucursal');
+    if(selSuc) {
+        selSuc.innerHTML = '';
+        sucursalesActivas.forEach(s => selSuc.innerHTML += `<option value="${s}">${s}</option>`);
+    }
+
+    const btnDel = document.getElementById('btn-eliminar-cliente');
+    if(btnDel) btnDel.classList.add('hidden');
+
+    m.classList.remove('hidden');
+};
+
+window.abrirModalEditarCliente = function(tel) {
+    const cli = clientesLealtad.find(c => c.telefono === tel);
+    if(!cli) return;
+
+    const m = document.getElementById('modal-cliente');
+    if(!m) return;
+
+    document.getElementById('modal-cliente-titulo').innerHTML = `<i class="fa-solid fa-user-pen text-yellow-500"></i> Editar Cliente: ${cli.nombre}`;
+    document.getElementById('cli-modal-tel-original').value = cli.telefono;
+    document.getElementById('cli-modal-nombre').value = cli.nombre;
+    document.getElementById('cli-modal-telefono').value = cli.telefono;
+    document.getElementById('cli-modal-sellos').value = cli.sellos || 0;
+    document.getElementById('cli-modal-visitas').value = cli.visitas || 0;
+
+    const selSuc = document.getElementById('cli-modal-sucursal');
+    if(selSuc) {
+        selSuc.innerHTML = '';
+        sucursalesActivas.forEach(s => {
+            const isSel = (cli.sucursal === s) ? ' selected' : '';
+            selSuc.innerHTML += `<option value="${s}"${isSel}>${s}</option>`;
+        });
+    }
+
+    const btnDel = document.getElementById('btn-eliminar-cliente');
+    if(btnDel) btnDel.classList.remove('hidden');
+
+    m.classList.remove('hidden');
+};
+
+window.cerrarModalCliente = function() {
+    const m = document.getElementById('modal-cliente');
+    if(m) m.classList.add('hidden');
+};
+
+window.guardarClienteModal = function(e) {
+    e.preventDefault();
+    const telOrig = document.getElementById('cli-modal-tel-original')?.value?.trim();
+    const nombre = document.getElementById('cli-modal-nombre')?.value?.trim();
+    const telefono = document.getElementById('cli-modal-telefono')?.value?.trim();
+    const sellos = Math.min(5, Math.max(0, parseInt(document.getElementById('cli-modal-sellos')?.value) || 0));
+    const visitas = Math.max(0, parseInt(document.getElementById('cli-modal-visitas')?.value) || 0);
+    const sucursal = document.getElementById('cli-modal-sucursal')?.value || sucursalActual;
+
+    if(!nombre || !telefono) return;
+
+    if(telOrig) {
+        // Editando cliente existente
+        const cli = clientesLealtad.find(c => c.telefono === telOrig);
+        if(cli) {
+            cli.nombre = nombre;
+            cli.telefono = telefono;
+            cli.sellos = sellos;
+            cli.visitas = visitas;
+            cli.sucursal = sucursal;
+        }
+    } else {
+        // Nuevo cliente
+        const existe = clientesLealtad.find(c => c.telefono === telefono);
+        if(existe) {
+            existe.nombre = nombre;
+            existe.sellos = sellos;
+            existe.visitas = visitas;
+            existe.sucursal = sucursal;
+        } else {
+            clientesLealtad.unshift({
+                telefono,
+                nombre,
+                sellos,
+                visitas,
+                sucursal,
+                ultimaVisita: new Date().toISOString().split('T')[0],
+                historial: []
+            });
+        }
+    }
+
+    guardarDatos();
+    cerrarModalCliente();
+    actualizarUILealtad();
+};
+
+window.eliminarClienteModal = function() {
+    const telOrig = document.getElementById('cli-modal-tel-original')?.value?.trim();
+    if(!telOrig) return;
+    mostrarConfirmacion('Eliminar Cliente', '¿Seguro que deseas eliminar este cliente del club de lealtad?', () => {
+        clientesLealtad = clientesLealtad.filter(c => c.telefono !== telOrig);
+        guardarDatos();
+        cerrarModalCliente();
+        actualizarUILealtad();
     });
 };
 
