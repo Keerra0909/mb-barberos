@@ -4,12 +4,26 @@
 let registros = JSON.parse(localStorage.getItem('mb_registros')) || [];
 let pagosNomina = JSON.parse(localStorage.getItem('mb_pagos')) || [];
 let historialEdiciones = JSON.parse(localStorage.getItem('mb_ediciones')) || [];
+let inventarioProductos = JSON.parse(localStorage.getItem('mb_inventario')) || [
+    { id: 1, nombre: 'Pomada Mate', precio: 250, stock: { 'La Morena': 15, 'La Quemada': 10, 'Nativitas': 8 }, stockMinimo: 3 },
+    { id: 2, nombre: 'Pomada Brillo', precio: 250, stock: { 'La Morena': 12, 'La Quemada': 8, 'Nativitas': 6 }, stockMinimo: 3 },
+    { id: 3, nombre: 'Polvo Texturizador', precio: 180, stock: { 'La Morena': 10, 'La Quemada': 6, 'Nativitas': 5 }, stockMinimo: 2 },
+    { id: 4, nombre: 'Minoxidil', precio: 350, stock: { 'La Morena': 8, 'La Quemada': 5, 'Nativitas': 4 }, stockMinimo: 2 },
+    { id: 5, nombre: 'Aceite para Barba', precio: 150, stock: { 'La Morena': 14, 'La Quemada': 9, 'Nativitas': 7 }, stockMinimo: 3 }
+];
+let clientesLealtad = JSON.parse(localStorage.getItem('mb_clientes')) || [
+    { telefono: '5512345678', nombre: 'Alejandro Ruiz', visitas: 4, sellos: 4, ultimaVisita: '2026-11-01', sucursal: 'La Morena', historial: [] },
+    { telefono: '5587654321', nombre: 'Roberto Gómez', visitas: 5, sellos: 5, ultimaVisita: '2026-11-05', sucursal: 'La Morena', historial: [] },
+    { telefono: '5544332211', nombre: 'Daniel Morales', visitas: 2, sellos: 2, ultimaVisita: '2026-11-07', sucursal: 'La Quemada', historial: [] }
+];
 let sucursalesActivas = ['La Morena', 'La Quemada', 'Nativitas'];
 
 window.guardarDatos = function() {
     localStorage.setItem('mb_registros', JSON.stringify(registros));
     localStorage.setItem('mb_pagos', JSON.stringify(pagosNomina));
     localStorage.setItem('mb_ediciones', JSON.stringify(historialEdiciones));
+    localStorage.setItem('mb_inventario', JSON.stringify(inventarioProductos));
+    localStorage.setItem('mb_clientes', JSON.stringify(clientesLealtad));
 };
 let barberosActivos = [
     {nombre: 'David', sucursal: 'La Morena'},
@@ -128,8 +142,11 @@ function iniciarSesion(rol) {
     if(etiquetaRol) etiquetaRol.classList.remove('hidden');
     if(panelComisiones) panelComisiones.classList.add('hidden');
 
+    if(tabs) tabs.classList.remove('hidden');
+    const tabRep = document.getElementById('tab-reportes');
+
     if(rol === 'admin') {
-        if(tabs) tabs.classList.remove('hidden');
+        if(tabRep) tabRep.classList.remove('hidden');
         if(selectorSuc) selectorSuc.classList.remove('hidden');
         if(btnConfig) btnConfig.classList.remove('hidden');
         if(btnLimpiar) btnLimpiar.classList.remove('hidden');
@@ -146,6 +163,7 @@ function iniciarSesion(rol) {
             sucursalActual = 'Todas';
         }
     } else {
+        if(tabRep) tabRep.classList.add('hidden'); // Ocultar Administración a cajeras
         sucursalActual = rol.replace('caja_', '');
         if(textoRol) textoRol.textContent = 'Tienda: ' + sucursalActual;
         const labelSucForm = document.getElementById('label-sucursal-form');
@@ -159,18 +177,7 @@ function iniciarSesion(rol) {
     const fechaInput = document.getElementById('filtro-fecha-pos');
     if(fechaInput) fechaInput.value = hoyIso;
 
-    // FORZAR VISTA POS AL INICIAR SESIÓN
-    const vistaPos = document.getElementById('vista-pos');
-    const vistaRep = document.getElementById('vista-reportes');
-    if(vistaPos) vistaPos.classList.remove('hidden');
-    if(vistaRep) vistaRep.classList.add('hidden');
-    
-    // Y resetear el tab visualmente si existe
-    const tabPos = document.getElementById('tab-pos');
-    const tabRep = document.getElementById('tab-reportes');
-    if(tabPos) tabPos.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
-    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
-
+    if(typeof cambiarTab === 'function') cambiarTab('pos');
     actualizarTodasLasListas();
     actualizarVistaHoy();
 }
@@ -259,7 +266,23 @@ function actualizarSelectsForm() {
 
     if(selProd) {
         selProd.innerHTML = '<option value="">+ Añadir Producto...</option>';
-        productosActivos.sort().forEach(p => selProd.innerHTML += `<option value="${p}">${p} — $${preciosBase[p] || 0}</option>`);
+        productosActivos.sort().forEach(p => {
+            const prodObj = inventarioProductos.find(item => item.nombre === p);
+            let stockTxt = '';
+            let disabled = '';
+            if (prodObj && prodObj.stock) {
+                const s = sucursalActual === 'Todas' ? Object.values(prodObj.stock).reduce((a,b)=>a+b, 0) : (prodObj.stock[sucursalActual] || 0);
+                if (s <= 0) {
+                    stockTxt = ' — (AGOTADO)';
+                    disabled = ' disabled class="text-zinc-600 bg-zinc-900"';
+                } else if (s <= (prodObj.stockMinimo || 3)) {
+                    stockTxt = ` — ⚠️ Quedan ${s}`;
+                } else {
+                    stockTxt = ` — (Stock: ${s})`;
+                }
+            }
+            selProd.innerHTML += `<option value="${p}"${disabled}>${p} — $${preciosBase[p] || 0}${stockTxt}</option>`;
+        });
     }
 }
 
@@ -509,16 +532,82 @@ if(regForm) regForm.addEventListener('submit', function(e) {
         monto, propina, pagoTxt: tipoPago, valEfectivo, valTarjeta, editado: false
     });
 
+    // Descontar inventario de productos vendidos
+    serviciosActuales.forEach(item => {
+        const prod = inventarioProductos.find(p => p.nombre === item);
+        if(prod && prod.stock) {
+            const suc = sucursalActual === 'Todas' ? 'La Morena' : sucursalActual;
+            prod.stock[suc] = Math.max(0, (prod.stock[suc] || 0) - 1);
+        }
+    });
+
+    // Procesar Lealtad de Cliente
+    const telCliente = document.getElementById('cliente-telefono')?.value?.trim() || '';
+    const nomCliente = document.getElementById('cliente-nombre')?.value?.trim() || '';
+    let clienteData = null;
+
+    if (telCliente) {
+        clienteData = clientesLealtad.find(c => c.telefono === telCliente);
+        if (!clienteData) {
+            clienteData = {
+                telefono: telCliente,
+                nombre: nomCliente || 'Cliente VIP',
+                visitas: 1,
+                sellos: 1,
+                ultimaVisita: fechaFiltro,
+                sucursal: sucursalActual === 'Todas' ? 'La Morena' : sucursalActual,
+                historial: []
+            };
+            clientesLealtad.unshift(clienteData);
+        } else {
+            if (nomCliente) clienteData.nombre = nomCliente;
+            clienteData.visitas = (clienteData.visitas || 0) + 1;
+            if (window.recompensaLealtadAplicada) {
+                clienteData.sellos = 0; // Cortesía canjeada
+                window.recompensaLealtadAplicada = false;
+            } else {
+                clienteData.sellos = ((clienteData.sellos || 0) % 5) + 1;
+            }
+            clienteData.ultimaVisita = fechaFiltro;
+            clienteData.sucursal = sucursalActual === 'Todas' ? 'La Morena' : sucursalActual;
+        }
+        if(!clienteData.historial) clienteData.historial = [];
+        clienteData.historial.unshift({
+            fecha: fechaFiltro,
+            hora: now.toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit'}),
+            servicio: servicioStr,
+            barbero,
+            total
+        });
+    }
+
     // Reset
     serviciosActuales = [];
     actualizarUISeleccion();
     if(document.getElementById('barbero')) document.getElementById('barbero').value = '';
     if(document.getElementById('propina')) document.getElementById('propina').value = '0';
     if(document.getElementById('monto')) document.getElementById('monto').value = '220';
+    if(document.getElementById('cliente-telefono')) document.getElementById('cliente-telefono').value = '';
+    if(document.getElementById('cliente-nombre')) document.getElementById('cliente-nombre').value = '';
+    const badgeCli = document.getElementById('badge-lealtad-cliente');
+    if(badgeCli) badgeCli.classList.add('hidden');
+    const bannerRec = document.getElementById('banner-recompensa-lealtad');
+    if(bannerRec) bannerRec.classList.add('hidden');
     if(tipoPago === 'Mixto' && document.getElementById('monto-efectivo-mixto')) document.getElementById('monto-efectivo-mixto').value = '0';
     calcularRestanteMixto();
     guardarDatos();
     actualizarVistaHoy();
+    actualizarSelectsForm();
+
+    abrirModalTicketDigital({
+        barbero,
+        servicio: servicioStr,
+        total,
+        pago: tipoPago,
+        sucursal: sucursalActual === 'Todas' ? 'La Morena' : sucursalActual,
+        fecha: now.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+        cliente: clienteData
+    });
 });
 
 function actualizarVistaHoy() {
@@ -656,29 +745,436 @@ if(btnLimpiar) btnLimpiar.addEventListener('click', () => {
 });
 
 // ==========================================
-// 5. TABS (POS / REPORTES)
+// 5. TABS & NAVEGACIÓN
 // ==========================================
-const tabPos = document.getElementById('tab-pos');
-const tabRep = document.getElementById('tab-reportes');
-const vistaPos = document.getElementById('vista-pos');
-const vistaRep = document.getElementById('vista-reportes');
+window.cambiarTab = function(tab) {
+    const tabs = ['pos', 'lealtad', 'inventario', 'reportes'];
+    tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        const vista = document.getElementById('vista-' + t);
+        if (btn) {
+            if (t === tab) {
+                btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors whitespace-nowrap flex items-center gap-1.5';
+            } else {
+                btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors whitespace-nowrap flex items-center gap-1.5';
+            }
+        }
+        if (vista) {
+            if (t === tab) vista.classList.remove('hidden');
+            else vista.classList.add('hidden');
+        }
+    });
 
-if(tabPos) tabPos.addEventListener('click', () => {
-    if(vistaPos) vistaPos.classList.remove('hidden');
-    if(vistaRep) vistaRep.classList.add('hidden');
-    tabPos.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
-    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
-});
-if(tabRep) tabRep.addEventListener('click', () => {
-    if(vistaPos) vistaPos.classList.add('hidden');
-    if(vistaRep) vistaRep.classList.remove('hidden');
-    if(tabRep) tabRep.className = 'py-3 px-2 border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors text-sm uppercase tracking-widest';
-    if(tabPos) tabPos.className = 'py-3 px-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors text-sm uppercase tracking-widest';
-    if(!document.getElementById('reporte-desde')?.value) {
-        document.getElementById('quick-date-select') && (document.getElementById('quick-date-select').value = 'este_mes');
-        applyQuickDate();
-    } else actualizarReportes();
-});
+    if (tab === 'pos') {
+        actualizarVistaHoy();
+        actualizarSelectsForm();
+    }
+    if (tab === 'lealtad') actualizarUILealtad();
+    if (tab === 'inventario') actualizarUIInventario();
+    if (tab === 'reportes') {
+        if(!document.getElementById('reporte-desde')?.value) {
+            document.getElementById('quick-date-select') && (document.getElementById('quick-date-select').value = 'este_mes');
+            applyQuickDate();
+        } else actualizarReportes();
+    }
+};
+
+// ==========================================
+// 5.1 LEALTAD Y CLIENTES
+// ==========================================
+window.recompensaLealtadAplicada = false;
+window.buscarClienteLealtad = function() {
+    const telInput = document.getElementById('cliente-telefono');
+    const nomInput = document.getElementById('cliente-nombre');
+    const badge = document.getElementById('badge-lealtad-cliente');
+    const banner = document.getElementById('banner-recompensa-lealtad');
+    if (!telInput) return;
+
+    const val = telInput.value.trim();
+    if (val.length < 3) {
+        if(badge) badge.classList.add('hidden');
+        if(banner) banner.classList.add('hidden');
+        return;
+    }
+
+    const match = clientesLealtad.find(c => c.telefono.includes(val) || (c.nombre && c.nombre.toLowerCase().includes(val.toLowerCase())));
+    if (match) {
+        if(nomInput && !nomInput.value) nomInput.value = match.nombre;
+        if(badge) {
+            badge.textContent = `⭐ ${match.sellos || 0}/5 SELLOS`;
+            badge.classList.remove('hidden');
+        }
+        if(banner) {
+            if((match.sellos || 0) >= 5) banner.classList.remove('hidden');
+            else banner.classList.add('hidden');
+        }
+    } else {
+        if(badge) badge.classList.add('hidden');
+        if(banner) banner.classList.add('hidden');
+    }
+};
+
+window.aplicarRecompensaLealtad = function() {
+    window.recompensaLealtadAplicada = true;
+    const montoEl = document.getElementById('monto');
+    if(montoEl) montoEl.value = '0';
+    if(!serviciosActuales.includes('🎁 Cortesía Lealtad (5/5)')) {
+        serviciosActuales.unshift('🎁 Cortesía Lealtad (5/5)');
+        actualizarUISeleccion();
+    }
+    const banner = document.getElementById('banner-recompensa-lealtad');
+    if(banner) banner.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> ¡Cortesía aplicada con éxito al ticket ($0)!</span>`;
+};
+
+window.actualizarUILealtad = function() {
+    const totCli = document.getElementById('lealtad-total-clientes');
+    if(totCli) totCli.textContent = clientesLealtad.length;
+
+    const recListas = clientesLealtad.filter(c => (c.sellos || 0) >= 5).length;
+    const recEl = document.getElementById('lealtad-recompensas-listas');
+    if(recEl) recEl.textContent = recListas;
+
+    const totVisitas = clientesLealtad.reduce((acc, c) => acc + (c.visitas || 0), 0);
+    const visEl = document.getElementById('lealtad-total-visitas');
+    if(visEl) visEl.textContent = totVisitas;
+
+    filtrarClientesUI();
+};
+
+window.filtrarClientesUI = function() {
+    const tbody = document.getElementById('tabla-clientes-lealtad');
+    if(!tbody) return;
+    const q = (document.getElementById('filtro-cliente-input')?.value || '').toLowerCase().trim();
+
+    const filtrados = clientesLealtad.filter(c => 
+        c.nombre.toLowerCase().includes(q) || c.telefono.includes(q)
+    );
+
+    if(filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-600 uppercase tracking-widest text-[10px]">No se encontraron clientes registrados.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    filtrados.forEach(c => {
+        const s = Math.min(5, Math.max(0, c.sellos || 0));
+        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(5 - s);
+        const badgeRecompensa = s >= 5 
+            ? `<span class="ml-2 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 rounded text-[9px] font-bold uppercase tracking-wider">¡Corte Gratis!</span>`
+            : '';
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-zinc-900/60 transition-colors">
+                <td class="p-3.5 font-bold text-zinc-200">${c.nombre} ${badgeRecompensa}</td>
+                <td class="p-3.5 font-mono text-zinc-400">${c.telefono}</td>
+                <td class="p-3.5 font-mono text-xs">
+                    <span class="text-yellow-400 font-bold">${s}/5</span> 
+                    <span class="ml-2 text-zinc-400">${tijeras}</span>
+                </td>
+                <td class="p-3.5 font-mono text-zinc-300 font-bold">${c.visitas || 0}</td>
+                <td class="p-3.5 font-mono text-zinc-500 text-xs">${c.ultimaVisita || '-'}</td>
+                <td class="p-3.5 text-right space-x-2">
+                    <button onclick="abrirModalTarjeta('${c.telefono}')" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-yellow-950/40 text-yellow-400 border border-yellow-800/60 rounded hover:bg-yellow-900/50 transition-colors">
+                        <i class="fa-solid fa-id-card mr-1"></i> Tarjeta
+                    </button>
+                    <button onclick="abrirModalTarjeta('${c.telefono}'); setTimeout(compartirTarjetaWhatsApp, 300)" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-800/60 rounded hover:bg-emerald-900/50 transition-colors">
+                        <i class="fa-brands fa-whatsapp mr-1"></i> WA
+                    </button>
+                </td>
+            </tr>`;
+    });
+};
+
+let clienteTarjetaActivo = null;
+window.abrirModalTarjeta = function(tel) {
+    const cli = clientesLealtad.find(c => c.telefono === tel);
+    if(!cli) return;
+    clienteTarjetaActivo = cli;
+
+    const m = document.getElementById('modal-tarjeta-lealtad');
+    if(!m) return;
+
+    document.getElementById('tarjeta-sucursal').textContent = cli.sucursal || sucursalActual;
+    document.getElementById('tarjeta-cliente-nombre').textContent = cli.nombre || 'Cliente VIP';
+    document.getElementById('tarjeta-cliente-telefono').textContent = cli.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+
+    const sellos = Math.min(5, Math.max(0, cli.sellos || 0));
+    document.getElementById('tarjeta-sellos-contador').textContent = `${sellos} / 5`;
+
+    const grid = document.getElementById('tarjeta-sellos-grid');
+    if(grid) {
+        grid.innerHTML = '';
+        for(let i = 1; i <= 5; i++) {
+            if(i <= sellos) {
+                grid.innerHTML += `
+                    <div class="flex-1 aspect-square rounded-xl bg-gradient-to-tr from-yellow-600 to-yellow-400 text-black flex flex-col items-center justify-center font-bold shadow-lg shadow-yellow-500/20 transform scale-105 transition-transform">
+                        <i class="fa-solid fa-scissors text-sm"></i>
+                        <span class="text-[8px] mt-0.5 font-mono">#${i}</span>
+                    </div>`;
+            } else {
+                grid.innerHTML += `
+                    <div class="flex-1 aspect-square rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 text-zinc-600 flex flex-col items-center justify-center font-mono">
+                        <i class="fa-solid fa-circle text-[8px] opacity-30"></i>
+                        <span class="text-[8px] mt-0.5 opacity-40">#${i}</span>
+                    </div>`;
+            }
+        }
+    }
+
+    const recTxt = document.getElementById('tarjeta-recompensa-texto');
+    if(recTxt) {
+        recTxt.textContent = sellos === 5 
+            ? '🎉 ¡META ALCANZADA! Muestra esta tarjeta para tu corte gratis' 
+            : `⭐ Faltan ${5 - sellos} visitas para tu corte de cortesía`;
+    }
+
+    // QR Code
+    const qrContainer = document.getElementById('qrcode-tarjeta');
+    if(qrContainer) {
+        qrContainer.innerHTML = '';
+        if(typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: `MB-VIP:${cli.telefono}`,
+                width: 120,
+                height: 120,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+    }
+
+    m.classList.remove('hidden');
+};
+
+window.cerrarModalTarjeta = function() {
+    const m = document.getElementById('modal-tarjeta-lealtad');
+    if(m) m.classList.add('hidden');
+    clienteTarjetaActivo = null;
+};
+
+window.compartirTarjetaWhatsApp = function() {
+    if(!clienteTarjetaActivo) return;
+    const c = clienteTarjetaActivo;
+    const s = c.sellos || 0;
+    const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
+    let msg = `💈 *TARJETA DIGITAL DE LEALTAD - MB BARBEROS* 💈\n`;
+    msg += `👤 *Titular:* ${c.nombre}\n`;
+    msg += `📱 *Tel:* ${c.telefono}\n`;
+    msg += `⭐ *Sellos:* ${s} de 5 ${tijeras}\n`;
+    msg += s === 5 ? `🎉 *¡Tienes corte de cortesía disponible!*\n` : `_Faltan ${5 - s} visitas para tu corte gratis._\n`;
+    msg += `📍 *Sucursal:* ${c.sucursal || sucursalActual}\n`;
+    const tel = c.telefono.replace(/\D/g, '');
+    window.open(`https://wa.me/52${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+// ==========================================
+// 5.2 TICKET DIGITAL WHATSAPP
+// ==========================================
+let ticketDigitalActual = null;
+window.abrirModalTicketDigital = function(datos) {
+    ticketDigitalActual = datos;
+    const m = document.getElementById('modal-ticket-digital');
+    if(!m) return;
+    
+    document.getElementById('ticket-dig-fecha').textContent = datos.fecha + ' (' + datos.sucursal + ')';
+    document.getElementById('ticket-dig-barbero').textContent = datos.barbero;
+    document.getElementById('ticket-dig-servicio').textContent = datos.servicio;
+    document.getElementById('ticket-dig-total').textContent = formatoDinero.format(datos.total);
+    document.getElementById('ticket-dig-pago').textContent = datos.pago;
+
+    const boxLealtad = document.getElementById('ticket-dig-lealtad-box');
+    const btnVerTarjeta = document.getElementById('btn-ticket-ver-tarjeta');
+    if (datos.cliente) {
+        if(boxLealtad) {
+            boxLealtad.classList.remove('hidden');
+            const s = datos.cliente.sellos || 1;
+            const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
+            document.getElementById('ticket-dig-lealtad-txt').textContent = `⭐ Sellos: ${s} de 5  ${tijeras}`;
+            document.getElementById('ticket-dig-lealtad-sub').textContent = s === 5 ? '🎉 ¡Recompensa lista para el próximo corte!' : `Faltan ${5 - s} visitas para recompensa de lealtad`;
+        }
+        if(btnVerTarjeta) btnVerTarjeta.classList.remove('hidden');
+    } else {
+        if(boxLealtad) boxLealtad.classList.add('hidden');
+        if(btnVerTarjeta) btnVerTarjeta.classList.add('hidden');
+    }
+
+    m.classList.remove('hidden');
+};
+
+window.cerrarModalTicketDigital = function() {
+    const m = document.getElementById('modal-ticket-digital');
+    if(m) m.classList.add('hidden');
+    ticketDigitalActual = null;
+};
+
+window.ejecutarEnvioWhatsAppTicket = function() {
+    if(!ticketDigitalActual) return;
+    const t = ticketDigitalActual;
+    let msg = `💈 *MB BARBEROS - COMPROBANTE DE SERVICIO* 💈\n`;
+    msg += `📍 *Sucursal:* ${t.sucursal}\n`;
+    msg += `📅 *Fecha:* ${t.fecha}\n`;
+    msg += `✂️ *Barbero:* ${t.barbero}\n\n`;
+    msg += `🧾 *Servicio(s):* ${t.servicio}\n`;
+    msg += `💰 *Total Pagado:* ${formatoDinero.format(t.total)} (${t.pago})\n\n`;
+
+    if(t.cliente) {
+        const s = t.cliente.sellos || 1;
+        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
+        msg += `⭐ *PROGRAMA DE LEALTAD VIP:*\n`;
+        msg += `Has acumulado *${s} de 5 sellos* ${tijeras}\n`;
+        if(s === 5) {
+            msg += `🎉 *¡Felicidades! Tienes un servicio de cortesía disponible para tu próxima visita.*\n`;
+        } else {
+            msg += `_¡Solo te faltan ${5 - s} visitas para tu corte de cortesía!_\n`;
+        }
+        msg += `\n`;
+    }
+
+    msg += `_¡Gracias por tu preferencia en Studio MB!_\n`;
+
+    const tel = t.cliente?.telefono ? t.cliente.telefono.replace(/\D/g, '') : '';
+    const url = tel.length === 10 ? `https://wa.me/52${tel}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+};
+
+window.verTarjetaDesdeTicket = function() {
+    if(ticketDigitalActual && ticketDigitalActual.cliente) {
+        window.abrirModalTarjeta(ticketDigitalActual.cliente.telefono);
+    }
+};
+
+// ==========================================
+// 5.3 INVENTARIO DE PRODUCTOS
+// ==========================================
+window.actualizarUIInventario = function() {
+    const totProd = document.getElementById('inv-total-productos');
+    if(totProd) totProd.textContent = inventarioProductos.length;
+
+    const suc = sucursalActual === 'Todas' ? 'La Morena' : sucursalActual;
+    const labelSuc = document.getElementById('inv-label-sucursal');
+    if(labelSuc) labelSuc.textContent = `Stock en ${suc}`;
+
+    let piezasTienda = 0;
+    let bajas = 0;
+    inventarioProductos.forEach(p => {
+        const s = (p.stock && p.stock[suc] !== undefined) ? p.stock[suc] : 0;
+        piezasTienda += s;
+        if(s <= (p.stockMinimo || 3)) bajas++;
+    });
+
+    const piezasEl = document.getElementById('inv-piezas-tienda');
+    if(piezasEl) piezasEl.textContent = piezasTienda;
+
+    const bajoEl = document.getElementById('inv-alertas-bajo');
+    if(bajoEl) bajoEl.textContent = bajas;
+
+    const tbody = document.getElementById('tabla-inventario-body');
+    if(!tbody) return;
+
+    tbody.innerHTML = '';
+    inventarioProductos.forEach(p => {
+        const stockActual = (p.stock && p.stock[suc] !== undefined) ? p.stock[suc] : 0;
+        const min = p.stockMinimo || 3;
+        
+        let estadoBadge = '';
+        if(stockActual === 0) {
+            estadoBadge = `<span class="px-2 py-0.5 bg-red-950 text-red-400 border border-red-800 rounded text-[9px] uppercase tracking-widest font-bold">Agotado</span>`;
+        } else if(stockActual <= min) {
+            estadoBadge = `<span class="px-2 py-0.5 bg-yellow-950 text-yellow-400 border border-yellow-800 rounded text-[9px] uppercase tracking-widest font-bold">Stock Bajo</span>`;
+        } else {
+            estadoBadge = `<span class="px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded text-[9px] uppercase tracking-widest font-bold">En Stock</span>`;
+        }
+
+        let breakdownStocks = '';
+        sucursalesActivas.forEach(sName => {
+            const qty = p.stock ? (p.stock[sName] || 0) : 0;
+            const isCur = sName === suc;
+            breakdownStocks += `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isCur ? 'bg-zinc-800 text-white font-bold border border-zinc-600' : 'text-zinc-500'}">${sName}: ${qty}</span> `;
+        });
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-zinc-900/60 transition-colors">
+                <td class="p-3.5 font-bold text-zinc-200">
+                    ${p.nombre}
+                </td>
+                <td class="p-3.5 font-mono text-emerald-400 font-bold">${formatoDinero.format(p.precio)}</td>
+                <td class="p-3.5">
+                    <div class="flex flex-wrap gap-1">${breakdownStocks}</div>
+                </td>
+                <td class="p-3.5 font-mono text-zinc-500">${min} pzs</td>
+                <td class="p-3.5">${estadoBadge}</td>
+                <td class="p-3.5 text-right space-x-1">
+                    <button onclick="ajustarStock('${p.nombre}', '${suc}', -1)" class="w-7 h-7 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold rounded text-xs transition-colors">-1</button>
+                    <button onclick="ajustarStock('${p.nombre}', '${suc}', 1)" class="w-7 h-7 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-emerald-400 font-bold rounded text-xs transition-colors">+1</button>
+                    <button onclick="ajustarStock('${p.nombre}', '${suc}', 5)" class="px-2 h-7 bg-blue-950 hover:bg-blue-900 border border-blue-800 text-blue-300 font-bold rounded text-xs transition-colors">+5</button>
+                </td>
+            </tr>`;
+    });
+};
+
+window.ajustarStock = function(prodNombre, suc, delta) {
+    const prod = inventarioProductos.find(p => p.nombre === prodNombre);
+    if(!prod) return;
+    if(!prod.stock) prod.stock = {};
+    prod.stock[suc] = Math.max(0, (prod.stock[suc] || 0) + delta);
+    guardarDatos();
+    actualizarUIInventario();
+    actualizarSelectsForm();
+};
+
+window.abrirModalNuevoProducto = function() {
+    const m = document.getElementById('modal-nuevo-producto');
+    if(!m) return;
+    const grid = document.getElementById('nuevo-prod-stocks-grid');
+    if(grid) {
+        grid.innerHTML = '';
+        sucursalesActivas.forEach(s => {
+            grid.innerHTML += `
+                <div>
+                    <label class="block text-[10px] text-zinc-500 font-bold uppercase mb-1">${s}</label>
+                    <input type="number" id="nuevo-stock-${s}" value="10" min="0" class="w-full input-dark rounded-sm p-2 text-xs">
+                </div>`;
+        });
+    }
+    m.classList.remove('hidden');
+};
+
+window.cerrarModalNuevoProducto = function() {
+    const m = document.getElementById('modal-nuevo-producto');
+    if(m) m.classList.add('hidden');
+    const f = document.getElementById('form-nuevo-producto');
+    if(f) f.reset();
+};
+
+window.guardarNuevoProducto = function(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('nuevo-prod-nombre')?.value?.trim();
+    const precio = parseFloat(document.getElementById('nuevo-prod-precio')?.value) || 0;
+    const minimo = parseInt(document.getElementById('nuevo-prod-minimo')?.value) || 3;
+    if(!nombre) return;
+
+    const stocks = {};
+    sucursalesActivas.forEach(s => {
+        stocks[s] = parseInt(document.getElementById(`nuevo-stock-${s}`)?.value) || 0;
+    });
+
+    inventarioProductos.push({
+        id: Date.now(),
+        nombre,
+        precio,
+        stockMinimo: minimo,
+        stock: stocks
+    });
+
+    if(!productosActivos.includes(nombre)) productosActivos.push(nombre);
+    preciosBase[nombre] = precio;
+
+    guardarDatos();
+    cerrarModalNuevoProducto();
+    actualizarUIInventario();
+    actualizarSelectsForm();
+};
 
 // ==========================================
 // 6. REPORTES
