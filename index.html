@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberOS - Studio MB</title>
 
 <script>
 window.addEventListener('error', function(e) {
     document.body.innerHTML = '<div style="color:red; background:white; position:fixed; z-index:9999; top:0; left:0; width:100%; padding:20px;">' + e.message + '<br>' + e.filename + ':' + e.lineno + '</div>' + document.body.innerHTML;
 });
 </script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarberOS - Studio MB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,6 +121,10 @@ window.addEventListener('error', function(e) {
                     </select>
                 </div>
                 
+                <a href="portal.html" target="_blank" class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded border border-yellow-700/60 bg-yellow-950/30 text-yellow-400 hover:bg-yellow-900/50 flex items-center gap-1.5 transition-all shadow ml-2" title="Abrir Portal de Clientes & Reservas">
+                    <i class="fa-solid fa-globe text-yellow-500"></i> <span class="hidden md:inline">Portal Clientes</span>
+                </a>
+
                 <button id="btn-config" class="text-zinc-500 hover:text-white transition-colors ml-2" title="Configurar Sistema">
                     <i class="fa-solid fa-sliders text-lg"></i>
                 </button>
@@ -135,6 +139,9 @@ window.addEventListener('error', function(e) {
             <div class="container mx-auto px-4 max-w-7xl flex gap-6 overflow-x-auto">
                 <button id="tab-pos" onclick="cambiarTab('pos')" class="py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors whitespace-nowrap flex items-center gap-1.5">
                     <i class="fa-solid fa-cash-register"></i> Bitácora & POS
+                </button>
+                <button id="tab-citas" onclick="cambiarTab('citas')" class="py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors whitespace-nowrap flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-check text-yellow-500/80"></i> Citas & Agenda <span id="badge-citas-hoy" class="hidden ml-1 px-1.5 py-0.2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 rounded-full text-[9px] font-bold">0</span>
                 </button>
                 <button id="tab-lealtad" onclick="cambiarTab('lealtad')" class="py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors whitespace-nowrap flex items-center gap-1.5">
                     <i class="fa-solid fa-award text-yellow-500/70"></i> Clientes & Lealtad
@@ -299,6 +306,82 @@ window.addEventListener('error', function(e) {
                                     <tbody id="tabla-registros" class="divide-y divide-zinc-900"></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA CITAS & AGENDA (PORTAL CLIENTES) -->
+                <div id="vista-citas" class="hidden space-y-8">
+                    <!-- Métricas de Citas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-panel p-6 rounded-sm border-l-2 border-yellow-500">
+                            <p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-day text-yellow-500"></i> Citas Para Hoy
+                            </p>
+                            <h3 class="text-3xl font-sans font-bold text-zinc-200" id="citas-total-hoy">0</h3>
+                            <p class="text-[10px] text-zinc-500 mt-2 uppercase tracking-wider">Agendadas para este día</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-sm border-l-2 border-blue-500">
+                            <p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-clock text-blue-400"></i> Citas Pendientes
+                            </p>
+                            <h3 class="text-3xl font-sans font-bold text-blue-400" id="citas-pendientes">0</h3>
+                            <p class="text-[10px] text-zinc-500 mt-2 uppercase tracking-wider">Por atender o en curso</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-sm border-l-2 border-emerald-500">
+                            <p class="text-[11px] text-zinc-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-400"></i> Citas Atendidas
+                            </p>
+                            <h3 class="text-3xl font-sans font-bold text-emerald-400" id="citas-atendidas">0</h3>
+                            <p class="text-[10px] text-zinc-500 mt-2 uppercase tracking-wider">Cobradas con éxito</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Citas y Agenda -->
+                    <div class="glass-panel rounded-sm overflow-hidden">
+                        <div class="p-4 border-b border-zinc-800 bg-black flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 class="text-sm font-sans font-bold silver-text tracking-widest uppercase flex items-center gap-2">
+                                    <i class="fa-solid fa-calendar-check text-yellow-500"></i> Agenda de Citas & Reservaciones
+                                </h2>
+                                <p class="text-[10px] text-zinc-500 uppercase tracking-widest">Sincronizado en tiempo real con el portal web de clientes (mitarjeta.mx)</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                                <input type="date" id="filtro-fecha-citas" class="bg-black border border-zinc-700 text-zinc-200 text-xs px-3 py-1.5 rounded-sm font-mono focus:border-yellow-500 focus:outline-none" onchange="filtrarCitasUI()">
+                                
+                                <select id="filtro-sucursal-citas" class="bg-black border border-zinc-700 text-zinc-300 text-xs px-3 py-1.5 rounded-sm focus:border-yellow-500 focus:outline-none" onchange="filtrarCitasUI()">
+                                    <option value="Todas">Todas las Sucursales</option>
+                                    <option value="La Morena">La Morena</option>
+                                    <option value="La Quemada">La Quemada</option>
+                                </select>
+
+                                <a href="portal.html" target="_blank" class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-sm border border-yellow-700/60 bg-yellow-950/30 text-yellow-400 hover:bg-yellow-900/50 transition-colors flex items-center gap-1.5">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Portal
+                                </a>
+
+                                <button onclick="abrirModalNuevaCita()" class="btn-silver px-3 py-1.5 text-[10px] whitespace-nowrap flex items-center gap-1.5 rounded-sm">
+                                    <i class="fa-solid fa-plus"></i> + Nueva Cita
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-[#050505] text-zinc-500 uppercase tracking-widest border-b border-zinc-800">
+                                    <tr>
+                                        <th class="p-3.5 font-normal">Hora</th>
+                                        <th class="p-3.5 font-normal">Cliente</th>
+                                        <th class="p-3.5 font-normal">Teléfono</th>
+                                        <th class="p-3.5 font-normal">Sucursal</th>
+                                        <th class="p-3.5 font-normal">Barbero</th>
+                                        <th class="p-3.5 font-normal">Servicio Solicitado</th>
+                                        <th class="p-3.5 font-normal">Estado</th>
+                                        <th class="p-3.5 text-right font-normal">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-citas-body" class="divide-y divide-zinc-900">
+                                    <!-- Injected -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -993,7 +1076,75 @@ window.addEventListener('error', function(e) {
         </div>
     </div>
 
-<script src="app.js?v=1790726218"></script>
+    <!-- MODAL: NUEVA CITA MANUAL -->
+    <div id="modal-nueva-cita" class="fixed inset-0 bg-[#050505]/90 backdrop-blur-sm z-[165] hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-sm p-6 relative border-t-2 border-yellow-500">
+            <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-3">
+                <h3 class="text-sm font-sans font-bold silver-text tracking-widest uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-plus text-yellow-500"></i> Registrar Nueva Cita
+                </h3>
+                <button onclick="cerrarModalNuevaCita()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-nueva-cita" class="space-y-4" onsubmit="guardarNuevaCitaManual(event)">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Fecha</label>
+                        <input type="date" id="cita-manual-fecha" class="w-full input-dark rounded-sm p-2.5 text-xs font-mono" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Hora</label>
+                        <input type="time" id="cita-manual-hora" value="12:00" class="w-full input-dark rounded-sm p-2.5 text-xs font-mono" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Sucursal</label>
+                        <select id="cita-manual-sucursal" class="w-full input-dark rounded-sm p-2.5 text-xs" onchange="actualizarBarberosModalCita()">
+                            <option value="La Morena">La Morena</option>
+                            <option value="La Quemada">La Quemada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Barbero</label>
+                        <select id="cita-manual-barbero" class="w-full input-dark rounded-sm p-2.5 text-xs" required></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Servicio</label>
+                    <select id="cita-manual-servicio" class="w-full input-dark rounded-sm p-2.5 text-xs" required>
+                        <option value="Corte de cabello">Corte de Cabello ($220)</option>
+                        <option value="Corte de barba">Corte de Barba Ritual ($220)</option>
+                        <option value="Corte y barba" selected>Corte y Barba ($380)</option>
+                        <option value="Servicio express">Servicio Express ($120)</option>
+                        <option value="Servicio luxury">Servicio Luxury ($550)</option>
+                        <option value="Limpieza facial">Limpieza Facial ($180)</option>
+                        <option value="Facial y corte">Facial y Corte ($330)</option>
+                        <option value="Facial, corte y barba">Facial, Corte y Barba ($480)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Nombre Cliente</label>
+                        <input type="text" id="cita-manual-nombre" placeholder="Nombre completo" class="w-full input-dark rounded-sm p-2.5 text-xs" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Teléfono (10 dgt)</label>
+                        <input type="tel" id="cita-manual-telefono" placeholder="55 1234 5678" maxlength="10" class="w-full input-dark rounded-sm p-2.5 text-xs font-mono" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-widest">Notas / Preferencias</label>
+                    <input type="text" id="cita-manual-notas" placeholder="Ej. Cliente prefiere degra alto" class="w-full input-dark rounded-sm p-2.5 text-xs">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="cerrarModalNuevaCita()" class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white p-2.5 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white p-2.5 rounded-sm text-xs tracking-widest uppercase font-bold transition-colors shadow-lg">Guardar Cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script src="app.js?v=1790726219" charset="UTF-8"></script>
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js")

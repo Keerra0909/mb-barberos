@@ -23,20 +23,64 @@ clientesLealtad.forEach(c => {
 });
 let sucursalesActivas = ['La Morena', 'La Quemada', 'Nativitas'];
 
+let citasAgendadas = JSON.parse(localStorage.getItem('mb_citas')) || [
+    {
+        id: 1731081600001,
+        fecha: new Date().toISOString().split('T')[0],
+        hora: '12:00',
+        sucursal: 'La Morena',
+        barbero: 'David',
+        servicio: 'Corte y barba',
+        cliente: 'Nancy Zakher Marcotte',
+        telefono: '9983856084',
+        notas: 'Cliente VIP · Portal Online',
+        estado: 'Pendiente',
+        creadaEn: new Date().toISOString()
+    },
+    {
+        id: 1731081600002,
+        fecha: new Date().toISOString().split('T')[0],
+        hora: '14:30',
+        sucursal: 'La Morena',
+        barbero: 'Mario',
+        servicio: 'Corte de cabello',
+        cliente: 'Alejandro Ruiz',
+        telefono: '5512345678',
+        notas: '',
+        estado: 'Confirmada',
+        creadaEn: new Date().toISOString()
+    },
+    {
+        id: 1731081600003,
+        fecha: new Date().toISOString().split('T')[0],
+        hora: '16:00',
+        sucursal: 'La Quemada',
+        barbero: 'Carlos',
+        servicio: 'Servicio luxury',
+        cliente: 'Daniel Morales',
+        telefono: '5544332211',
+        notas: 'Primera vez con luxury',
+        estado: 'Confirmada',
+        creadaEn: new Date().toISOString()
+    }
+];
+
 window.guardarDatos = function() {
     localStorage.setItem('mb_registros', JSON.stringify(registros));
     localStorage.setItem('mb_pagos', JSON.stringify(pagosNomina));
     localStorage.setItem('mb_ediciones', JSON.stringify(historialEdiciones));
     localStorage.setItem('mb_inventario', JSON.stringify(inventarioProductos));
     localStorage.setItem('mb_clientes', JSON.stringify(clientesLealtad));
+    localStorage.setItem('mb_citas', JSON.stringify(citasAgendadas));
     localStorage.setItem('mb_meta_sellos', metaSellos.toString());
 };
 let barberosActivos = [
     {nombre: 'David', sucursal: 'La Morena'},
     {nombre: 'Brandon', sucursal: 'La Morena'},
-    {nombre: 'Mario', sucursal: 'La Quemada'},
-    {nombre: 'Gabo', sucursal: 'Nativitas'},
-    {nombre: 'Carlos', sucursal: 'La Morena'}
+    {nombre: 'Mario', sucursal: 'La Morena'},
+    {nombre: 'Gabo', sucursal: 'La Morena'},
+    {nombre: 'Carlos', sucursal: 'La Quemada'},
+    {nombre: 'Sebas', sucursal: 'La Quemada'}
 ];
 let productosActivos = ['Pomada Mate', 'Pomada Brillo', 'Polvo Texturizador', 'Minoxidil', 'Aceite para Barba'];
 
@@ -830,7 +874,7 @@ window.cambiarTab = function(tab) {
         tab = 'pos';
     }
 
-    const tabs = ['pos', 'lealtad', 'inventario', 'reportes'];
+    const tabs = ['pos', 'citas', 'lealtad', 'inventario', 'reportes'];
     tabs.forEach(t => {
         const btn = document.getElementById('tab-' + t);
         const vista = document.getElementById('vista-' + t);
@@ -858,6 +902,7 @@ window.cambiarTab = function(tab) {
         actualizarVistaHoy();
         actualizarSelectsForm();
     }
+    if (tab === 'citas') actualizarUICitas();
     if (tab === 'lealtad') actualizarUILealtad();
     if (tab === 'inventario') actualizarUIInventario();
     if (tab === 'reportes' && rolActual === 'admin') {
@@ -866,6 +911,239 @@ window.cambiarTab = function(tab) {
             applyQuickDate();
         } else actualizarReportes();
     }
+};
+
+// ==========================================
+// 5.0 CITAS Y AGENDA (CONEXIÓN CON PORTAL)
+// ==========================================
+window.actualizarUICitas = function() {
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const fFecha = document.getElementById('filtro-fecha-citas');
+    if (fFecha && !fFecha.value) fFecha.value = hoyStr;
+
+    const fSuc = document.getElementById('filtro-sucursal-citas');
+    if (fSuc && sucursalActual !== 'Todas') fSuc.value = sucursalActual;
+
+    const citasHoy = citasAgendadas.filter(c => c.fecha === hoyStr);
+    const elTotHoy = document.getElementById('citas-total-hoy');
+    if (elTotHoy) elTotHoy.textContent = citasHoy.length;
+
+    const badgeHoy = document.getElementById('badge-citas-hoy');
+    if (badgeHoy) {
+        if (citasHoy.length > 0) {
+            badgeHoy.textContent = citasHoy.length;
+            badgeHoy.classList.remove('hidden');
+        } else {
+            badgeHoy.classList.add('hidden');
+        }
+    }
+
+    const pendientes = citasAgendadas.filter(c => c.estado === 'Pendiente' || c.estado === 'Confirmada').length;
+    const elPend = document.getElementById('citas-pendientes');
+    if (elPend) elPend.textContent = pendientes;
+
+    const atendidas = citasAgendadas.filter(c => c.estado === 'Atendida' || c.estado === 'En Proceso').length;
+    const elAten = document.getElementById('citas-atendidas');
+    if (elAten) elAten.textContent = atendidas;
+
+    filtrarCitasUI();
+};
+
+window.filtrarCitasUI = function() {
+    const tbody = document.getElementById('tabla-citas-body');
+    if (!tbody) return;
+
+    const fechaFiltro = document.getElementById('filtro-fecha-citas')?.value;
+    const sucFiltro = document.getElementById('filtro-sucursal-citas')?.value || 'Todas';
+
+    let filtradas = [...citasAgendadas];
+    if (fechaFiltro) filtradas = filtradas.filter(c => c.fecha === fechaFiltro);
+    if (sucFiltro !== 'Todas') filtradas = filtradas.filter(c => c.sucursal === sucFiltro);
+
+    filtradas.sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+
+    if (filtradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-zinc-600 uppercase tracking-widest text-[10px]">No hay citas agendadas para este filtro.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    filtradas.forEach(c => {
+        let badgeEstado = '';
+        if (c.estado === 'Confirmada') {
+            badgeEstado = `<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-950/40 text-emerald-400 border border-emerald-800/60">Confirmada</span>`;
+        } else if (c.estado === 'Pendiente') {
+            badgeEstado = `<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-yellow-950/40 text-yellow-400 border border-yellow-800/60">Pendiente</span>`;
+        } else if (c.estado === 'Atendida' || c.estado === 'En Proceso') {
+            badgeEstado = `<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-blue-950/40 text-blue-400 border border-blue-800/60">En Curso</span>`;
+        } else {
+            badgeEstado = `<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700">${c.estado}</span>`;
+        }
+
+        const telFmt = (c.telefono || '').replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-zinc-900/60 transition-colors">
+                <td class="p-3.5 font-mono text-zinc-200 font-bold text-xs">${c.hora} hrs</td>
+                <td class="p-3.5 font-bold text-zinc-100">${c.cliente} ${c.notas ? `<span class="block text-[9px] text-zinc-500 font-normal italic">${c.notas}</span>` : ''}</td>
+                <td class="p-3.5 font-mono text-zinc-400 text-xs">${telFmt}</td>
+                <td class="p-3.5 text-zinc-400 text-xs font-semibold">${c.sucursal}</td>
+                <td class="p-3.5 font-bold text-yellow-500/90 text-xs">${c.barbero}</td>
+                <td class="p-3.5 text-zinc-300 text-xs">${c.servicio}</td>
+                <td class="p-3.5">${badgeEstado}</td>
+                <td class="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                    <button onclick="cargarCitaEnPOS(${c.id})" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-yellow-500 hover:bg-yellow-400 text-black rounded transition-colors shadow" title="Cargar en el Punto de Venta">
+                        <i class="fa-solid fa-cash-register mr-1"></i> Cobrar en POS
+                    </button>
+                    <button onclick="contactarClienteCita(${c.id})" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/60 rounded transition-colors" title="Enviar WhatsApp de confirmación">
+                        <i class="fa-brands fa-whatsapp mr-1"></i> WA
+                    </button>
+                    <button onclick="toggleEstadoCita(${c.id})" class="px-2 py-1 text-[10px] text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-600 rounded transition-colors" title="Cambiar Estado">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                    <button onclick="eliminarCita(${c.id})" class="px-2 py-1 text-[10px] text-zinc-600 hover:text-red-400 border border-zinc-900 hover:border-red-900 rounded transition-colors" title="Eliminar Cita">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            </tr>`;
+    });
+};
+
+window.cargarCitaEnPOS = function(id) {
+    const cita = citasAgendadas.find(c => c.id === id);
+    if (!cita) return;
+
+    cambiarTab('pos');
+
+    const telInput = document.getElementById('cliente-telefono');
+    const nomInput = document.getElementById('cliente-nombre');
+    const selCliente = document.getElementById('cliente-select-existente');
+    if (telInput) telInput.value = cita.telefono;
+    if (nomInput) nomInput.value = cita.cliente;
+    if (selCliente) selCliente.value = cita.telefono;
+    buscarClienteLealtad();
+
+    const selBarbero = document.getElementById('barbero');
+    if (selBarbero) selBarbero.value = cita.barbero;
+
+    serviciosActuales = [cita.servicio];
+    actualizarUISeleccion();
+    const montoEl = document.getElementById('monto');
+    if (montoEl) montoEl.value = preciosBase[cita.servicio] || 220;
+
+    cita.estado = 'En Proceso';
+    guardarDatos();
+};
+
+window.contactarClienteCita = function(id) {
+    const cita = citasAgendadas.find(c => c.id === id);
+    if (!cita) return;
+
+    const iconBarber = String.fromCodePoint(0x1F488);
+    const iconWave = String.fromCodePoint(0x1F44B);
+    const iconPin = String.fromCodePoint(0x1F4CD);
+    const iconSciss = String.fromCodePoint(0x2702) + String.fromCodePoint(0xFE0F);
+    const iconRec = String.fromCodePoint(0x1F9FE);
+    const iconCal = String.fromCodePoint(0x1F4C5);
+    const iconClock = String.fromCodePoint(0x23F0);
+    const sep = '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500';
+
+    let msg = `${iconBarber} *BARBER STUDIO MB*\n`;
+    msg += `_Confirmaci\u00F3n Oficial de Cita_\n`;
+    msg += `${sep}\n\n`;
+    msg += `${iconWave} \u00A1Hola, *${cita.cliente}*!\n`;
+    msg += `Te confirmamos tu cita programada:\n\n`;
+    msg += `${iconPin} *Sucursal:* ${cita.sucursal}\n`;
+    msg += `${iconSciss} *Barbero:* ${cita.barbero}\n`;
+    msg += `${iconRec} *Servicio:* ${cita.servicio}\n`;
+    msg += `${iconCal} *Fecha:* ${cita.fecha}\n`;
+    msg += `${iconClock} *Hora:* ${cita.hora} hrs\n\n`;
+    msg += `_Recuerda que tu servicio incluye black mask, bebida de cortes\u00EDa y masaje final._\n`;
+    msg += `${sep}\n`;
+    msg += `\u00A1Te esperamos puntual en Studio MB!`;
+
+    const tel = (cita.telefono || '').replace(/\D/g, '');
+    window.open(`https://wa.me/52${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+window.toggleEstadoCita = function(id) {
+    const cita = citasAgendadas.find(c => c.id === id);
+    if (!cita) return;
+    if (cita.estado === 'Pendiente') cita.estado = 'Confirmada';
+    else if (cita.estado === 'Confirmada') cita.estado = 'Atendida';
+    else if (cita.estado === 'Atendida') cita.estado = 'Pendiente';
+    else cita.estado = 'Confirmada';
+    guardarDatos();
+    actualizarUICitas();
+};
+
+window.eliminarCita = function(id) {
+    mostrarConfirmacion('Eliminar Cita', '¿Deseas eliminar esta cita agendada?', () => {
+        citasAgendadas = citasAgendadas.filter(c => c.id !== id);
+        guardarDatos();
+        actualizarUICitas();
+    });
+};
+
+window.abrirModalNuevaCita = function() {
+    const m = document.getElementById('modal-nueva-cita');
+    if (!m) return;
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('cita-manual-fecha').value = hoy;
+    document.getElementById('cita-manual-sucursal').value = sucursalActual === 'Todas' ? 'La Morena' : sucursalActual;
+    document.getElementById('cita-manual-nombre').value = '';
+    document.getElementById('cita-manual-telefono').value = '';
+    document.getElementById('cita-manual-notas').value = '';
+    actualizarBarberosModalCita();
+    m.classList.remove('hidden');
+};
+
+window.cerrarModalNuevaCita = function() {
+    const m = document.getElementById('modal-nueva-cita');
+    if (m) m.classList.add('hidden');
+};
+
+window.actualizarBarberosModalCita = function() {
+    const suc = document.getElementById('cita-manual-sucursal')?.value || 'La Morena';
+    const sel = document.getElementById('cita-manual-barbero');
+    if (!sel) return;
+    sel.innerHTML = '';
+    const barberos = barberosActivos.filter(b => b.sucursal === suc);
+    barberos.forEach(b => {
+        sel.innerHTML += `<option value="${b.nombre}">${b.nombre}</option>`;
+    });
+};
+
+window.guardarNuevaCitaManual = function(e) {
+    e.preventDefault();
+    const fecha = document.getElementById('cita-manual-fecha')?.value;
+    const hora = document.getElementById('cita-manual-hora')?.value;
+    const sucursal = document.getElementById('cita-manual-sucursal')?.value;
+    const barbero = document.getElementById('cita-manual-barbero')?.value;
+    const servicio = document.getElementById('cita-manual-servicio')?.value;
+    const cliente = document.getElementById('cita-manual-nombre')?.value.trim();
+    const telefono = document.getElementById('cita-manual-telefono')?.value.trim();
+    const notas = document.getElementById('cita-manual-notas')?.value.trim();
+
+    if (!fecha || !hora || !cliente || !telefono) return;
+
+    citasAgendadas.unshift({
+        id: Date.now(),
+        fecha,
+        hora,
+        sucursal,
+        barbero,
+        servicio,
+        cliente,
+        telefono,
+        notas,
+        estado: 'Confirmada',
+        creadaEn: new Date().toISOString()
+    });
+
+    guardarDatos();
+    cerrarModalNuevaCita();
+    actualizarUICitas();
 };
 
 // ==========================================
@@ -1230,21 +1508,90 @@ window.cerrarModalTarjeta = function() {
     clienteTarjetaActivo = null;
 };
 
+function generarBarraSellosWA(sellos, meta) {
+    const s = Math.min(meta, Math.max(0, sellos));
+    let iconos = [];
+    for (let i = 1; i <= meta; i++) {
+        if (i <= s) {
+            iconos.push('\u{2702}\u{FE0F}'); // ✂️
+        } else {
+            iconos.push('\u{25CB}'); // ○
+        }
+    }
+    return '[' + iconos.join(' ') + ']';
+}
+
+function formatearTelefonoWA(tel) {
+    if(!tel) return '-';
+    const clean = tel.replace(/\D/g, '');
+    if(clean.length === 10) {
+        return clean.slice(0, 2) + ' ' + clean.slice(2, 6) + ' ' + clean.slice(6);
+    }
+    return tel;
+}
+
+function formatearFechaBonitaWA(fechaStr) {
+    if (!fechaStr) return '-';
+    const parts = fechaStr.split('-');
+    if (parts.length === 3) {
+        return parts[2] + '/' + parts[1] + '/' + parts[0];
+    }
+    return fechaStr;
+}
+
 window.compartirTarjetaWhatsApp = function() {
     if(!clienteTarjetaActivo) return;
     const c = clienteTarjetaActivo;
     const s = Math.min(metaSellos, c.sellos || 0);
     const faltan = Math.max(0, metaSellos - s);
-    const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
-    let msg = `💈 *TARJETA DIGITAL DE LEALTAD - MB BARBEROS* 💈\n`;
-    msg += `👤 *Titular:* ${c.nombre}\n`;
-    msg += `📱 *Tel:* ${c.telefono}\n`;
-    msg += `📅 *Cliente desde:* ${c.clienteDesde || c.ultimaVisita || '-'}\n`;
-    msg += `⭐ *Sellos:* ${s} de ${metaSellos} ${tijeras}\n`;
-    msg += s >= metaSellos ? `🎉 *¡Tienes corte de cortesía disponible!*\n` : `_Faltan ${faltan} visitas para tu corte gratis._\n`;
-    msg += `📍 *Sucursal:* ${c.sucursal || sucursalActual}\n`;
-    const tel = c.telefono.replace(/\D/g, '');
-    window.open(`https://wa.me/52${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+    const barra = generarBarraSellosWA(s, metaSellos);
+    const telFmt = formatearTelefonoWA(c.telefono);
+    const fechaFmt = formatearFechaBonitaWA(c.clienteDesde || c.ultimaVisita);
+    const sucursal = c.sucursal || sucursalActual;
+    const telLimpio = c.telefono.replace(/\D/g, '');
+
+    let msg = `\u{1F488} *STUDIO MB BARBERSHOP*\n`;
+    msg += `_Club de Lealtad & Experiencia VIP_\n`;
+    msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n`;
+
+    if (s >= metaSellos) {
+        msg += `\u{1F451} \u{1F389} *\u00A1FELICIDADES, ${c.nombre.toUpperCase()}!*\n`;
+        msg += `\u00A1Has completado tu tarjeta de lealtad en *Studio MB*!\n\n`;
+        msg += `\u{1F48E} *TU ESTADO VIP:*\n`;
+        msg += `\u2022 *Titular:* ${c.nombre}\n`;
+        msg += `\u2022 *Tel\u00E9fono:* ${telFmt}\n`;
+        msg += `\u2022 *Sucursal:* ${sucursal}\n`;
+        msg += `\u2022 *Miembro desde:* ${fechaFmt}\n\n`;
+        msg += `\u{2702}\u{FE0F} *PROGRESO:* \`${barra}\` (${s}/${metaSellos} - \u00A1META COMPLETA!)\n\n`;
+        msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n`;
+        msg += `\u{1F381} *\u00A1TIENES UN CORTE GRATIS DISPONIBLE!*\n`;
+        msg += `Tu siguiente servicio de corte o arreglo de barba va por cuenta de la casa.\n`;
+        msg += `\u{1F449} Presenta este mensaje en caja en tu pr\u00F3xima visita para canjear tu regalo.\n`;
+        msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n`;
+    } else {
+        msg += `\u{1F44B} \u00A1Hola, *${c.nombre}*!\n`;
+        msg += `Gracias por tu preferencia y confianza en *Studio MB*.\n\n`;
+        msg += `\u{1F48E} *TU PASE DIGITAL VIP:*\n`;
+        msg += `\u2022 *Titular:* ${c.nombre}\n`;
+        msg += `\u2022 *Tel\u00E9fono:* ${telFmt}\n`;
+        msg += `\u2022 *Sucursal:* ${sucursal}\n`;
+        msg += `\u2022 *Miembro desde:* ${fechaFmt}\n\n`;
+        msg += `\u{2702}\u{FE0F} *PROGRESO DE SELLOS:*\n`;
+        msg += `\`${barra}\`  *(${s} de ${metaSellos} sellos)*\n\n`;
+        msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n`;
+        msg += `\u{1F381} *BENEFICIO DE LEALTAD:*\n`;
+        msg += `Al reunir *${metaSellos} sellos*, tu siguiente servicio es *100% CORTES\u00CDA*.\n`;
+        msg += `\u{1F449} _\u00A1Solo te ${faltan === 1 ? 'falta 1 visita' : 'faltan ' + faltan + ' visitas'} para tu corte gratis!_\n`;
+        msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n`;
+    }
+
+    if (window.location && window.location.origin) {
+        msg += `\u{1F4F1} *Ver tu Pase en vivo:* ${window.location.origin}/?tarjeta=${telLimpio}\n\n`;
+    }
+
+    msg += `_Studio MB \u00B7 El arte del buen corte & distinci\u00F3n_`;
+
+    window.open(`https://wa.me/52${telLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
 // ==========================================
@@ -1269,8 +1616,8 @@ window.abrirModalTicketDigital = function(datos) {
             boxLealtad.classList.remove('hidden');
             const s = Math.min(metaSellos, datos.cliente.sellos || 1);
             const faltan = Math.max(0, metaSellos - s);
-            const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
-            document.getElementById('ticket-dig-lealtad-txt').textContent = `⭐ Sellos: ${s} de ${metaSellos}  ${tijeras}`;
+            const barra = generarBarraSellosWA(s, metaSellos);
+            document.getElementById('ticket-dig-lealtad-txt').textContent = `⭐ Sellos: ${s} de ${metaSellos}  ${barra}`;
             document.getElementById('ticket-dig-lealtad-sub').textContent = s >= metaSellos ? '🎉 ¡Recompensa lista para el próximo corte!' : `Faltan ${faltan} visitas para recompensa de lealtad`;
         }
         if(btnVerTarjeta) btnVerTarjeta.classList.remove('hidden');
@@ -1291,28 +1638,47 @@ window.cerrarModalTicketDigital = function() {
 window.ejecutarEnvioWhatsAppTicket = function() {
     if(!ticketDigitalActual) return;
     const t = ticketDigitalActual;
-    let msg = `💈 *MB BARBEROS - COMPROBANTE DE SERVICIO* 💈\n`;
-    msg += `📍 *Sucursal:* ${t.sucursal}\n`;
-    msg += `📅 *Fecha:* ${t.fecha}\n`;
-    msg += `✂️ *Barbero:* ${t.barbero}\n\n`;
-    msg += `🧾 *Servicio(s):* ${t.servicio}\n`;
-    msg += `💰 *Total Pagado:* ${formatoDinero.format(t.total)} (${t.pago})\n\n`;
+
+    let msg = `\u{1F488} *STUDIO MB BARBERSHOP*\n`;
+    msg += `_Comprobante de Servicio Digital_\n`;
+    msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n`;
+
+    const nombreCli = t.cliente?.nombre ? t.cliente.nombre : 'Cliente';
+    msg += `\u{1F64C} \u00A1Gracias por tu visita, *${nombreCli}*!\n\n`;
+
+    msg += `\u{1F9FE} *DETALLE DEL SERVICIO*\n`;
+    msg += `\u2022 *Servicio(s):* ${t.servicio}\n`;
+    msg += `\u2022 *Barbero:* ${t.barbero}\n`;
+    msg += `\u2022 *Sucursal:* ${t.sucursal}\n`;
+    msg += `\u2022 *Fecha:* ${t.fecha}\n\n`;
+
+    msg += `\u{1F4B3} *PAGO REGISTRADO*\n`;
+    msg += `\u2022 *Total Pagado:* *${formatoDinero.format(t.total)}*\n`;
+    msg += `\u2022 *M\u00E9todo de Pago:* ${t.pago}\n\n`;
 
     if(t.cliente) {
         const s = Math.min(metaSellos, t.cliente.sellos || 1);
         const faltan = Math.max(0, metaSellos - s);
-        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
-        msg += `⭐ *PROGRAMA DE LEALTAD VIP:*\n`;
-        msg += `Has acumulado *${s} de ${metaSellos} sellos* ${tijeras}\n`;
+        const barra = generarBarraSellosWA(s, metaSellos);
+
+        msg += `\u{2B50} *CLUB DE LEALTAD VIP*\n`;
+        msg += `\u2022 *Sellos acumulados:* ${s} de ${metaSellos}\n`;
+        msg += `\u2022 *Progreso:* \`${barra}\`\n`;
         if(s >= metaSellos) {
-            msg += `🎉 *¡Felicidades! Tienes un servicio de cortesía disponible para tu próxima visita.*\n`;
+            msg += `\u2022 *Beneficio:* \u{1F389} *\u00A1Corte de cortes\u00EDa disponible para tu pr\u00F3xima visita!*\n\n`;
         } else {
-            msg += `_¡Solo te faltan ${faltan} visitas para tu corte de cortesía!_\n`;
+            msg += `\u2022 *Beneficio:* _\u00A1Te ${faltan === 1 ? 'falta 1 visita' : 'faltan ' + faltan + ' visitas'} para tu corte gratis!_\n\n`;
         }
-        msg += `\n`;
+
+        const telLimpio = t.cliente.telefono ? t.cliente.telefono.replace(/\D/g, '') : '';
+        if (window.location && window.location.origin && telLimpio) {
+            msg += `\u{1F4F1} *Ver tu Pase VIP en vivo:* ${window.location.origin}/?tarjeta=${telLimpio}\n\n`;
+        }
     }
 
-    msg += `_¡Gracias por tu preferencia en Studio MB!_\n`;
+    msg += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n`;
+    msg += `_Conserva este mensaje como tu comprobante oficial de servicio._\n`;
+    msg += `_Studio MB \u00B7 Siempre con estilo._`;
 
     const tel = t.cliente?.telefono ? t.cliente.telefono.replace(/\D/g, '') : '';
     const url = tel.length === 10 ? `https://wa.me/52${tel}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -1861,11 +2227,74 @@ if(formCorte) formCorte.addEventListener('submit', e => {
     window.cerrarModalCorteCaja();
     const modalExito = document.getElementById('modal-exito');
     if(modalExito) modalExito.classList.remove('hidden');
-    let difText = dif===0 ? '✅ CAJA CUADRADA' : (dif>0 ? `⚠️ SOBRANTE: ${formatoDinero.format(dif)}` : `🚨 FALTANTE: ${formatoDinero.format(Math.abs(dif))}`);
-    let msg = `💈 CORTE DE CAJA - MB BARBEROS 💈\n📍 Sucursal: ${sucursalActual}\n📅 Fecha: ${new Date().toLocaleDateString('es-MX')}\n\n`;
-    msg += `✂️ Tickets: ${window.totalTicketsDia||0}\n💵 Efectivo: ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n💳 Tarjeta: ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
-    msg += `🌟 Propinas: ${formatoDinero.format(window.totalPropinasDia||0)} (${formatoDinero.format(window.totalPropinasEfvoDia||0)} efvo / ${formatoDinero.format(window.totalPropinasTarjDia||0)} tarj)\n`;
-    msg += `🚀 TOTAL: ${formatoDinero.format(window.totalIngresosDia||0)}\n💸 Gastos: -${formatoDinero.format(window.gastosTotalesActuales||0)}\n📊 Esperado: ${formatoDinero.format(esp)}\n💰 Contado: ${formatoDinero.format(r)}\n\n${difText}\n\n_BarberOS_`;
+
+    const iconCheck = String.fromCodePoint(0x2705);
+    const iconWarn = String.fromCodePoint(0x26A0) + String.fromCodePoint(0xFE0F);
+    const iconSiren = String.fromCodePoint(0x1F6A8);
+    const iconBarber = String.fromCodePoint(0x1F488);
+    const iconPin = String.fromCodePoint(0x1F4CD);
+    const iconCal = String.fromCodePoint(0x1F4C5);
+    const iconUser = String.fromCodePoint(0x1F464);
+    const iconChart = String.fromCodePoint(0x1F4CA);
+    const iconCash = String.fromCodePoint(0x1F4B5);
+    const iconCard = String.fromCodePoint(0x1F4B3);
+    const iconStar = String.fromCodePoint(0x2B50);
+    const iconExp = String.fromCodePoint(0x1F4B8);
+    const iconBag = String.fromCodePoint(0x1F4BC);
+    const iconMoney = String.fromCodePoint(0x1F4B0);
+
+    let difText = '';
+    if(Math.abs(dif) < 0.01) {
+        difText = `${iconCheck} *ESTADO: \u00A1CAJA CUADRADA EXACTA!*`;
+    } else if(dif > 0) {
+        difText = `${iconWarn} *ESTADO: SOBRANTE DE +${formatoDinero.format(dif)}*`;
+    } else {
+        difText = `${iconSiren} *ESTADO: FALTANTE DE -${formatoDinero.format(Math.abs(dif))}*`;
+    }
+
+    const now = new Date();
+    const fechaFmt = now.toLocaleDateString('es-MX', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+    const horaFmt = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    const sep = '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500';
+
+    let msg = `${iconBarber} *BARBER STUDIO MB*\n`;
+    msg += `_Reporte Oficial de Corte de Caja_\n`;
+    msg += `${sep}\n\n`;
+
+    msg += `${iconPin} *Sucursal:* ${sucursalActual}\n`;
+    msg += `${iconCal} *Fecha:* ${fechaFmt} (${horaFmt} hrs)\n`;
+    msg += `${iconUser} *Cierre de Turno:* ${rolActual === 'admin' ? 'Administrador' : ('Caja ' + sucursalActual)}\n\n`;
+
+    msg += `${iconChart} *BALANCE GENERAL DEL D\u00CDA*\n`;
+    msg += `\u2022 *Tickets Cobrados:* ${window.totalTicketsDia||0} servicios\n`;
+    msg += `\u2022 *Total Facturado:* *${formatoDinero.format(window.totalIngresosDia||0)}*\n\n`;
+
+    msg += `${iconCard} *DESGLOSE DE COBROS*\n`;
+    msg += `\u2022 ${iconCash} *Efectivo:* ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n`;
+    msg += `\u2022 ${iconCard} *Tarjeta:* ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n\n`;
+
+    msg += `${iconStar} *PROPINAS DEL EQUIPO*\n`;
+    msg += `\u2022 *Total Propinas:* ${formatoDinero.format(window.totalPropinasDia||0)}\n`;
+    msg += `  \u2514 ${iconCash} En efectivo: ${formatoDinero.format(window.totalPropinasEfvoDia||0)}\n`;
+    msg += `  \u2514 ${iconCard} En tarjeta: ${formatoDinero.format(window.totalPropinasTarjDia||0)}\n\n`;
+
+    msg += `${iconExp} *GASTOS OPERATIVOS*\n`;
+    msg += `\u2022 *Total Gastos (-):* -${formatoDinero.format(window.gastosTotalesActuales||0)}\n\n`;
+
+    msg += `${sep}\n`;
+    msg += `${iconBag} *ARQUEO DE CAJA F\u00CDSICA*\n`;
+    msg += `\u2022 *Ingresos Efectivo:* ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n`;
+    msg += `\u2022 *Menos Propinas Totales (-):* -${formatoDinero.format(window.totalPropinasDia||0)}\n`;
+    msg += `\u2022 *Menos Gastos (-):* -${formatoDinero.format(window.gastosTotalesActuales||0)}\n`;
+    msg += `${sep}\n`;
+    msg += `${iconMoney} *TOTAL ESPERADO EN CAJA:* *${formatoDinero.format(esp)}*\n`;
+    msg += `${iconCash} *EFECTIVO F\u00CDSICO CONTADO:* *${formatoDinero.format(r)}*\n`;
+    msg += `${sep}\n`;
+    msg += `${difText}\n`;
+    msg += `${sep}\n\n`;
+
+    msg += `_MB BarberOS \u00B7 The Gentleman's House_`;
+
     setTimeout(() => {
         if(modalExito) modalExito.classList.add('hidden');
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1876,13 +2305,27 @@ if(formCorte) formCorte.addEventListener('submit', e => {
 window.enviarResumenWhatsApp = function() {
     actualizarVistaHoy();
     const fecha = document.getElementById('filtro-fecha-pos')?.value || new Date().toLocaleDateString('es-MX');
-    let msg = `💈 *RESUMEN DEL DÍA - ${sucursalActual}*\n📅 ${fecha}\n\n`;
-    msg += `✂️ *Tickets:* ${window.totalTicketsDia||0}\n`;
-    msg += `💵 *Efectivo:* ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n`;
-    msg += `💳 *Tarjeta:* ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
-    msg += `🌟 *Propinas:* ${formatoDinero.format(window.totalPropinasDia||0)}\n`;
-    msg += `🚀 *TOTAL:* ${formatoDinero.format(window.totalIngresosDia||0)}\n`;
-    msg += `\n_BarberOS_`;
+    const iconBarber = String.fromCodePoint(0x1F488);
+    const iconCal = String.fromCodePoint(0x1F4C5);
+    const iconSciss = String.fromCodePoint(0x2702) + String.fromCodePoint(0xFE0F);
+    const iconCash = String.fromCodePoint(0x1F4B5);
+    const iconCard = String.fromCodePoint(0x1F4B3);
+    const iconStar = String.fromCodePoint(0x2B50);
+    const sep = '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500';
+
+    let msg = `${iconBarber} *BARBER STUDIO MB*\n`;
+    msg += `_Resumen de Operaci\u00F3n Diaria · ${sucursalActual}_\n`;
+    msg += `${sep}\n\n`;
+    msg += `${iconCal} *Fecha:* ${fecha}\n\n`;
+    msg += `\u2022 ${iconSciss} *Tickets Cobrados:* ${window.totalTicketsDia||0}\n`;
+    msg += `\u2022 ${iconCash} *Efectivo:* ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n`;
+    msg += `\u2022 ${iconCard} *Tarjeta:* ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
+    msg += `\u2022 ${iconStar} *Propinas:* ${formatoDinero.format(window.totalPropinasDia||0)}\n\n`;
+    msg += `${sep}\n`;
+    msg += `*TOTAL DEL D\u00CDA:* *${formatoDinero.format(window.totalIngresosDia||0)}*\n`;
+    msg += `${sep}\n\n`;
+    msg += `_MB BarberOS \u00B7 The Gentleman's House_`;
+
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
