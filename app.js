@@ -11,11 +11,16 @@ let inventarioProductos = JSON.parse(localStorage.getItem('mb_inventario')) || [
     { id: 4, nombre: 'Minoxidil', precio: 350, stock: { 'La Morena': 8, 'La Quemada': 5, 'Nativitas': 4 }, stockMinimo: 2 },
     { id: 5, nombre: 'Aceite para Barba', precio: 150, stock: { 'La Morena': 14, 'La Quemada': 9, 'Nativitas': 7 }, stockMinimo: 3 }
 ];
+let metaSellos = parseInt(localStorage.getItem('mb_meta_sellos')) || 5;
 let clientesLealtad = JSON.parse(localStorage.getItem('mb_clientes')) || [
-    { telefono: '5512345678', nombre: 'Alejandro Ruiz', visitas: 4, sellos: 4, ultimaVisita: '2026-11-01', sucursal: 'La Morena', historial: [] },
-    { telefono: '5587654321', nombre: 'Roberto Gómez', visitas: 5, sellos: 5, ultimaVisita: '2026-11-05', sucursal: 'La Morena', historial: [] },
-    { telefono: '5544332211', nombre: 'Daniel Morales', visitas: 2, sellos: 2, ultimaVisita: '2026-11-07', sucursal: 'La Quemada', historial: [] }
+    { telefono: '5512345678', nombre: 'Alejandro Ruiz', visitas: 4, sellos: 4, clienteDesde: '2026-08-15', ultimaVisita: '2026-11-01', sucursal: 'La Morena', historial: [] },
+    { telefono: '5587654321', nombre: 'Roberto Gómez', visitas: 5, sellos: 5, clienteDesde: '2026-06-20', ultimaVisita: '2026-11-05', sucursal: 'La Morena', historial: [] },
+    { telefono: '5544332211', nombre: 'Daniel Morales', visitas: 2, sellos: 2, clienteDesde: '2026-10-12', ultimaVisita: '2026-11-07', sucursal: 'La Quemada', historial: [] }
 ];
+// Asegurar que todos los clientes tengan fecha de inicio/registro
+clientesLealtad.forEach(c => {
+    if(!c.clienteDesde) c.clienteDesde = c.fechaRegistro || c.ultimaVisita || '2026-11-01';
+});
 let sucursalesActivas = ['La Morena', 'La Quemada', 'Nativitas'];
 
 window.guardarDatos = function() {
@@ -24,6 +29,7 @@ window.guardarDatos = function() {
     localStorage.setItem('mb_ediciones', JSON.stringify(historialEdiciones));
     localStorage.setItem('mb_inventario', JSON.stringify(inventarioProductos));
     localStorage.setItem('mb_clientes', JSON.stringify(clientesLealtad));
+    localStorage.setItem('mb_meta_sellos', metaSellos.toString());
 };
 let barberosActivos = [
     {nombre: 'David', sucursal: 'La Morena'},
@@ -89,6 +95,11 @@ function promptPin(rol) {
     rolPendiente = rol;
     const loginRoles = document.getElementById('login-roles');
     const loginPin = document.getElementById('login-pin');
+    const tituloPin = document.getElementById('titulo-login-pin');
+    if(tituloPin) {
+        if(rol === 'admin') tituloPin.textContent = 'PIN de Dueño / Admin';
+        else tituloPin.textContent = 'PIN de ' + rol.replace('caja_', 'Tienda ');
+    }
     if(loginRoles) loginRoles.classList.add('hidden');
     if(loginPin) loginPin.classList.remove('hidden');
     const pinErr = document.getElementById('pin-error');
@@ -109,13 +120,32 @@ function verificarPin() {
     const input = document.getElementById('pin-input');
     if(!input) return;
     const val = input.value;
-    if(val === '9999') {
-        iniciarSesion(rolPendiente);
-        cancelarPin();
+    const err = document.getElementById('pin-error');
+
+    if(rolPendiente === 'admin') {
+        // Acceso exclusivo Dueño / Admin: SOLO PIN 9999
+        if(val === '9999') {
+            iniciarSesion('admin');
+            cancelarPin();
+        } else {
+            if(err) {
+                err.textContent = 'Código de Dueño Incorrecto';
+                err.classList.remove('hidden');
+            }
+            input.value = '';
+        }
     } else {
-        const err = document.getElementById('pin-error');
-        if(err) err.classList.remove('hidden');
-        input.value = '';
+        // Acceso Tiendas / Cajas: PIN de tienda '1234' o PIN maestro '9999'
+        if(val === '1234' || val === '9999') {
+            iniciarSesion(rolPendiente);
+            cancelarPin();
+        } else {
+            if(err) {
+                err.textContent = 'Código de Tienda Incorrecto';
+                err.classList.remove('hidden');
+            }
+            input.value = '';
+        }
     }
 }
 
@@ -146,7 +176,7 @@ function iniciarSesion(rol) {
     const tabRep = document.getElementById('tab-reportes');
 
     if(rol === 'admin') {
-        if(tabRep) tabRep.classList.remove('hidden');
+        if(tabRep) { tabRep.classList.remove('hidden'); tabRep.style.display = ''; }
         if(selectorSuc) selectorSuc.classList.remove('hidden');
         if(btnConfig) btnConfig.classList.remove('hidden');
         if(btnLimpiar) btnLimpiar.classList.remove('hidden');
@@ -163,7 +193,14 @@ function iniciarSesion(rol) {
             sucursalActual = 'Todas';
         }
     } else {
-        if(tabRep) tabRep.classList.add('hidden'); // Ocultar Administración a cajeras
+        // ROL TIENDA / CAJA: NUNCA TIENE ACCESO A ADMINISTRACIÓN
+        if(tabRep) { tabRep.classList.add('hidden'); tabRep.style.display = 'none'; }
+        if(selectorSuc) selectorSuc.classList.add('hidden');
+        if(btnConfig) btnConfig.classList.add('hidden');
+        if(btnLimpiar) btnLimpiar.classList.add('hidden');
+        if(panelComisiones) panelComisiones.classList.add('hidden');
+        if(etiquetaRol) etiquetaRol.classList.remove('hidden');
+
         sucursalActual = rol.replace('caja_', '');
         if(textoRol) textoRol.textContent = 'Tienda: ' + sucursalActual;
         const labelSucForm = document.getElementById('label-sucursal-form');
@@ -295,10 +332,10 @@ function actualizarSelectClientesPOS() {
     sel.innerHTML = '<option value="">👤 Seleccionar cliente registrado...</option>';
     clientesLealtad.forEach(c => {
         const s = c.sellos || 0;
-        const icon = s >= 5 ? '👑' : '⭐';
-        const promo = s >= 5 ? ' - ¡Corte Gratis!' : '';
+        const icon = s >= metaSellos ? '👑' : '⭐';
+        const promo = s >= metaSellos ? ' - ¡Corte Gratis!' : '';
         const telFmt = c.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
-        sel.innerHTML += `<option value="${c.telefono}">${c.nombre} — ${telFmt} (${icon} ${s}/5${promo})</option>`;
+        sel.innerHTML += `<option value="${c.telefono}">${c.nombre} — ${telFmt} (${icon} ${s}/${metaSellos}${promo})</option>`;
     });
     if (currentVal) sel.value = currentVal;
 }
@@ -591,6 +628,7 @@ if(regForm) regForm.addEventListener('submit', function(e) {
                 nombre: nomCliente || 'Cliente VIP',
                 visitas: 1,
                 sellos: 1,
+                clienteDesde: fechaFiltro,
                 ultimaVisita: fechaFiltro,
                 sucursal: sucursalActual === 'Todas' ? 'La Morena' : sucursalActual,
                 historial: []
@@ -598,12 +636,13 @@ if(regForm) regForm.addEventListener('submit', function(e) {
             clientesLealtad.unshift(clienteData);
         } else {
             if (nomCliente) clienteData.nombre = nomCliente;
+            if (!clienteData.clienteDesde) clienteData.clienteDesde = fechaFiltro;
             clienteData.visitas = (clienteData.visitas || 0) + 1;
             if (window.recompensaLealtadAplicada) {
                 clienteData.sellos = 0; // Cortesía canjeada
                 window.recompensaLealtadAplicada = false;
             } else {
-                clienteData.sellos = ((clienteData.sellos || 0) % 5) + 1;
+                clienteData.sellos = ((clienteData.sellos || 0) % metaSellos) + 1;
             }
             clienteData.ultimaVisita = fechaFiltro;
             clienteData.sucursal = sucursalActual === 'Todas' ? 'La Morena' : sucursalActual;
@@ -786,15 +825,27 @@ if(btnLimpiar) btnLimpiar.addEventListener('click', () => {
 // 5. TABS & NAVEGACIÓN
 // ==========================================
 window.cambiarTab = function(tab) {
+    // SEGURIDAD ESTRICTA: Solo el Dueño / Admin tiene acceso a Administración
+    if (tab === 'reportes' && rolActual !== 'admin') {
+        tab = 'pos';
+    }
+
     const tabs = ['pos', 'lealtad', 'inventario', 'reportes'];
     tabs.forEach(t => {
         const btn = document.getElementById('tab-' + t);
         const vista = document.getElementById('vista-' + t);
         if (btn) {
-            if (t === tab) {
-                btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors whitespace-nowrap flex items-center gap-1.5';
+            if (t === 'reportes' && rolActual !== 'admin') {
+                btn.classList.add('hidden');
+                btn.style.display = 'none';
             } else {
-                btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors whitespace-nowrap flex items-center gap-1.5';
+                btn.classList.remove('hidden');
+                btn.style.display = '';
+                if (t === tab) {
+                    btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-yellow-500 text-yellow-400 font-bold transition-colors whitespace-nowrap flex items-center gap-1.5';
+                } else {
+                    btn.className = 'py-4 text-[11px] tracking-[0.15em] uppercase border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 font-medium transition-colors whitespace-nowrap flex items-center gap-1.5';
+                }
             }
         }
         if (vista) {
@@ -809,7 +860,7 @@ window.cambiarTab = function(tab) {
     }
     if (tab === 'lealtad') actualizarUILealtad();
     if (tab === 'inventario') actualizarUIInventario();
-    if (tab === 'reportes') {
+    if (tab === 'reportes' && rolActual === 'admin') {
         if(!document.getElementById('reporte-desde')?.value) {
             document.getElementById('quick-date-select') && (document.getElementById('quick-date-select').value = 'este_mes');
             applyQuickDate();
@@ -821,6 +872,15 @@ window.cambiarTab = function(tab) {
 // 5.1 LEALTAD Y CLIENTES
 // ==========================================
 window.recompensaLealtadAplicada = false;
+
+window.cambiarMetaSellos = function(nuevaMeta) {
+    const val = parseInt(nuevaMeta) || 5;
+    metaSellos = Math.max(2, Math.min(20, val));
+    guardarDatos();
+    actualizarUILealtad();
+    actualizarSelectClientesPOS();
+};
+
 window.buscarClienteLealtad = function() {
     const telInput = document.getElementById('cliente-telefono');
     const nomInput = document.getElementById('cliente-nombre');
@@ -842,12 +902,21 @@ window.buscarClienteLealtad = function() {
         if(nomInput && !nomInput.value) nomInput.value = match.nombre;
         if(selRapido) selRapido.value = match.telefono;
         if(badge) {
-            badge.textContent = `⭐ ${match.sellos || 0}/5 SELLOS`;
+            badge.textContent = `⭐ ${match.sellos || 0}/${metaSellos} SELLOS`;
             badge.classList.remove('hidden');
         }
         if(banner) {
-            if((match.sellos || 0) >= 5) banner.classList.remove('hidden');
-            else banner.classList.add('hidden');
+            if((match.sellos || 0) >= metaSellos) {
+                banner.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-yellow-400"></i>
+                        <span>¡${metaSellos} sellos! Recompensa lista</span>
+                    </div>
+                    <button type="button" onclick="aplicarRecompensaLealtad()" class="px-2 py-0.5 bg-yellow-500 text-black font-bold text-[10px] rounded uppercase hover:bg-yellow-400 transition-colors">Aplicar</button>`;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
         }
     } else {
         if(badge) badge.classList.add('hidden');
@@ -859,8 +928,8 @@ window.aplicarRecompensaLealtad = function() {
     window.recompensaLealtadAplicada = true;
     const montoEl = document.getElementById('monto');
     if(montoEl) montoEl.value = '0';
-    if(!serviciosActuales.includes('🎁 Cortesía Lealtad (5/5)')) {
-        serviciosActuales.unshift('🎁 Cortesía Lealtad (5/5)');
+    if(!serviciosActuales.includes(`🎁 Cortesía Lealtad (${metaSellos}/${metaSellos})`)) {
+        serviciosActuales.unshift(`🎁 Cortesía Lealtad (${metaSellos}/${metaSellos})`);
         actualizarUISeleccion();
     }
     const banner = document.getElementById('banner-recompensa-lealtad');
@@ -871,9 +940,18 @@ window.actualizarUILealtad = function() {
     const totCli = document.getElementById('lealtad-total-clientes');
     if(totCli) totCli.textContent = clientesLealtad.length;
 
-    const recListas = clientesLealtad.filter(c => (c.sellos || 0) >= 5).length;
+    const recListas = clientesLealtad.filter(c => (c.sellos || 0) >= metaSellos).length;
     const recEl = document.getElementById('lealtad-recompensas-listas');
     if(recEl) recEl.textContent = recListas;
+
+    const recLbl = document.getElementById('lealtad-label-recompensas');
+    if(recLbl) recLbl.textContent = `Recompensas Listas (${metaSellos}/${metaSellos})`;
+
+    const thProg = document.getElementById('th-progreso-sellos');
+    if(thProg) thProg.textContent = `Progreso Sellos (${metaSellos} max)`;
+
+    const selMeta = document.getElementById('select-meta-sellos');
+    if(selMeta) selMeta.value = metaSellos;
 
     const totVisitas = clientesLealtad.reduce((acc, c) => acc + (c.visitas || 0), 0);
     const visEl = document.getElementById('lealtad-total-visitas');
@@ -892,25 +970,33 @@ window.filtrarClientesUI = function() {
     );
 
     if(filtrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-600 uppercase tracking-widest text-[10px]">No se encontraron clientes registrados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-zinc-600 uppercase tracking-widest text-[10px]">No se encontraron clientes registrados.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = '';
     filtrados.forEach(c => {
-        const s = Math.min(5, Math.max(0, c.sellos || 0));
-        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(5 - s);
-        const badgeRecompensa = s >= 5 
+        const s = Math.min(metaSellos, Math.max(0, c.sellos || 0));
+        const faltan = Math.max(0, metaSellos - s);
+        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
+        const badgeRecompensa = s >= metaSellos 
             ? `<span class="ml-2 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 rounded text-[9px] font-bold uppercase tracking-wider">¡Corte Gratis!</span>`
             : '';
+        const desdeFmt = c.clienteDesde || c.fechaRegistro || c.ultimaVisita || '2026-11-01';
 
         tbody.innerHTML += `
             <tr class="hover:bg-zinc-900/60 transition-colors">
                 <td class="p-3.5 font-bold text-zinc-200">${c.nombre} ${badgeRecompensa}</td>
                 <td class="p-3.5 font-mono text-zinc-400">${c.telefono}</td>
+                <td class="p-3.5 font-mono text-zinc-400 text-xs">
+                    <span class="inline-flex items-center gap-1.5 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800 text-zinc-300">
+                        <i class="fa-regular fa-calendar text-yellow-500/80 text-[10px]"></i>
+                        ${desdeFmt}
+                    </span>
+                </td>
                 <td class="p-3.5 font-mono text-xs">
-                    <span class="text-yellow-400 font-bold">${s}/5</span> 
-                    <span class="ml-2 text-zinc-400">${tijeras}</span>
+                    <span class="text-yellow-400 font-bold">${s}/${metaSellos}</span> 
+                    <span class="ml-2 text-zinc-400 tracking-tight">${tijeras}</span>
                 </td>
                 <td class="p-3.5 font-mono text-zinc-300 font-bold">${c.visitas || 0}</td>
                 <td class="p-3.5 font-mono text-zinc-500 text-xs">${c.ultimaVisita || '-'}</td>
@@ -936,8 +1022,20 @@ window.abrirModalNuevoCliente = function() {
     document.getElementById('cli-modal-tel-original').value = '';
     document.getElementById('cli-modal-nombre').value = '';
     document.getElementById('cli-modal-telefono').value = '';
-    document.getElementById('cli-modal-sellos').value = '1';
+    
+    const inpSellos = document.getElementById('cli-modal-sellos');
+    if(inpSellos) {
+        inpSellos.value = '1';
+        inpSellos.max = metaSellos;
+    }
+    const lblSellos = document.getElementById('label-cli-modal-sellos');
+    if(lblSellos) lblSellos.textContent = `Sellos (0 a ${metaSellos})`;
+    
     document.getElementById('cli-modal-visitas').value = '1';
+
+    const hoy = new Date().toISOString().split('T')[0];
+    const inpDesde = document.getElementById('cli-modal-cliente-desde');
+    if(inpDesde) inpDesde.value = hoy;
 
     const selSuc = document.getElementById('cli-modal-sucursal');
     if(selSuc) {
@@ -962,8 +1060,20 @@ window.abrirModalEditarCliente = function(tel) {
     document.getElementById('cli-modal-tel-original').value = cli.telefono;
     document.getElementById('cli-modal-nombre').value = cli.nombre;
     document.getElementById('cli-modal-telefono').value = cli.telefono;
-    document.getElementById('cli-modal-sellos').value = cli.sellos || 0;
+
+    const inpSellos = document.getElementById('cli-modal-sellos');
+    if(inpSellos) {
+        inpSellos.value = Math.min(metaSellos, cli.sellos || 0);
+        inpSellos.max = metaSellos;
+    }
+    const lblSellos = document.getElementById('label-cli-modal-sellos');
+    if(lblSellos) lblSellos.textContent = `Sellos (0 a ${metaSellos})`;
+
     document.getElementById('cli-modal-visitas').value = cli.visitas || 0;
+
+    const hoy = new Date().toISOString().split('T')[0];
+    const inpDesde = document.getElementById('cli-modal-cliente-desde');
+    if(inpDesde) inpDesde.value = cli.clienteDesde || cli.fechaRegistro || cli.ultimaVisita || hoy;
 
     const selSuc = document.getElementById('cli-modal-sucursal');
     if(selSuc) {
@@ -990,9 +1100,10 @@ window.guardarClienteModal = function(e) {
     const telOrig = document.getElementById('cli-modal-tel-original')?.value?.trim();
     const nombre = document.getElementById('cli-modal-nombre')?.value?.trim();
     const telefono = document.getElementById('cli-modal-telefono')?.value?.trim();
-    const sellos = Math.min(5, Math.max(0, parseInt(document.getElementById('cli-modal-sellos')?.value) || 0));
+    const sellos = Math.min(metaSellos, Math.max(0, parseInt(document.getElementById('cli-modal-sellos')?.value) || 0));
     const visitas = Math.max(0, parseInt(document.getElementById('cli-modal-visitas')?.value) || 0);
     const sucursal = document.getElementById('cli-modal-sucursal')?.value || sucursalActual;
+    const clienteDesde = document.getElementById('cli-modal-cliente-desde')?.value?.trim() || new Date().toISOString().split('T')[0];
 
     if(!nombre || !telefono) return;
 
@@ -1005,6 +1116,7 @@ window.guardarClienteModal = function(e) {
             cli.sellos = sellos;
             cli.visitas = visitas;
             cli.sucursal = sucursal;
+            cli.clienteDesde = clienteDesde;
         }
     } else {
         // Nuevo cliente
@@ -1014,6 +1126,7 @@ window.guardarClienteModal = function(e) {
             existe.sellos = sellos;
             existe.visitas = visitas;
             existe.sucursal = sucursal;
+            existe.clienteDesde = clienteDesde;
         } else {
             clientesLealtad.unshift({
                 telefono,
@@ -1021,6 +1134,7 @@ window.guardarClienteModal = function(e) {
                 sellos,
                 visitas,
                 sucursal,
+                clienteDesde,
                 ultimaVisita: new Date().toISOString().split('T')[0],
                 historial: []
             });
@@ -1058,13 +1172,16 @@ window.abrirModalTarjeta = function(tel) {
     document.getElementById('tarjeta-cliente-nombre').textContent = cli.nombre || 'Cliente VIP';
     document.getElementById('tarjeta-cliente-telefono').textContent = cli.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
 
-    const sellos = Math.min(5, Math.max(0, cli.sellos || 0));
-    document.getElementById('tarjeta-sellos-contador').textContent = `${sellos} / 5`;
+    const desdeTxt = document.getElementById('tarjeta-cliente-desde');
+    if(desdeTxt) desdeTxt.textContent = cli.clienteDesde || cli.fechaRegistro || cli.ultimaVisita || '2026-11-01';
+
+    const sellos = Math.min(metaSellos, Math.max(0, cli.sellos || 0));
+    document.getElementById('tarjeta-sellos-contador').textContent = `${sellos} / ${metaSellos}`;
 
     const grid = document.getElementById('tarjeta-sellos-grid');
     if(grid) {
         grid.innerHTML = '';
-        for(let i = 1; i <= 5; i++) {
+        for(let i = 1; i <= metaSellos; i++) {
             if(i <= sellos) {
                 grid.innerHTML += `
                     <div class="flex-1 aspect-square rounded-xl bg-gradient-to-tr from-yellow-600 to-yellow-400 text-black flex flex-col items-center justify-center font-bold shadow-lg shadow-yellow-500/20 transform scale-105 transition-transform">
@@ -1083,9 +1200,9 @@ window.abrirModalTarjeta = function(tel) {
 
     const recTxt = document.getElementById('tarjeta-recompensa-texto');
     if(recTxt) {
-        recTxt.textContent = sellos === 5 
+        recTxt.textContent = sellos >= metaSellos 
             ? '🎉 ¡META ALCANZADA! Muestra esta tarjeta para tu corte gratis' 
-            : `⭐ Faltan ${5 - sellos} visitas para tu corte de cortesía`;
+            : `⭐ Faltan ${metaSellos - sellos} visitas para tu corte de cortesía`;
     }
 
     // QR Code
@@ -1116,13 +1233,15 @@ window.cerrarModalTarjeta = function() {
 window.compartirTarjetaWhatsApp = function() {
     if(!clienteTarjetaActivo) return;
     const c = clienteTarjetaActivo;
-    const s = c.sellos || 0;
-    const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
+    const s = Math.min(metaSellos, c.sellos || 0);
+    const faltan = Math.max(0, metaSellos - s);
+    const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
     let msg = `💈 *TARJETA DIGITAL DE LEALTAD - MB BARBEROS* 💈\n`;
     msg += `👤 *Titular:* ${c.nombre}\n`;
     msg += `📱 *Tel:* ${c.telefono}\n`;
-    msg += `⭐ *Sellos:* ${s} de 5 ${tijeras}\n`;
-    msg += s === 5 ? `🎉 *¡Tienes corte de cortesía disponible!*\n` : `_Faltan ${5 - s} visitas para tu corte gratis._\n`;
+    msg += `📅 *Cliente desde:* ${c.clienteDesde || c.ultimaVisita || '-'}\n`;
+    msg += `⭐ *Sellos:* ${s} de ${metaSellos} ${tijeras}\n`;
+    msg += s >= metaSellos ? `🎉 *¡Tienes corte de cortesía disponible!*\n` : `_Faltan ${faltan} visitas para tu corte gratis._\n`;
     msg += `📍 *Sucursal:* ${c.sucursal || sucursalActual}\n`;
     const tel = c.telefono.replace(/\D/g, '');
     window.open(`https://wa.me/52${tel}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1148,10 +1267,11 @@ window.abrirModalTicketDigital = function(datos) {
     if (datos.cliente) {
         if(boxLealtad) {
             boxLealtad.classList.remove('hidden');
-            const s = datos.cliente.sellos || 1;
-            const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
-            document.getElementById('ticket-dig-lealtad-txt').textContent = `⭐ Sellos: ${s} de 5  ${tijeras}`;
-            document.getElementById('ticket-dig-lealtad-sub').textContent = s === 5 ? '🎉 ¡Recompensa lista para el próximo corte!' : `Faltan ${5 - s} visitas para recompensa de lealtad`;
+            const s = Math.min(metaSellos, datos.cliente.sellos || 1);
+            const faltan = Math.max(0, metaSellos - s);
+            const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
+            document.getElementById('ticket-dig-lealtad-txt').textContent = `⭐ Sellos: ${s} de ${metaSellos}  ${tijeras}`;
+            document.getElementById('ticket-dig-lealtad-sub').textContent = s >= metaSellos ? '🎉 ¡Recompensa lista para el próximo corte!' : `Faltan ${faltan} visitas para recompensa de lealtad`;
         }
         if(btnVerTarjeta) btnVerTarjeta.classList.remove('hidden');
     } else {
@@ -1179,14 +1299,15 @@ window.ejecutarEnvioWhatsAppTicket = function() {
     msg += `💰 *Total Pagado:* ${formatoDinero.format(t.total)} (${t.pago})\n\n`;
 
     if(t.cliente) {
-        const s = t.cliente.sellos || 1;
-        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(Math.max(0, 5 - s));
+        const s = Math.min(metaSellos, t.cliente.sellos || 1);
+        const faltan = Math.max(0, metaSellos - s);
+        const tijeras = '✂️'.repeat(s) + '⚪'.repeat(faltan);
         msg += `⭐ *PROGRAMA DE LEALTAD VIP:*\n`;
-        msg += `Has acumulado *${s} de 5 sellos* ${tijeras}\n`;
-        if(s === 5) {
+        msg += `Has acumulado *${s} de ${metaSellos} sellos* ${tijeras}\n`;
+        if(s >= metaSellos) {
             msg += `🎉 *¡Felicidades! Tienes un servicio de cortesía disponible para tu próxima visita.*\n`;
         } else {
-            msg += `_¡Solo te faltan ${5 - s} visitas para tu corte de cortesía!_\n`;
+            msg += `_¡Solo te faltan ${faltan} visitas para tu corte de cortesía!_\n`;
         }
         msg += `\n`;
     }
