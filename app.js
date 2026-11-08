@@ -539,6 +539,7 @@ function actualizarVistaHoy() {
     }
 
     let tIngresos = 0, tEfectivo = 0, tTarjeta = 0, tPropinas = 0;
+    let tPropinasEfvo = 0, tPropinasTarj = 0;
     const resBarb = {};
 
     // Gastos first
@@ -558,6 +559,14 @@ function actualizarVistaHoy() {
     // Tickets
     [...regsHoy].sort((a,b) => b.id - a.id).forEach((r, i) => {
         tIngresos += r.monto; tEfectivo += r.valEfectivo; tTarjeta += r.valTarjeta; tPropinas += (r.propina || 0);
+        let pEf = 0, pTar = 0;
+        if(r.pagoTxt === 'Efectivo') { pEf = r.propina || 0; }
+        else if(r.pagoTxt === 'Tarjeta') { pTar = r.propina || 0; }
+        else {
+            if((r.valTarjeta || 0) >= (r.propina || 0)) pTar = r.propina || 0;
+            else { pTar = r.valTarjeta || 0; pEf = (r.propina || 0) - pTar; }
+        }
+        tPropinasEfvo += pEf; tPropinasTarj += pTar;
         if(!resBarb[r.barbero]) resBarb[r.barbero] = { cortes: 0, comision: 0, propinas: 0 };
         resBarb[r.barbero].cortes++;
         resBarb[r.barbero].comision += r.monto * 0.5;
@@ -617,6 +626,8 @@ function actualizarVistaHoy() {
     // Update global vars for corte de caja
     window.totalIngresosDia = tIngresos;
     window.totalPropinasDia = tPropinas;
+    window.totalPropinasEfvoDia = tPropinasEfvo;
+    window.totalPropinasTarjDia = tPropinasTarj;
     window.ingresosEfvoActuales = tEfectivo;
     window.ingresosTarjetaActuales = tTarjeta;
     window.totalTicketsDia = regsHoy.length;
@@ -1036,6 +1047,13 @@ if(formGasto) formGasto.addEventListener('submit', e => {
 window.abrirModalCorteCaja = function() {
     const m = document.getElementById('modal-corte'); if(!m) return;
     const ci = document.getElementById('corte-ingresos-efvo'); if(ci) ci.textContent = formatoDinero.format(window.ingresosEfvoActuales||0);
+    const cp = document.getElementById('corte-propinas'); if(cp) cp.textContent = formatoDinero.format(window.totalPropinasDia||0);
+    const cpd = document.getElementById('corte-propinas-detalle');
+    if(cpd) {
+        const pef = window.totalPropinasEfvoDia || 0;
+        const ptar = window.totalPropinasTarjDia || 0;
+        cpd.textContent = `(💵 ${formatoDinero.format(pef)} efvo • 💳 ${formatoDinero.format(ptar)} tarj)`;
+    }
     const cg = document.getElementById('corte-gastos'); if(cg) cg.textContent = formatoDinero.format(window.gastosTotalesActuales||0);
     const ce = document.getElementById('corte-esperado'); if(ce) ce.textContent = formatoDinero.format(window.cajaEfectivoActual||0);
     const cr = document.getElementById('corte-real'); if(cr) cr.value = '';
@@ -1069,6 +1087,7 @@ if(formCorte) formCorte.addEventListener('submit', e => {
     let difText = dif===0 ? '✅ CAJA CUADRADA' : (dif>0 ? `⚠️ SOBRANTE: ${formatoDinero.format(dif)}` : `🚨 FALTANTE: ${formatoDinero.format(Math.abs(dif))}`);
     let msg = `💈 CORTE DE CAJA - MB BARBEROS 💈\n📍 Sucursal: ${sucursalActual}\n📅 Fecha: ${new Date().toLocaleDateString('es-MX')}\n\n`;
     msg += `✂️ Tickets: ${window.totalTicketsDia||0}\n💵 Efectivo: ${formatoDinero.format(window.ingresosEfvoActuales||0)}\n💳 Tarjeta: ${formatoDinero.format(window.ingresosTarjetaActuales||0)}\n`;
+    msg += `🌟 Propinas: ${formatoDinero.format(window.totalPropinasDia||0)} (${formatoDinero.format(window.totalPropinasEfvoDia||0)} efvo / ${formatoDinero.format(window.totalPropinasTarjDia||0)} tarj)\n`;
     msg += `🚀 TOTAL: ${formatoDinero.format(window.totalIngresosDia||0)}\n💸 Gastos: -${formatoDinero.format(window.gastosTotalesActuales||0)}\n📊 Esperado: ${formatoDinero.format(esp)}\n💰 Contado: ${formatoDinero.format(r)}\n\n${difText}\n\n_BarberOS_`;
     setTimeout(() => {
         if(modalExito) modalExito.classList.add('hidden');
