@@ -633,7 +633,7 @@ function actualizarVistaHoy() {
     window.totalTicketsDia = regsHoy.length;
     const gastoTotal = gastosHoy.reduce((s, r) => s + r.monto, 0);
     window.gastosTotalesActuales = gastoTotal;
-    window.cajaEfectivoActual = tEfectivo - gastoTotal;
+    window.cajaEfectivoActual = tEfectivo - tPropinas - gastoTotal;
 }
 
 function eliminarRegistro(id) {
