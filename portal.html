@@ -35,11 +35,55 @@
       scroll-behavior: smooth;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
       background-color: #000000;
       color: #e6ebef;
       font-family: 'Outfit', sans-serif;
       overflow-x: hidden;
+    }
+
+    body {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+    }
+
+    /* Barra de navegación superior fija */
+    .top-nav {
+      width: 100% !important;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(8, 9, 10, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(201, 162, 72, 0.25);
+      flex-shrink: 0;
+    }
+
+    /* Contenedor central Hoja */
+    .hoja {
+      width: 100% !important;
+      max-width: 580px !important;
+      margin: 0 auto !important;
+      position: relative;
+      padding: 24px 16px 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+      .hoja {
+        max-width: 620px !important;
+      }
     }
 
     .font-cinzel { font-family: 'Cinzel', serif; }
