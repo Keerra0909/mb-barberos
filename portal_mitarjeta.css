@@ -1,0 +1,890 @@
+
+  /* ============================================================
+     MOLDE "ALAS" — Barber Studio MB, Narvarte, CDMX.
+     Mismo formato de la casa (portada, botones con nombre, sellos,
+     secciones, barberos en círculo, sucursal antes de reservar),
+     con la piel que sale de SU rótulo y de SUS flyers:
+
+       · negro absoluto, cromo pulido y oro fino — nada más
+       · el rótulo de alas, en blanco, vive de fondo como marca
+         de agua gigante y respira con el scroll
+       · la carta de precios es su pizarra: nombre, guía punteada
+         y precio, con SUS iconos de línea redibujados en SVG
+       · las promos son sus recuadros de flyer: marco con esquinas
+         de filete y el círculo de "NORMALMENTE $200" tachado
+       · tipografía: Cinzel para el rótulo (los remates del logo),
+         Oswald condensada para los precios (los flyers), Italianno
+         para "The Gentleman's House" y Outfit para leer.
+
+     Dos sucursales, cada una con sus barberos y su propia agenda:
+       barberstudiomb-morena   · La Morena 1556  · Mario, Gabriel y David
+       barberstudiomb-quemada  · La Quemada 143  · Carlos
+     Reservar abre primero la hoja de sucursal; el servicio elegido
+     viaja en ?sv= y llega escrito en el WhatsApp.
+
+     Pero el NEGOCIO es uno solo, y así lo pidió el cliente (28-ago-2026):
+       · UNA tarjeta de sellos para las dos — dueña barberstudiomb-quemada,
+         La Morena la comparte (llaves grupo/comparte del panel)
+       · UN WhatsApp para todos los avisos — "avisos" compartido igual
+       · UN Google Calendar — quemada lleva copia del `gcal` de morena
+         (mismo refresh token y mismo calendario). OJO: "Desconectar
+         Google" desde cualquiera de los dos paneles revoca el token
+         y desconecta a LAS DOS; se reconecta desde el panel.
+       · la sección de Lealtad lleva de fondo la foto que mandó el
+         cliente (img/mb-lealtad.jpg?v=f348d8bc) con velo oscuro: pidió, textual,
+         que los sellos se vean bien.
+     ============================================================ */
+  :root{
+    --negro:#000000; --negro2:#0a0b0c; --carbon:#121315; --carbon2:#191b1e;
+    --hueso:#f3f5f7; --hueso2:#c6ccd2; --gris:#8b9299; --gris2:#5f666c;
+    --oro:#c9a248; --oro-lt:#e8cd8a; --oro-dk:#8d6f2c;
+    --cromo:linear-gradient(100deg,#5f666c 0%,#9aa2a9 12%,#e6ebef 30%,#ffffff 44%,#c3cad0 58%,#8b939a 74%,#565d63 100%);
+    /* cromo de verdad para el monograma MB: DOS destellos y valles oscuros
+       entre ellos. Un solo brillo se lee como letra gris clara; el metal se
+       reconoce por el contraste entre el reflejo y la sombra. */
+    --cromo-mb:linear-gradient(100deg,#3f464c 0%,#7d858c 8%,#e4eaef 19%,#ffffff 28%,#aeb6bc 38%,#5c6369 49%,#dfe6ea 64%,#ffffff 73%,#9aa2a9 86%,#474e54 100%);
+    --oro-grad:linear-gradient(100deg,#8d6f2c 0%,#c9a248 22%,#f4e0a8 44%,#e8cd8a 58%,#b18c39 78%,#8d6f2c 100%);
+    /* los bloques dejan pasar la marca de agua a propósito: si van muy
+       opacos, el logo de fondo desaparece detrás de ellos */
+    --vidrio:rgba(10,11,12,.6);
+    --filo:rgba(198,204,210,.15);
+    --filo2:rgba(198,204,210,.42);
+    --filo-oro:rgba(201,162,72,.34);
+    --sans:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --deco:"Cinzel",Georgia,"Times New Roman",serif;
+    --cond:"Oswald",Impact,"Arial Narrow",sans-serif;
+    --script:"Italianno",cursive;
+  }
+  /* El ángulo del aro de cromo. Se anima ESTE número, no el elemento:
+     girar con transform un cuadro de 286 px le infla la caja envolvente a
+     404 px (286 × √2) y eso metía scroll horizontal en pantallas de 375.
+     Si el navegador no registra la variable, el aro simplemente se queda
+     quieto: se ve igual, nada más no gira. */
+  @property --ang{syntax:"<angle>"; inherits:false; initial-value:0deg}
+
+  /* Una regla de autor con `display` le gana al `[hidden]` del navegador, así
+     que sin esto el popup del alta de lealtad (.leal-velo, display:flex) sale
+     abierto nomás cargar la página. Igual que en foro-barber. */
+  [hidden]{display:none !important}
+
+  *{box-sizing:border-box;margin:0}
+  html,body{min-height:100%}
+  /* red de seguridad: la tarjeta nunca se desliza de lado. `clip` y no
+     `hidden` porque `hidden` volvería al <html> un contenedor de scroll y
+     rompería el position:fixed de la barra de reservar en iOS. */
+  html{scroll-behavior:smooth; overflow-x:clip}
+  body{
+    font-family:var(--sans); color:var(--hueso); background:var(--negro);
+    display:flex; justify-content:center; overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ============ FONDO: SU RÓTULO, A IZQUIERDA Y DERECHA ============
+     El logo blanco vive detrás de todo, siempre de a dos: uno asomándose
+     por el borde izquierdo y otro por el derecho, cortados por la orilla
+     para que solo se les vea un ala. Hay cinco pares, uno por sección:
+     al pasar el scroll se enciende el que toca y se apagan los demás, y
+     cada pieza viaja a distinta velocidad (parallax). Así el fondo se
+     mueve un poco todo el rato sin robarle lectura a nada.
+     Todas son la MISMA imagen, cambiada de tamaño, altura y giro. */
+  .amb{position:fixed; inset:0; z-index:-3; overflow:hidden; pointer-events:none; background:var(--negro)}
+  .esc{position:absolute; inset:0; opacity:0; transition:opacity 1.5s ease}
+  .esc.on{opacity:1}
+  .mk{
+    position:absolute; width:var(--w,320px); aspect-ratio:1;
+    background-image:url("img/mb-logo.png?v=3ffe87d3");
+    background-repeat:no-repeat; background-position:center; background-size:contain;
+    transform:translate3d(0,calc(var(--sy,0) * var(--f,-.08) * 1px),0) rotate(var(--giro,0deg));
+    will-change:transform;
+    /* respira entre su opacidad y un poco menos; la marca NUNCA se apaga */
+    opacity:var(--op,.2);
+    animation:latir 16s ease-in-out infinite alternate;
+  }
+  /* se salen casi la mitad por su orilla: se asoma el ala, no el logo entero */
+  .mk.izq{left:calc(var(--w,320px) * -.42)}
+  .mk.der{right:calc(var(--w,320px) * -.42)}
+  @keyframes latir{from{opacity:calc(var(--op,.2) * .65)} to{opacity:var(--op,.2)}}
+
+  /* Blanco sobre negro engaña: lo que en el monitor ya se ve, en un
+     teléfono a media luz desaparece. Y encima, en pantalla angosta los
+     bloques de contenido cubren casi todo el ancho, así que la marca
+     solo respira en los márgenes y en los huecos entre secciones.
+     Por eso van altas: detrás de un bloque queda ~1/3 de esto. */
+  /* 1 · portada */
+  .e1 .izq{--w:min(84vw,450px); top:2%;  --f:-.05; --op:.26}
+  .e1 .der{--w:min(70vw,370px); top:33%; --f:-.11; --op:.2;  --giro:6deg}
+  /* 2 · servicios */
+  .e2 .izq{--w:min(76vw,400px); top:24%; --f:-.14; --op:.24; --giro:-7deg}
+  .e2 .der{--w:min(90vw,480px); top:0%;  --f:-.07; --op:.19}
+  /* 3 · promociones */
+  .e3 .izq{--w:min(66vw,350px); top:44%; --f:-.09; --op:.2}
+  .e3 .der{--w:min(82vw,440px); top:10%; --f:-.17; --op:.26; --giro:5deg}
+  /* 4 · barberos */
+  .e4 .izq{--w:min(94vw,500px); top:16%; --f:-.2;  --op:.22; --giro:4deg}
+  .e4 .der{--w:min(72vw,380px); top:50%; --f:-.06; --op:.24}
+  /* 5 · sucursales */
+  .e5 .izq{--w:min(78vw,410px); top:6%;  --f:-.12; --op:.25}
+  .e5 .der{--w:min(88vw,470px); top:36%; --f:-.15; --op:.2;  --giro:-5deg}
+  .velo{
+    position:fixed; inset:0; z-index:-2; pointer-events:none;
+    transform:translate3d(0,calc(var(--sy,0) * -.03 * 1px),0);
+    background:
+      radial-gradient(88% 52% at 50% -4%,rgba(232,205,138,.09),transparent 64%),
+      radial-gradient(70% 48% at 14% 88%,rgba(198,204,210,.07),transparent 66%),
+      /* el velo de abajo iba tan negro que se comía la marca de agua */
+      linear-gradient(180deg,rgba(0,0,0,.26) 0%,rgba(0,0,0,0) 28%,rgba(0,0,0,.52) 100%);
+  }
+  .grano{
+    position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- EFECTO PROPIO: PLUMAS DE LUZ ----
+     Del logo salen dos alas; aquí quedan como destellos verticales muy
+     suaves que suben, como una pluma cayendo al revés. Dos planos con
+     parallax distinto. */
+  .plumas{
+    position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;
+    transform:translate3d(0,calc(var(--sy,0) * -.2 * 1px),0); will-change:transform;
+  }
+  .plumas.hondo{transform:translate3d(0,calc(var(--sy,0) * -.08 * 1px),0)}
+  .pluma{
+    position:absolute; width:2px; height:120px; border-radius:99px; opacity:0;
+    background:linear-gradient(180deg,transparent,rgba(243,245,247,.7),rgba(232,205,138,.34),transparent);
+    filter:blur(1px); animation:subir 15s ease-in-out infinite;
+  }
+  .plumas.hondo .pluma{width:4px; height:200px; filter:blur(5px); animation-duration:23s}
+  @keyframes subir{
+    0%{transform:translate3d(0,34vh,0) rotate(6deg); opacity:0}
+    22%{opacity:.8}
+    64%{opacity:.32}
+    100%{transform:translate3d(-18px,-38vh,0) rotate(-6deg); opacity:0}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .mk,.pluma,.plumas,.cta::after,.tick-track,.aro,.poste::before,
+    h1 b,.promo-precio{animation:none !important}
+    .plumas{display:none}
+    .rev{opacity:1 !important; transform:none !important; transition:none}
+    .mk{transform:rotate(var(--giro,0deg))}
+    .velo{transform:none}
+  }
+
+  /* ================= ESTRUCTURA ================= */
+  .hoja{width:100%; max-width:472px; position:relative; padding:30px 18px 30px;
+    display:flex; flex-direction:column; gap:20px; text-align:center}
+  .hoja > *{min-width:0; max-width:100%}
+  .rev{opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.3,1)}
+  .rev.vis{opacity:1; transform:none}
+
+  /* ================= PORTADA =================
+     El rótulo va COMPLETO y sin recortar, tal como lo mandó el cliente.
+     Debajo se repiten en texto el nombre y el lema: sí, se leen dos
+     veces, pero el texto de verdad es el que pesa para Google, y el
+     rótulo es imagen. Detrás, un aro de cromo que gira y un resplandor
+     tenue; nada de encerrarlo en un disco: es un logo alto y con
+     detalle, encerrarlo lo mataría. */
+  header{position:relative; padding-top:2px}
+  .rotulo{
+    position:relative; width:290px; max-width:100%; margin:0 auto 2px;
+    transform:translate3d(0,calc(var(--sy,0) * .05 * 1px),0);
+  }
+  .rotulo img{width:100%; height:auto; display:block; position:relative; z-index:1;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,.9)) drop-shadow(0 0 22px rgba(232,205,138,.14))}
+  .rotulo .halo{
+    position:absolute; left:50%; top:50%; width:236px; height:236px;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle,rgba(232,205,138,.18),rgba(198,204,210,.07) 46%,transparent 70%);
+  }
+  /* dos aros de cromo girando en sentidos opuestos, como el filete del flyer.
+     Van por FUERA de las alas: si los cruzan, el rótulo se ensucia. */
+  /* Los aros se miden en % del rótulo, no en px fijos: así el sobrante por
+     abajo es siempre la misma proporción y la lucecita nunca alcanza al
+     renglón de "Narvarte · CDMX", ni en un teléfono angosto donde el logo se
+     encoge y los aros —si fueran fijos— se le saldrían. */
+  .aro{
+    position:absolute; left:50%; top:50%; width:95%; aspect-ratio:1;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    border:1px solid transparent;
+    background:conic-gradient(from var(--ang),transparent 0 58%,rgba(243,245,247,.7) 71%,transparent 84%) border-box;
+    -webkit-mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    animation:girar 26s linear infinite;
+  }
+  .aro.dos{
+    width:107.5%; opacity:.42;
+    background:conic-gradient(from var(--ang),transparent 0 66%,rgba(232,205,138,.8) 76%,transparent 88%) border-box;
+    animation:girar 41s linear infinite reverse;
+  }
+  @keyframes girar{to{--ang:360deg}}
+
+  /* el margen de arriba tiene que ganarle al sobrante del aro grande
+     (3.75% del ancho del rótulo por cada lado) o la lucecita le pasa encima */
+  .ciudad{
+    display:flex; align-items:center; gap:12px; justify-content:center;
+    font-size:9px; font-weight:500; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--gris); padding-left:.42em; margin:26px 0 14px;
+  }
+  .ciudad::before,.ciudad::after{content:""; width:30px; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,162,72,.6),transparent)}
+  h1{font-family:var(--deco); font-weight:400; font-size:clamp(22px,6.6vw,29px);
+    line-height:1.14; letter-spacing:.16em; color:var(--hueso); text-transform:uppercase}
+  /* EL MB EN METÁLICO (lo pidió el cliente: "que brille el MB").
+     Tres piezas hacen el efecto: el cromo de dos destellos que se barre solo,
+     el filo negro de abajo —que es lo que da el relieve de letra troquelada—
+     y un resplandor cálido muy tenue para que el metal no se vea muerto
+     sobre el negro. */
+  h1 b{
+    display:block; margin-top:7px; font-weight:600; letter-spacing:.14em;
+    background:var(--cromo-mb); background-size:260% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:brillo 7s ease-in-out infinite alternate;
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.9))
+           drop-shadow(0 3px 9px rgba(0,0,0,.85))
+           drop-shadow(0 0 16px rgba(232,205,138,.2));
+  }
+  @keyframes brillo{from{background-position:0 0} to{background-position:100% 0}}
+  .lema{
+    margin:2px auto 0; font-family:var(--script); font-size:38px; line-height:1;
+    letter-spacing:.01em;
+    background:var(--oro-grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  /* line-height apretado a propósito: son tres renglones cortos y el cliente
+     los quiere más juntos, como escalones, no como párrafo suelto */
+  .sub-lema{margin:12px auto 0; max-width:320px; font-size:13.5px; font-weight:300; line-height:1.45; color:var(--hueso2)}
+
+  /* ================= LETRERO CORRIENDO ================= */
+  .tick{
+    overflow:hidden; padding:9px 0; border-radius:2px;
+    background:var(--cromo);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  }
+  .tick-track{
+    display:inline-flex; gap:22px; white-space:nowrap;
+    animation:tick 28s linear infinite;
+    font-family:var(--cond); font-size:11px; font-weight:600; letter-spacing:.24em;
+    text-transform:uppercase; color:#000;
+  }
+  .tick-track span i{font-style:normal; font-size:8px; vertical-align:2px; margin-right:8px; color:#6b5720}
+  @keyframes tick{to{transform:translateX(-50%)}}
+
+  /* ================= POSTE DE BARBERO ================= */
+  /* El separador es su poste: cromo girando entre dos casquillos. */
+  .poste{height:5px; border-radius:99px; overflow:hidden; position:relative;
+    background:#050606; border:1px solid rgba(198,204,210,.2)}
+  .poste::before{
+    content:""; position:absolute; inset:-50% -60%;
+    background:repeating-linear-gradient(58deg,
+      #ffffff 0 7px, #b9c0c6 7px 13px, #0a0b0c 13px 23px, #c9a248 23px 29px, #0a0b0c 29px 36px);
+    animation:correr 4.2s linear infinite;
+  }
+  @keyframes correr{to{transform:translateX(36px)}}
+
+  /* ================= CTA ================= */
+  .cta{
+    position:relative; overflow:hidden; cursor:pointer; width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:19px 17px; border-radius:6px; text-align:left; border:none;
+    background:var(--cromo); background-size:190% 100%;
+    color:#000; font-family:var(--sans); text-decoration:none;
+    box-shadow:0 20px 46px rgba(0,0,0,.7);
+    transition:background-position .6s ease, transform .16s ease;
+  }
+  .cta:hover{background-position:100% 0; transform:translateY(-3px)}
+  .cta:active{transform:translateY(1px)}
+  .cta .txt{position:relative; z-index:1; flex:1; min-width:0; display:flex; flex-direction:column; gap:6px}
+  .cta .txt strong{
+    display:flex; align-items:center; gap:11px;
+    font-family:var(--cond); font-size:21px; font-weight:600; letter-spacing:.12em;
+    line-height:1; text-transform:uppercase;
+  }
+  .cta .txt strong svg{width:19px; height:19px; flex:0 0 19px}
+  .cta .txt small{font-size:12px; font-weight:400; line-height:1.45; color:rgba(0,0,0,.72)}
+  .cta::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.8) 50%,transparent 60%);
+    transform:translateX(-130%); animation:shine 4.6s ease-in-out infinite;
+  }
+  @keyframes shine{0%,58%{transform:translateX(-130%)} 78%,100%{transform:translateX(130%)}}
+  .ir{
+    position:relative; z-index:1; flex:0 0 46px; width:46px; height:46px; border-radius:50%;
+    background:rgba(0,0,0,.08); border:1px solid rgba(0,0,0,.2);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1.4), background .2s ease;
+  }
+  .ir svg{width:21px; height:21px}
+  .cta:hover .ir{transform:translateX(4px); background:rgba(0,0,0,.14)}
+
+  /* ================= BOTONES CON NOMBRE ================= */
+  .actions{display:flex; flex-direction:column; gap:9px}
+  .action{
+    display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:6px;
+    color:var(--hueso); text-decoration:none; text-align:left; width:100%;
+    font-family:var(--sans); cursor:pointer;
+    background:var(--vidrio); border:1px solid var(--filo);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    transition:transform .16s ease, background .2s ease, border-color .2s ease;
+  }
+  .action:hover{transform:translateY(-2px); background:rgba(25,27,30,.9); border-color:var(--filo2)}
+  .action:active{transform:translateY(1px)}
+  .action .ico{
+    flex:0 0 40px; height:40px; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(232,205,138,.06); border:1px solid var(--filo-oro); color:var(--oro-lt);
+    transition:transform .2s ease, background .2s ease;
+  }
+  .action:hover .ico{transform:rotate(-5deg) scale(1.06); background:rgba(232,205,138,.15)}
+  .action .ico svg{width:18px; height:18px}
+  .action .lbl{flex:1; display:flex; flex-direction:column; gap:3px; min-width:0}
+  .action .lbl strong{font-family:var(--cond); font-size:14px; font-weight:500; letter-spacing:.18em; text-transform:uppercase}
+  .action .lbl small{color:var(--gris); font-size:11.5px; font-weight:300}
+  .action .chev{flex:0 0 20px; text-align:right; color:var(--oro); font-size:17px; line-height:1}
+
+  /* ================= SELLOS ================= */
+  .sellos{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .sello{
+    padding:15px 6px; border-radius:6px;
+    background:var(--vidrio); border:1px solid var(--filo);
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    font-size:8.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gris); line-height:1.5;
+    transition:transform .18s ease, border-color .18s ease;
+  }
+  .sello:hover{transform:translateY(-3px); border-color:var(--filo2)}
+  .sello svg{width:21px; height:21px; color:var(--hueso2)}
+  .sello b{font-family:var(--cond); font-size:24px; font-weight:400; letter-spacing:.02em; color:var(--hueso); line-height:1}
+  /* el número al LADO de la palabra, no encima: así lo pidió el cliente */
+  .sello .par{display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap}
+
+  /* ================= SECCIONES ================= */
+  .bloque{
+    position:relative; padding:26px 15px 22px; border:1px solid var(--filo); border-radius:8px;
+    background:var(--vidrio); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 22px 54px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
+    text-align:center;
+  }
+  /* esquinas de filete dorado, como el marco impreso de sus flyers */
+  .bloque::before,.bloque::after{
+    content:""; position:absolute; width:22px; height:22px; pointer-events:none;
+  }
+  .bloque::before{top:7px; left:7px; border-top:1px solid var(--filo-oro); border-left:1px solid var(--filo-oro)}
+  .bloque::after{bottom:7px; right:7px; border-bottom:1px solid var(--filo-oro); border-right:1px solid var(--filo-oro)}
+  .bloque > h2{
+    font-family:var(--deco); font-size:23px; font-weight:500; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--hueso); line-height:1.2; padding-left:.22em;
+  }
+  .subt{
+    display:block; margin-top:9px; font-size:8.5px; font-weight:600;
+    letter-spacing:.38em; text-transform:uppercase; color:var(--oro); padding-left:.38em;
+  }
+  .ayuda{margin:12px 0 18px; font-size:12.5px; font-weight:300; color:var(--gris); line-height:1.7}
+  .ayuda b{color:var(--hueso2); font-weight:500}
+
+  /* ---- LA PIZARRA DE PRECIOS ----
+     Igual que su menú impreso: icono, nombre, guía punteada y precio.
+     Toda la fila es el botón de reservar; no hay acordeón que esconda
+     precios porque en su carta se leen todos de un golpe. */
+  .carta{display:flex; flex-direction:column; margin-top:2px}
+  .linea{
+    display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+    padding:13px 3px; background:none; border:none; cursor:pointer;
+    font-family:var(--sans); color:var(--hueso);
+    border-bottom:1px solid rgba(198,204,210,.11);
+    transition:background .2s ease, padding-left .2s ease;
+  }
+  .linea:last-child{border-bottom:none}
+  .linea:hover{background:rgba(198,204,210,.05); padding-left:8px}
+  .linea:active{transform:translateY(1px)}
+  .linea .ic{flex:0 0 25px; height:25px; display:flex; align-items:center; justify-content:center; color:var(--hueso2)}
+  .linea .ic svg{width:23px; height:23px}
+  .linea .n{flex:0 0 auto; max-width:56%}
+  .linea .n strong{
+    display:block; font-family:var(--cond); font-size:14.5px; font-weight:400;
+    letter-spacing:.09em; text-transform:uppercase; line-height:1.2; color:var(--hueso);
+  }
+  .linea .n small{display:block; margin-top:2px; font-size:10px; font-weight:300; letter-spacing:.06em; color:var(--gris2)}
+  .linea .guion{flex:1; min-width:14px; height:1px;
+    background:repeating-linear-gradient(90deg,rgba(198,204,210,.42) 0 2px,transparent 2px 6px)}
+  .linea .p{
+    flex:0 0 auto; font-family:var(--cond); font-size:21px; font-weight:400; letter-spacing:.01em;
+    line-height:1; color:var(--hueso);
+    background:var(--cromo); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .linea .mas{
+    flex:0 0 20px; height:20px; border-radius:50%; margin-left:-2px;
+    border:1px solid rgba(198,204,210,.3); color:var(--gris);
+    display:flex; align-items:center; justify-content:center; font-size:13px; line-height:0;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .linea:hover .mas{background:rgba(232,205,138,.16); color:var(--oro-lt); border-color:var(--filo-oro)}
+  .nota{margin-top:16px; font-size:11px; font-weight:300; color:var(--gris); line-height:1.65; text-align:left}
+
+  /* ---- CORTESÍAS: la banda de abajo de su menú ---- */
+  /* cuatro cortesías: black mask, bebida, música y masaje */
+  .cortesias{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin-top:18px;
+    border-top:1px solid var(--filo-oro); border-bottom:1px solid var(--filo-oro);
+  }
+  .cortesia{
+    padding:14px 3px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-size:8px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--gris); line-height:1.5;
+  }
+  .cortesia + .cortesia{border-left:1px solid rgba(198,204,210,.12)}
+  .cortesia svg{width:22px; height:22px; color:var(--hueso2)}
+
+  /* ================= PROMOCIONES =================
+     Sus recuadros de flyer, tal cual: marco con filete, el precio grande
+     en cromo y el círculo de "NORMALMENTE $200" con el precio tachado
+     encima de la esquina. */
+  .promos{display:flex; flex-direction:column; gap:14px; margin-top:6px}
+  .promo{
+    position:relative; display:block; width:100%; cursor:pointer; text-decoration:none;
+    font-family:var(--sans); text-align:center; color:var(--hueso);
+    padding:22px 16px 20px; border-radius:4px;
+    background:linear-gradient(150deg,rgba(25,27,30,.9),rgba(0,0,0,.92));
+    border:1px solid rgba(198,204,210,.24);
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.7), inset 0 0 26px rgba(0,0,0,.9), 0 14px 34px rgba(0,0,0,.6);
+    transition:transform .18s ease, border-color .2s ease;
+  }
+  .promo:hover{transform:translateY(-3px); border-color:var(--filo2)}
+  .promo:active{transform:translateY(0)}
+  /* las que llevan círculo de "antes" dejan su carril libre a la derecha:
+     el precio queda a la izquierda y el círculo encima, como en el flyer */
+  .promo.con-antes{padding-right:104px}
+  /* filete interior, como el marco impreso */
+  .promo .marco{position:absolute; inset:8px; pointer-events:none;
+    border:1px solid rgba(201,162,72,.3); border-radius:2px}
+  /* etiqueta de "solo en tal sucursal": va cosida a la orilla de arriba,
+     como un sello, para que nadie llegue a la otra sucursal con este precio */
+  .promo .solo{
+    position:absolute; top:0; left:50%; transform:translate(-50%,-50%);
+    padding:4px 12px; border-radius:99px; white-space:nowrap;
+    background:var(--oro-grad); color:#14100a;
+    font-family:var(--cond); font-size:8.5px; font-weight:600; letter-spacing:.18em;
+    text-transform:uppercase; box-shadow:0 4px 12px rgba(0,0,0,.7);
+  }
+  .promo:has(.solo){margin-top:6px}
+  .promo .dia{
+    position:relative; display:block; margin-bottom:9px;
+    font-family:var(--cond); font-size:10px; font-weight:500; letter-spacing:.34em;
+    text-transform:uppercase; color:var(--oro-lt); padding-left:.34em;
+  }
+  .promo .que{
+    position:relative; display:block; font-family:var(--cond); font-size:15px; font-weight:400;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--hueso2); line-height:1.3;
+    padding-left:.18em;
+  }
+  .promo-precio{
+    position:relative; display:block; margin-top:4px;
+    font-family:var(--cond); font-size:clamp(48px,15vw,64px); font-weight:600;
+    letter-spacing:-.01em; line-height:1.05;
+    background:var(--cromo); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:brillo 6s ease-in-out infinite alternate;
+    filter:drop-shadow(0 4px 14px rgba(255,255,255,.14));
+  }
+  .promo-precio.dorado{background-image:var(--oro-grad); filter:drop-shadow(0 4px 16px rgba(232,205,138,.22))}
+  .promo .pesos{
+    position:relative; display:block; margin-top:-2px;
+    font-family:var(--cond); font-size:10px; font-weight:400; letter-spacing:.42em;
+    text-transform:uppercase; color:var(--gris); padding-left:.42em;
+  }
+  /* el círculo de "NORMALMENTE $200", tachado */
+  .antes{
+    position:absolute; right:14px; top:50%; transform:translateY(-42%);
+    width:82px; height:82px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:radial-gradient(120% 120% at 34% 26%,#ffffff,#c3cad0 46%,#7d858c 100%);
+    box-shadow:0 8px 22px rgba(0,0,0,.75), inset 0 -6px 14px rgba(0,0,0,.22);
+    color:#0a0b0c; pointer-events:none;
+  }
+  .antes .et{font-family:var(--cond); font-size:7.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; opacity:.8}
+  .antes .v{position:relative; font-family:var(--cond); font-size:26px; font-weight:500; line-height:1}
+  .antes .v::after{
+    content:""; position:absolute; left:-10%; right:-10%; top:52%; height:2px;
+    background:#0a0b0c; transform:rotate(-13deg);
+  }
+  .promo .ver{
+    position:relative; display:inline-flex; align-items:center; gap:8px; margin-top:14px;
+    font-family:var(--cond); font-size:9.5px; font-weight:500; letter-spacing:.26em;
+    text-transform:uppercase; color:var(--oro);
+  }
+  .promo .ver svg{width:11px; height:11px}
+  .promo.membresia{background:linear-gradient(150deg,rgba(35,28,10,.72),rgba(0,0,0,.94))}
+  .promo.membresia .marco{border-color:rgba(232,205,138,.5)}
+  .promo .corona{width:30px; height:30px; margin:0 auto 4px; color:var(--oro-lt); display:block; position:relative}
+  .letra-chica{margin-top:12px; font-size:10px; font-weight:300; color:var(--gris2); letter-spacing:.1em; line-height:1.6}
+
+  /* ================= BARBEROS ================= */
+  .eq-suc{
+    display:flex; align-items:center; gap:10px; margin-top:20px;
+    font-family:var(--cond); font-size:9.5px; font-weight:500; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--oro-lt);
+  }
+  .eq-suc::before,.eq-suc::after{content:""; flex:1; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,162,72,.5),transparent)}
+  .equipo{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px}
+  /* un solo barbero suelto en una rejilla de 3 se ve abandonado en la esquina:
+     con uno o dos, la rejilla se encoge y se centra */
+  .equipo.uno{grid-template-columns:minmax(0,142px); justify-content:center}
+  .equipo.dos{grid-template-columns:repeat(2,minmax(0,1fr)); max-width:296px; margin-inline:auto}
+  .barbero{
+    display:flex; flex-direction:column; align-items:center; gap:9px;
+    padding:13px 4px 12px; border-radius:6px; text-decoration:none; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .barbero:hover{transform:translateY(-4px); border-color:var(--filo2); background:rgba(232,205,138,.07)}
+  .barbero:active{transform:translateY(-1px)}
+  .barbero .foto{
+    width:74px; height:74px; border-radius:50%; object-fit:cover; display:block;
+    border:1.5px solid var(--filo2);
+    box-shadow:0 8px 20px rgba(0,0,0,.75), 0 0 0 4px rgba(198,204,210,.07);
+    filter:grayscale(.35) contrast(1.08);
+    transition:transform .3s cubic-bezier(.2,.7,.3,1.3), filter .3s ease, box-shadow .3s ease;
+  }
+  /* sin foto en el panel: su inicial en el mismo círculo */
+  .barbero .foto.ini{display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.05); font-family:var(--cond); font-size:28px; color:var(--oro-lt)}
+  .barbero:hover .foto{transform:scale(1.07); filter:none; box-shadow:0 10px 26px rgba(0,0,0,.8), 0 0 0 5px rgba(232,205,138,.18)}
+  .barbero .n{font-family:var(--cond); font-size:13px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; text-align:center; line-height:1.1}
+  .barbero .ag{font-size:7.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--oro)}
+
+  /* ================= SUCURSALES ================= */
+  .sucs{display:flex; flex-direction:column; gap:12px; margin-top:14px}
+  /* cada sede es una ficha: su dirección arriba y su horario abajo, en la
+     misma caja, para que nadie confunda los horarios de una con los de la otra */
+  .sede{border:1px solid var(--filo); border-radius:6px; overflow:hidden;
+    background:rgba(255,255,255,.03)}
+  .sede .suc{border:none; background:none; border-radius:0}
+  .sede .suc:hover{transform:none; background:rgba(232,205,138,.06)}
+  .sede .horario{border-top:1px solid rgba(198,204,210,.12)}
+  .suc{
+    display:flex; align-items:center; gap:13px; text-align:left; text-decoration:none;
+    padding:15px 14px; border-radius:6px; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .18s ease, border-color .2s ease, background .2s ease;
+  }
+  .suc:hover{transform:translateY(-3px); border-color:var(--filo2); background:rgba(232,205,138,.06)}
+  .suc .ico{
+    flex:0 0 42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(232,205,138,.08); border:1px solid var(--filo-oro); color:var(--oro-lt);
+  }
+  .suc .ico svg{width:19px; height:19px}
+  .suc .d{flex:1; min-width:0}
+  .suc .d strong{display:block; font-family:var(--cond); font-size:16px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; line-height:1.2}
+  .suc .d small{display:block; margin-top:4px; font-size:11.5px; font-weight:300; color:var(--gris); line-height:1.5}
+  .suc .chev{color:var(--oro); font-size:17px}
+
+  /* ---- HORARIO ---- */
+  .panel{border:1px solid var(--filo); border-radius:6px; overflow:hidden; margin-top:14px}
+  /* ---- HORARIO: tres columnas, día · primera cita · última cita ----
+     Cada hora lleva su nombre encima. Antes iban las dos en un solo renglón
+     (11:00 – 20:30) con una nota al pie explicando que la segunda NO era la
+     hora de cierre; el cliente leyó eso y no lo entendió.
+
+     UNA sola rejilla para todo el horario, no una por renglón: si cada fila
+     mide sus columnas por su cuenta, el rótulo "Primera cita" no cae exactamente
+     encima de su hora. Y las columnas de horas se miden SOLAS (auto) mientras
+     el que cede el ancho es el nombre del día (minmax(0,1fr)): así, mida lo
+     que mida "Última cita" en el teléfono del cliente, la fila no se puede
+     salir de la ficha —que recorta lo que se desborde (overflow:hidden). */
+  .horario{
+    display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+    padding:4px 15px 8px; font-size:12.5px; font-weight:300; color:var(--hueso2);
+  }
+  /* las celdas se estiran a la altura del renglón (no `align-items:center`):
+     así las tres rayitas de abajo quedan a la misma altura y se leen como
+     una sola línea. El contenido se centra dentro de cada celda. */
+  .horario > *{
+    display:flex; align-items:center; padding:12px 0;
+    border-bottom:1px solid rgba(198,204,210,.1);
+  }
+  .horario > b{
+    font-family:var(--cond); font-weight:400; letter-spacing:.16em;
+    text-transform:uppercase; font-size:11px; color:var(--gris);
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .horario > .v{
+    justify-content:flex-end; text-align:right; padding-left:14px; min-width:42px;
+    letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  }
+  .horario > .cerrado{grid-column:2 / -1}
+  /* el último renglón (día + "cerrado") va sin raya */
+  .horario > *:nth-last-child(-n+2){border-bottom:none}
+  .horario > .rot{
+    padding-top:10px; padding-bottom:7px;
+    font-family:var(--cond); font-size:8.5px; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--oro); line-height:1.3;
+  }
+
+  /* ================= CIERRE ================= */
+  .cierre{padding:10px 0 0; text-align:center}
+  .tel{
+    display:inline-flex; align-items:center; gap:12px; justify-content:center;
+    color:var(--hueso); text-decoration:none;
+    font-family:var(--cond); font-size:28px; font-weight:300; letter-spacing:.08em;
+  }
+  .tel svg{width:17px;height:17px; color:var(--oro)}
+  .dir{display:block; margin-top:14px; font-size:11.5px; font-weight:300; color:var(--gris); line-height:1.85; letter-spacing:.07em}
+  .dir b{color:var(--hueso2); font-weight:500}
+  .firma{margin-top:10px; font-family:var(--script); font-size:29px; line-height:1;
+    background:var(--oro-grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .mini{display:flex; gap:9px; justify-content:center; margin-top:20px; flex-wrap:wrap}
+  .mini button,.mini a{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 18px;
+    font-size:9.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+    cursor:pointer; font-family:var(--sans); border-radius:99px;
+    color:var(--hueso2); text-decoration:none;
+    background:rgba(10,11,12,.7); border:1px solid rgba(198,204,210,.24);
+    transition:transform .16s ease, background .2s ease;
+  }
+  .mini button:hover,.mini a:hover{transform:translateY(-2px); background:rgba(198,204,210,.12)}
+  .mini svg{width:12px;height:12px; color:var(--oro)}
+  .madeby{margin-top:22px; font-size:10.5px; font-weight:300; color:var(--gris2); letter-spacing:.08em}
+  .madeby a{color:var(--hueso2); text-decoration:none; font-weight:500}
+
+  /* ================= DIÁLOGO: ELEGIR SUCURSAL ================= */
+  dialog.suc-dlg{
+    /* margin:auto es lo que centra un <dialog> modal; el reset *{margin:0} se lo quita */
+    margin:auto; border:none; padding:0; background:none;
+    width:100%; max-width:min(92vw,420px); color:var(--hueso); overflow:visible;
+  }
+  dialog.suc-dlg::backdrop{background:rgba(0,0,0,.88); backdrop-filter:blur(5px)}
+  .dlg-caja{
+    position:relative; padding:24px 18px 18px; border-radius:10px; text-align:center;
+    background:var(--carbon); border:1px solid var(--filo2);
+    box-shadow:0 30px 70px rgba(0,0,0,.85);
+  }
+  .dlg-caja h3{font-family:var(--deco); font-size:21px; font-weight:500; letter-spacing:.18em; text-transform:uppercase}
+  .dlg-caja .que{margin:10px 0 16px; font-size:12.5px; font-weight:300; color:var(--gris); line-height:1.65}
+  .dlg-caja .que b{color:var(--hueso2); font-weight:500}
+  .dlg-ops{display:flex; flex-direction:column; gap:9px}
+  .dlg-ops a{
+    display:flex; align-items:center; gap:12px; padding:14px 13px; border-radius:6px;
+    text-align:left; text-decoration:none; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .16s ease, border-color .2s ease, background .2s ease;
+  }
+  .dlg-ops a:hover{transform:translateY(-2px); border-color:var(--filo2); background:rgba(232,205,138,.07)}
+  .dlg-ops .num{
+    flex:0 0 34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--cond); font-size:15px; font-weight:400; color:var(--oro-lt);
+    background:rgba(232,205,138,.08); border:1px solid var(--filo-oro);
+  }
+  .dlg-ops .n{flex:1; min-width:0}
+  .dlg-ops .n strong{display:block; font-family:var(--cond); font-size:15px; font-weight:400; letter-spacing:.14em; text-transform:uppercase}
+  .dlg-ops .n small{display:block; margin-top:3px; font-size:11px; font-weight:300; color:var(--gris); line-height:1.5}
+  .dlg-cerrar{
+    margin-top:14px; width:100%; padding:12px; border-radius:6px; cursor:pointer;
+    font-family:var(--sans); font-size:9.5px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+    background:transparent; color:var(--gris); border:1px solid rgba(198,204,210,.18);
+    transition:background .2s ease, color .2s ease;
+  }
+  .dlg-cerrar:hover{background:rgba(198,204,210,.08); color:var(--hueso2)}
+
+  /* ================= PROGRESO Y RESERVA FLOTANTE ================= */
+  .progreso{
+    position:fixed; left:0; top:0; height:2px; z-index:8; pointer-events:none;
+    width:100%; transform-origin:0 50%; transform:scaleX(var(--prog,0));
+    background:var(--cromo); box-shadow:0 0 12px rgba(198,204,210,.5);
+  }
+  .flota{
+    position:fixed; left:0; right:0; bottom:0; z-index:7;
+    display:flex; justify-content:center;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(0deg,rgba(0,0,0,.98) 62%,rgba(0,0,0,0));
+    transform:translateY(140%); transition:transform .34s cubic-bezier(.2,.7,.3,1);
+    pointer-events:none;
+  }
+  .flota.on{transform:none; pointer-events:auto}
+  .flota button{
+    width:100%; max-width:444px; cursor:pointer; font-family:var(--cond);
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    padding:15px; border-radius:6px; border:none;
+    color:#000; background:var(--cromo); background-size:190% 100%;
+    font-size:14px; font-weight:600; letter-spacing:.24em; text-transform:uppercase;
+    box-shadow:0 -6px 30px rgba(0,0,0,.8);
+    transition:background-position .6s ease, transform .14s ease;
+  }
+  .flota button:hover{background-position:100% 0}
+  .flota button:active{transform:scale(.99)}
+  .flota button svg{width:16px; height:16px}
+
+  /* ================= TARJETA DE LEALTAD =================
+     Una sola tarjeta para las DOS sucursales (los datos viven en
+     barberstudiomb-quemada, la dueña; La Morena la comparte con las
+     llaves grupo/comparte del panel). El fondo es SU foto: las
+     herramientas sobre el tapete negro que mandó el cliente. Encima
+     lleva un velo oscuro porque lo que pidió, con esas palabras, es
+     que los sellos SE VEAN BIEN: todo lo que va sobre la foto carga
+     su propia sombra o su propio fondo. La sección solo aparece si
+     la API confirma que los sellos están encendidos.
+     Va en PLATA (el cromo de la casa), no en oro: la primera versión
+     salió dorada y el cliente la rechazó el mismo 28-ago — "esto
+     plata bro". El oro de la tarjeta se queda para acentos chicos. */
+  .leal{
+    position:relative; overflow:hidden; text-align:center; margin-top:18px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.62), rgba(0,0,0,.44) 40%, rgba(0,0,0,.76)),
+      url("img/mb-lealtad.jpg?v=f348d8bc") center 38%/cover no-repeat var(--negro2);
+    border:1px solid var(--filo2); border-radius:14px;
+    padding:26px 18px 22px;
+    box-shadow:0 18px 44px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .leal-donde{
+    display:inline-flex; align-items:center; gap:6px; margin:0 0 14px; padding:6px 13px;
+    border:1px solid rgba(198,204,210,.5); border-radius:999px;
+    font-family:var(--cond); font-size:9.5px; font-weight:400; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--hueso2); background:rgba(0,0,0,.5);
+  }
+  .leal-gancho{
+    position:relative; margin:0 0 18px; font-size:16px; font-weight:500;
+    line-height:1.55; color:var(--hueso); text-shadow:0 1px 10px rgba(0,0,0,.85);
+  }
+  .leal-gancho b{
+    font-weight:600;
+    background:var(--cromo); -webkit-background-clip:text; background-clip:text;
+    color:transparent; filter:drop-shadow(0 1px 6px rgba(0,0,0,.8));
+  }
+  .leal-sellos{
+    position:relative; display:grid; gap:10px; margin:0 auto 14px; max-width:330px;
+    grid-template-columns:repeat(var(--cols,5),1fr);
+  }
+  /* el sello vacío lleva su propio fondo oscuro: sobre la foto, un aro
+     punteado pelón desaparecía justo donde caiga una herramienta clara */
+  .leal-sello{
+    aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
+    border:1.5px dashed rgba(243,245,247,.55); color:transparent;
+    background:rgba(0,0,0,.46); box-shadow:0 2px 10px rgba(0,0,0,.55);
+  }
+  .leal-sello svg{width:48%; height:48%}
+  .leal-sello.on{
+    border:1.5px solid rgba(255,255,255,.9); color:#0d0f11;
+    background:var(--cromo);
+    box-shadow:0 0 16px rgba(230,235,239,.45), 0 2px 10px rgba(0,0,0,.55);
+  }
+  /* sellos de ejemplo, antes de que active su tarjeta: a media luz */
+  .leal-sellos.muestra .leal-sello.on{opacity:.45; box-shadow:0 2px 10px rgba(0,0,0,.55)}
+  .leal-sello.nuevo{animation:leal-cae .5s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes leal-cae{from{transform:scale(.35); opacity:0} to{transform:scale(1); opacity:1}}
+  .leal-cuenta{
+    position:relative; margin:0 0 16px; font-size:12.5px; color:var(--hueso2);
+    font-weight:400; text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+  .leal-cuenta b{color:var(--hueso); font-weight:600}
+  .leal-btn{
+    position:relative; width:100%; padding:14px; border:0; border-radius:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    background:var(--cromo); color:#000;
+    font-family:var(--cond); font-size:13.5px; font-weight:500;
+    letter-spacing:.14em; text-transform:uppercase;
+  }
+  .leal-btn svg{width:17px; height:17px}
+  .leal-btn:active{transform:scale(.99)}
+  .leal-btn[disabled]{opacity:.55}
+  .leal-err{margin:0 0 9px; min-height:1em; font-size:12.5px; color:#ff8b7a; font-weight:600}
+  .leal-fino{
+    position:relative; margin:11px 0 0; font-size:11.5px; color:var(--hueso2);
+    line-height:1.6; font-weight:400; text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+  .leal-fino.ojo{color:var(--hueso); font-weight:600}
+  .leal-fino b{color:var(--hueso)}
+  /* el botón de Google es su asset oficial: no se le cambia nada, solo se centra */
+  .leal-wallet{
+    display:block; margin:0 auto; padding:0; border:0; background:none;
+    cursor:pointer; line-height:0;
+  }
+  .leal-wallet img{display:block; height:55px; width:auto}
+  .leal-wallet:active{opacity:.85}
+  .leal-wallet[disabled]{opacity:.5}
+  .leal-doble{
+    position:relative; display:inline-block; margin:0 0 14px; padding:5px 11px; border-radius:999px;
+    font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    color:#0a0b0c; background:var(--cromo);
+  }
+  /* ---- el popup del alta ----
+     Vive FUERA de <main> a propósito, junto a los <dialog> de sucursal:
+     un velo a pantalla completa no va dentro de un contenedor animado. */
+  .leal-velo{
+    position:fixed; inset:0; z-index:60; display:flex;
+    align-items:center; justify-content:center;
+    padding:20px; overflow-y:auto;
+    background:rgba(0,0,0,.74); backdrop-filter:blur(3px);
+    opacity:1; animation:leal-vela .22s ease both;
+  }
+  @keyframes leal-vela{from{opacity:0} to{opacity:1}}
+  .leal-pop{
+    position:relative; width:100%; max-width:400px; margin:auto; text-align:center;
+    background:linear-gradient(165deg,var(--carbon2),var(--negro2));
+    border:1px solid var(--filo2);
+    border-radius:18px;
+    padding:38px 22px 26px;
+    box-shadow:0 22px 60px rgba(0,0,0,.65);
+    animation:leal-sube .3s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes leal-sube{from{transform:scale(.95); opacity:0} to{transform:none; opacity:1}}
+  .leal-x{
+    position:absolute; top:13px; right:13px; width:34px; height:34px; padding:0;
+    border:1px solid var(--filo); border-radius:50%;
+    background:rgba(0,0,0,.3); color:var(--gris); cursor:pointer;
+    display:grid; place-items:center;
+  }
+  .leal-x svg{width:15px; height:15px}
+  .leal-regalo{
+    display:block; width:46px; height:46px; margin:0 auto 14px; color:var(--hueso2);
+    filter:drop-shadow(0 3px 12px rgba(198,204,210,.35));
+  }
+  .leal-regalo svg{width:100%; height:100%}
+  .leal-pop-tit{
+    margin:0; font-family:var(--deco); font-size:18px; font-weight:500;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--hueso);
+  }
+  .leal-pop-sub{margin:7px 0 20px; font-size:13px; color:var(--gris); font-weight:400; line-height:1.55}
+  .leal-pop input{
+    width:100%; margin-bottom:10px; padding:14px 15px; font-size:16px; font-family:var(--sans);
+    border:1.5px solid var(--filo2); border-radius:10px;
+    background:rgba(0,0,0,.38); color:var(--hueso); outline:none; text-align:center;
+  }
+  .leal-pop input::placeholder{color:var(--gris2)}
+  .leal-pop input:focus-visible{border-color:var(--hueso2)}
+  .leal-pop .leal-wallet{margin-top:14px}
+  .leal-pop .leal-btn{margin-top:14px}
+  /* el cumpleaños que se pide después, ya con la tarjeta activa */
+  .leal-cum{position:relative; display:flex; gap:8px; margin-top:12px}
+  .leal-cum input{
+    flex:1; min-width:0; padding:11px 12px; font-size:16px; font-family:var(--sans);
+    border:1.5px solid var(--filo2); border-radius:9px;
+    background:rgba(0,0,0,.38); color:var(--hueso); outline:none; text-align:center;
+  }
+  .leal-cum input::placeholder{color:var(--gris2)}
+  .leal-cum button{
+    padding:0 16px; border:0; border-radius:9px; cursor:pointer; font-family:var(--cond);
+    font-size:12.5px; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+    color:#000; background:var(--cromo);
+  }
+  .leal-cum-liga{
+    position:relative; margin:10px 0 0; background:none; border:0; padding:0; cursor:pointer;
+    color:var(--hueso2); font-family:var(--sans); font-size:12.5px; font-weight:600;
+    text-decoration:underline; text-underline-offset:3px;
+    text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+
+  /* ================= MARCA DE AGUA DEMO ================= */
+  .wm{position:fixed; inset:0; z-index:5; pointer-events:none; display:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='220'%3E%3Ctext x='170' y='110' fill='rgba(243,245,247,0.08)' transform='rotate(-24 170 110)' text-anchor='middle' font-family='Arial' font-size='24' font-weight='700'%3EDEMO %C2%B7 mitarjeta.mx%3C/text%3E%3C/svg%3E");
+  }
+  .wm-pill{
+    position:fixed; left:50%; top:10px; transform:translateX(-50%); z-index:9;
+    display:none; padding:8px 18px; border-radius:99px; pointer-events:none;
+    background:var(--carbon2); border:1px solid var(--filo); color:var(--hueso2);
+    max-width:calc(100vw - 20px); text-align:center;
+    font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  }
+  [data-demo="1"] .wm, [data-demo="1"] .wm-pill{display:block}
+
