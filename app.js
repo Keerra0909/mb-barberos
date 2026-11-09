@@ -87,19 +87,22 @@ let productosActivos = ['Pomada Mate', 'Pomada Brillo', 'Polvo Texturizador', 'M
 let catalog = [
     { cat: 'Clásicos', items: ['Corte de Cabello', 'Corte de Barba (Ritual)', 'Corte y Barba', 'Servicio Express', 'Servicio Luxury'] },
     { cat: 'Spa y Faciales', items: ['Limpieza Facial', 'Facial y Corte', 'Facial, Corte y Barba', 'Facial y Barba', 'Corte y Masaje', 'Corte, Barba y Masaje', 'Corte y Reflexoterapia', 'Corte, Barba y Reflexoterapia'] },
-    { cat: 'Extras', items: ['Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas'] }
+    { cat: 'Extras', items: ['Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas'] },
+    { cat: 'Membresías', items: ['Membresía mensual · La Quemada', 'Membresía mensual · La Morena'] }
 ];
 let preciosBase = {
     'Corte de Cabello': 220, 'Corte de Barba (Ritual)': 220, 'Corte y Barba': 380, 'Servicio Express': 120, 'Servicio Luxury': 550,
     'Limpieza Facial': 180, 'Facial y Corte': 330, 'Facial, Corte y Barba': 480, 'Facial y Barba': 330,
     'Corte y Masaje': 600, 'Corte, Barba y Masaje': 750, 'Corte y Reflexoterapia': 580, 'Corte, Barba y Reflexoterapia': 730,
     'Tinte de Barba': 120, 'Grecas': 80, 'Perfilado de Cejas': 80, 'Planchado de Cejas': 150,
+    'Membresía mensual · La Quemada': 700, 'Membresía mensual · La Morena': 800,
     'Pomada Mate': 250, 'Pomada Brillo': 250, 'Polvo Texturizador': 180, 'Minoxidil': 350, 'Aceite para Barba': 150
 };
 let serviciosActivos = ['Corte de Cabello', 'Corte de Barba (Ritual)', 'Corte y Barba', 'Servicio Express', 'Servicio Luxury',
     'Limpieza Facial', 'Facial y Corte', 'Facial, Corte y Barba', 'Facial y Barba',
     'Corte y Masaje', 'Corte, Barba y Masaje', 'Corte y Reflexoterapia', 'Corte, Barba y Reflexoterapia',
-    'Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas'];
+    'Tinte de Barba', 'Grecas', 'Perfilado de Cejas', 'Planchado de Cejas',
+    'Membresía mensual · La Quemada', 'Membresía mensual · La Morena'];
 let bebidasActivas = ['-', 'Agua', 'Coca Cola', 'Cerveza', 'Jugo'];
 
 let sucursalActual = 'La Morena';
@@ -1270,11 +1273,14 @@ window.filtrarClientesUI = function() {
         const badgeRecompensa = s >= metaSellos 
             ? `<span class="ml-2 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 rounded text-[9px] font-bold uppercase tracking-wider">¡Corte Gratis!</span>`
             : '';
+        const badgeMembresia = (c.membresia && c.membresia.activa)
+            ? `<span class="ml-1.5 px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/50 rounded text-[9px] font-bold uppercase tracking-wider" title="Vence: ${c.membresia.vence || '30 días'}"><i class="fa-solid fa-crown text-amber-400 mr-1"></i>Membresía (${c.membresia.monto ? '$'+c.membresia.monto : 'Activa'})</span>`
+            : '';
         const desdeFmt = c.clienteDesde || c.fechaRegistro || c.ultimaVisita || '2026-11-01';
 
         tbody.innerHTML += `
             <tr class="hover:bg-zinc-900/60 transition-colors">
-                <td class="p-3.5 font-bold text-zinc-200">${c.nombre} ${badgeRecompensa}</td>
+                <td class="p-3.5 font-bold text-zinc-200">${c.nombre} ${badgeRecompensa} ${badgeMembresia}</td>
                 <td class="p-3.5 font-mono text-zinc-400">${c.telefono}</td>
                 <td class="p-3.5 font-mono text-zinc-400 text-xs">
                     <span class="inline-flex items-center gap-1.5 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800 text-zinc-300">
