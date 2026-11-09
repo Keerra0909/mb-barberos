@@ -1,0 +1,2178 @@
+<!DOCTYPE html><html lang="es" class="js" data-demo="" style="--sy: 0; --prog: 0.0000;"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barber Studio MB · The Gentleman's House · Narvarte, CDMX</title>
+<meta name="description" content="Barber Studio MB, The Gentleman's House. Dos sucursales en la Narvarte: La Morena y La Quemada. Corte $220, corte y barba $380, membresía mensual desde $700. Agenda tu cita en línea.">
+<meta property="og:title" content="Barber Studio MB · The Gentleman's House">
+<meta property="og:description" content="Dos sucursales en la Narvarte · Corte y barba $380 · Membresía: los cortes que necesites al mes desde $700">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mitarjeta.mx/barberstudiomb">
+<meta property="og:site_name" content="mitarjeta.mx">
+<meta property="og:image" content="https://mitarjeta.mx/img/mb-og.jpg?v=2988d238">
+<meta property="og:locale" content="es_MX">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&amp;family=Italianno&amp;family=Oswald:wght@300;400;500;600;700&amp;family=Outfit:wght@200;300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     MOLDE "ALAS" — Barber Studio MB, Narvarte, CDMX.
+     Mismo formato de la casa (portada, botones con nombre, sellos,
+     secciones, barberos en círculo, sucursal antes de reservar),
+     con la piel que sale de SU rótulo y de SUS flyers:
+
+       · negro absoluto, cromo pulido y oro fino — nada más
+       · el rótulo de alas, en blanco, vive de fondo como marca
+         de agua gigante y respira con el scroll
+       · la carta de precios es su pizarra: nombre, guía punteada
+         y precio, con SUS iconos de línea redibujados en SVG
+       · las promos son sus recuadros de flyer: marco con esquinas
+         de filete y el círculo de "NORMALMENTE $200" tachado
+       · tipografía: Cinzel para el rótulo (los remates del logo),
+         Oswald condensada para los precios (los flyers), Italianno
+         para "The Gentleman's House" y Outfit para leer.
+
+     Dos sucursales, cada una con sus barberos y su propia agenda:
+       barberstudiomb-morena   · La Morena 1556  · Mario, Gabriel y David
+       barberstudiomb-quemada  · La Quemada 143  · Carlos
+     Reservar abre primero la hoja de sucursal; el servicio elegido
+     viaja en ?sv= y llega escrito en el WhatsApp.
+
+     Pero el NEGOCIO es uno solo, y así lo pidió el cliente (28-ago-2026):
+       · UNA tarjeta de sellos para las dos — dueña barberstudiomb-quemada,
+         La Morena la comparte (llaves grupo/comparte del panel)
+       · UN WhatsApp para todos los avisos — "avisos" compartido igual
+       · UN Google Calendar — quemada lleva copia del `gcal` de morena
+         (mismo refresh token y mismo calendario). OJO: "Desconectar
+         Google" desde cualquiera de los dos paneles revoca el token
+         y desconecta a LAS DOS; se reconecta desde el panel.
+       · la sección de Lealtad lleva de fondo la foto que mandó el
+         cliente (img/mb-lealtad.jpg?v=f348d8bc) con velo oscuro: pidió, textual,
+         que los sellos se vean bien.
+     ============================================================ */
+  :root{
+    --negro:#000000; --negro2:#0a0b0c; --carbon:#121315; --carbon2:#191b1e;
+    --hueso:#f3f5f7; --hueso2:#c6ccd2; --gris:#8b9299; --gris2:#5f666c;
+    --oro:#c9a248; --oro-lt:#e8cd8a; --oro-dk:#8d6f2c;
+    --cromo:linear-gradient(100deg,#5f666c 0%,#9aa2a9 12%,#e6ebef 30%,#ffffff 44%,#c3cad0 58%,#8b939a 74%,#565d63 100%);
+    /* cromo de verdad para el monograma MB: DOS destellos y valles oscuros
+       entre ellos. Un solo brillo se lee como letra gris clara; el metal se
+       reconoce por el contraste entre el reflejo y la sombra. */
+    --cromo-mb:linear-gradient(100deg,#3f464c 0%,#7d858c 8%,#e4eaef 19%,#ffffff 28%,#aeb6bc 38%,#5c6369 49%,#dfe6ea 64%,#ffffff 73%,#9aa2a9 86%,#474e54 100%);
+    --oro-grad:linear-gradient(100deg,#8d6f2c 0%,#c9a248 22%,#f4e0a8 44%,#e8cd8a 58%,#b18c39 78%,#8d6f2c 100%);
+    /* los bloques dejan pasar la marca de agua a propósito: si van muy
+       opacos, el logo de fondo desaparece detrás de ellos */
+    --vidrio:rgba(10,11,12,.6);
+    --filo:rgba(198,204,210,.15);
+    --filo2:rgba(198,204,210,.42);
+    --filo-oro:rgba(201,162,72,.34);
+    --sans:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --deco:"Cinzel",Georgia,"Times New Roman",serif;
+    --cond:"Oswald",Impact,"Arial Narrow",sans-serif;
+    --script:"Italianno",cursive;
+  }
+  /* El ángulo del aro de cromo. Se anima ESTE número, no el elemento:
+     girar con transform un cuadro de 286 px le infla la caja envolvente a
+     404 px (286 × √2) y eso metía scroll horizontal en pantallas de 375.
+     Si el navegador no registra la variable, el aro simplemente se queda
+     quieto: se ve igual, nada más no gira. */
+  @property --ang{syntax:"<angle>"; inherits:false; initial-value:0deg}
+
+  /* Una regla de autor con `display` le gana al `[hidden]` del navegador, así
+     que sin esto el popup del alta de lealtad (.leal-velo, display:flex) sale
+     abierto nomás cargar la página. Igual que en foro-barber. */
+  [hidden]{display:none !important}
+
+  *{box-sizing:border-box;margin:0}
+  html,body{min-height:100%}
+  /* red de seguridad: la tarjeta nunca se desliza de lado. `clip` y no
+     `hidden` porque `hidden` volvería al <html> un contenedor de scroll y
+     rompería el position:fixed de la barra de reservar en iOS. */
+  html{scroll-behavior:smooth; overflow-x:clip}
+  body{
+    font-family:var(--sans); color:var(--hueso); background:var(--negro);
+    display:flex; justify-content:center; overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ============ FONDO: SU RÓTULO, A IZQUIERDA Y DERECHA ============
+     El logo blanco vive detrás de todo, siempre de a dos: uno asomándose
+     por el borde izquierdo y otro por el derecho, cortados por la orilla
+     para que solo se les vea un ala. Hay cinco pares, uno por sección:
+     al pasar el scroll se enciende el que toca y se apagan los demás, y
+     cada pieza viaja a distinta velocidad (parallax). Así el fondo se
+     mueve un poco todo el rato sin robarle lectura a nada.
+     Todas son la MISMA imagen, cambiada de tamaño, altura y giro. */
+  .amb{position:fixed; inset:0; z-index:-3; overflow:hidden; pointer-events:none; background:var(--negro)}
+  .esc{position:absolute; inset:0; opacity:0; transition:opacity 1.5s ease}
+  .esc.on{opacity:1}
+  .mk{
+    position:absolute; width:var(--w,320px); aspect-ratio:1;
+    background-image:url("img/mb-logo.png?v=3ffe87d3");
+    background-repeat:no-repeat; background-position:center; background-size:contain;
+    transform:translate3d(0,calc(var(--sy,0) * var(--f,-.08) * 1px),0) rotate(var(--giro,0deg));
+    will-change:transform;
+    /* respira entre su opacidad y un poco menos; la marca NUNCA se apaga */
+    opacity:var(--op,.2);
+    animation:latir 16s ease-in-out infinite alternate;
+  }
+  /* se salen casi la mitad por su orilla: se asoma el ala, no el logo entero */
+  .mk.izq{left:calc(var(--w,320px) * -.42)}
+  .mk.der{right:calc(var(--w,320px) * -.42)}
+  @keyframes latir{from{opacity:calc(var(--op,.2) * .65)} to{opacity:var(--op,.2)}}
+
+  /* Blanco sobre negro engaña: lo que en el monitor ya se ve, en un
+     teléfono a media luz desaparece. Y encima, en pantalla angosta los
+     bloques de contenido cubren casi todo el ancho, así que la marca
+     solo respira en los márgenes y en los huecos entre secciones.
+     Por eso van altas: detrás de un bloque queda ~1/3 de esto. */
+  /* 1 · portada */
+  .e1 .izq{--w:min(84vw,450px); top:2%;  --f:-.05; --op:.26}
+  .e1 .der{--w:min(70vw,370px); top:33%; --f:-.11; --op:.2;  --giro:6deg}
+  /* 2 · servicios */
+  .e2 .izq{--w:min(76vw,400px); top:24%; --f:-.14; --op:.24; --giro:-7deg}
+  .e2 .der{--w:min(90vw,480px); top:0%;  --f:-.07; --op:.19}
+  /* 3 · promociones */
+  .e3 .izq{--w:min(66vw,350px); top:44%; --f:-.09; --op:.2}
+  .e3 .der{--w:min(82vw,440px); top:10%; --f:-.17; --op:.26; --giro:5deg}
+  /* 4 · barberos */
+  .e4 .izq{--w:min(94vw,500px); top:16%; --f:-.2;  --op:.22; --giro:4deg}
+  .e4 .der{--w:min(72vw,380px); top:50%; --f:-.06; --op:.24}
+  /* 5 · sucursales */
+  .e5 .izq{--w:min(78vw,410px); top:6%;  --f:-.12; --op:.25}
+  .e5 .der{--w:min(88vw,470px); top:36%; --f:-.15; --op:.2;  --giro:-5deg}
+  .velo{
+    position:fixed; inset:0; z-index:-2; pointer-events:none;
+    transform:translate3d(0,calc(var(--sy,0) * -.03 * 1px),0);
+    background:
+      radial-gradient(88% 52% at 50% -4%,rgba(232,205,138,.09),transparent 64%),
+      radial-gradient(70% 48% at 14% 88%,rgba(198,204,210,.07),transparent 66%),
+      /* el velo de abajo iba tan negro que se comía la marca de agua */
+      linear-gradient(180deg,rgba(0,0,0,.26) 0%,rgba(0,0,0,0) 28%,rgba(0,0,0,.52) 100%);
+  }
+  .grano{
+    position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- EFECTO PROPIO: PLUMAS DE LUZ ----
+     Del logo salen dos alas; aquí quedan como destellos verticales muy
+     suaves que suben, como una pluma cayendo al revés. Dos planos con
+     parallax distinto. */
+  .plumas{
+    position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;
+    transform:translate3d(0,calc(var(--sy,0) * -.2 * 1px),0); will-change:transform;
+  }
+  .plumas.hondo{transform:translate3d(0,calc(var(--sy,0) * -.08 * 1px),0)}
+  .pluma{
+    position:absolute; width:2px; height:120px; border-radius:99px; opacity:0;
+    background:linear-gradient(180deg,transparent,rgba(243,245,247,.7),rgba(232,205,138,.34),transparent);
+    filter:blur(1px); animation:subir 15s ease-in-out infinite;
+  }
+  .plumas.hondo .pluma{width:4px; height:200px; filter:blur(5px); animation-duration:23s}
+  @keyframes subir{
+    0%{transform:translate3d(0,34vh,0) rotate(6deg); opacity:0}
+    22%{opacity:.8}
+    64%{opacity:.32}
+    100%{transform:translate3d(-18px,-38vh,0) rotate(-6deg); opacity:0}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .mk,.pluma,.plumas,.cta::after,.tick-track,.aro,.poste::before,
+    h1 b,.promo-precio{animation:none !important}
+    .plumas{display:none}
+    .rev{opacity:1 !important; transform:none !important; transition:none}
+    .mk{transform:rotate(var(--giro,0deg))}
+    .velo{transform:none}
+  }
+
+  /* ================= ESTRUCTURA ================= */
+  .hoja{width:100%; max-width:472px; position:relative; padding:30px 18px 30px;
+    display:flex; flex-direction:column; gap:20px; text-align:center}
+  .hoja > *{min-width:0; max-width:100%}
+  .rev{opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.3,1)}
+  .rev.vis{opacity:1; transform:none}
+
+  /* ================= PORTADA =================
+     El rótulo va COMPLETO y sin recortar, tal como lo mandó el cliente.
+     Debajo se repiten en texto el nombre y el lema: sí, se leen dos
+     veces, pero el texto de verdad es el que pesa para Google, y el
+     rótulo es imagen. Detrás, un aro de cromo que gira y un resplandor
+     tenue; nada de encerrarlo en un disco: es un logo alto y con
+     detalle, encerrarlo lo mataría. */
+  header{position:relative; padding-top:2px}
+  .rotulo{
+    position:relative; width:290px; max-width:100%; margin:0 auto 2px;
+    transform:translate3d(0,calc(var(--sy,0) * .05 * 1px),0);
+  }
+  .rotulo img{width:100%; height:auto; display:block; position:relative; z-index:1;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,.9)) drop-shadow(0 0 22px rgba(232,205,138,.14))}
+  .rotulo .halo{
+    position:absolute; left:50%; top:50%; width:236px; height:236px;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle,rgba(232,205,138,.18),rgba(198,204,210,.07) 46%,transparent 70%);
+  }
+  /* dos aros de cromo girando en sentidos opuestos, como el filete del flyer.
+     Van por FUERA de las alas: si los cruzan, el rótulo se ensucia. */
+  /* Los aros se miden en % del rótulo, no en px fijos: así el sobrante por
+     abajo es siempre la misma proporción y la lucecita nunca alcanza al
+     renglón de "Narvarte · CDMX", ni en un teléfono angosto donde el logo se
+     encoge y los aros —si fueran fijos— se le saldrían. */
+  .aro{
+    position:absolute; left:50%; top:50%; width:95%; aspect-ratio:1;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+    border:1px solid transparent;
+    background:conic-gradient(from var(--ang),transparent 0 58%,rgba(243,245,247,.7) 71%,transparent 84%) border-box;
+    -webkit-mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    animation:girar 26s linear infinite;
+  }
+  .aro.dos{
+    width:107.5%; opacity:.42;
+    background:conic-gradient(from var(--ang),transparent 0 66%,rgba(232,205,138,.8) 76%,transparent 88%) border-box;
+    animation:girar 41s linear infinite reverse;
+  }
+  @keyframes girar{to{--ang:360deg}}
+
+  /* el margen de arriba tiene que ganarle al sobrante del aro grande
+     (3.75% del ancho del rótulo por cada lado) o la lucecita le pasa encima */
+  .ciudad{
+    display:flex; align-items:center; gap:12px; justify-content:center;
+    font-size:9px; font-weight:500; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--gris); padding-left:.42em; margin:26px 0 14px;
+  }
+  .ciudad::before,.ciudad::after{content:""; width:30px; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,162,72,.6),transparent)}
+  h1{font-family:var(--deco); font-weight:400; font-size:clamp(22px,6.6vw,29px);
+    line-height:1.14; letter-spacing:.16em; color:var(--hueso); text-transform:uppercase}
+  /* EL MB EN METÁLICO (lo pidió el cliente: "que brille el MB").
+     Tres piezas hacen el efecto: el cromo de dos destellos que se barre solo,
+     el filo negro de abajo —que es lo que da el relieve de letra troquelada—
+     y un resplandor cálido muy tenue para que el metal no se vea muerto
+     sobre el negro. */
+  h1 b{
+    display:block; margin-top:7px; font-weight:600; letter-spacing:.14em;
+    background:var(--cromo-mb); background-size:260% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:brillo 7s ease-in-out infinite alternate;
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.9))
+           drop-shadow(0 3px 9px rgba(0,0,0,.85))
+           drop-shadow(0 0 16px rgba(232,205,138,.2));
+  }
+  @keyframes brillo{from{background-position:0 0} to{background-position:100% 0}}
+  .lema{
+    margin:2px auto 0; font-family:var(--script); font-size:38px; line-height:1;
+    letter-spacing:.01em;
+    background:var(--oro-grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  /* line-height apretado a propósito: son tres renglones cortos y el cliente
+     los quiere más juntos, como escalones, no como párrafo suelto */
+  .sub-lema{margin:12px auto 0; max-width:320px; font-size:13.5px; font-weight:300; line-height:1.45; color:var(--hueso2)}
+
+  /* ================= LETRERO CORRIENDO ================= */
+  .tick{
+    overflow:hidden; padding:9px 0; border-radius:2px;
+    background:var(--cromo);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  }
+  .tick-track{
+    display:inline-flex; gap:22px; white-space:nowrap;
+    animation:tick 28s linear infinite;
+    font-family:var(--cond); font-size:11px; font-weight:600; letter-spacing:.24em;
+    text-transform:uppercase; color:#000;
+  }
+  .tick-track span i{font-style:normal; font-size:8px; vertical-align:2px; margin-right:8px; color:#6b5720}
+  @keyframes tick{to{transform:translateX(-50%)}}
+
+  /* ================= POSTE DE BARBERO ================= */
+  /* El separador es su poste: cromo girando entre dos casquillos. */
+  .poste{height:5px; border-radius:99px; overflow:hidden; position:relative;
+    background:#050606; border:1px solid rgba(198,204,210,.2)}
+  .poste::before{
+    content:""; position:absolute; inset:-50% -60%;
+    background:repeating-linear-gradient(58deg,
+      #ffffff 0 7px, #b9c0c6 7px 13px, #0a0b0c 13px 23px, #c9a248 23px 29px, #0a0b0c 29px 36px);
+    animation:correr 4.2s linear infinite;
+  }
+  @keyframes correr{to{transform:translateX(36px)}}
+
+  /* ================= CTA ================= */
+  .cta{
+    position:relative; overflow:hidden; cursor:pointer; width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:19px 17px; border-radius:6px; text-align:left; border:none;
+    background:var(--cromo); background-size:190% 100%;
+    color:#000; font-family:var(--sans); text-decoration:none;
+    box-shadow:0 20px 46px rgba(0,0,0,.7);
+    transition:background-position .6s ease, transform .16s ease;
+  }
+  .cta:hover{background-position:100% 0; transform:translateY(-3px)}
+  .cta:active{transform:translateY(1px)}
+  .cta .txt{position:relative; z-index:1; flex:1; min-width:0; display:flex; flex-direction:column; gap:6px}
+  .cta .txt strong{
+    display:flex; align-items:center; gap:11px;
+    font-family:var(--cond); font-size:21px; font-weight:600; letter-spacing:.12em;
+    line-height:1; text-transform:uppercase;
+  }
+  .cta .txt strong svg{width:19px; height:19px; flex:0 0 19px}
+  .cta .txt small{font-size:12px; font-weight:400; line-height:1.45; color:rgba(0,0,0,.72)}
+  .cta::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.8) 50%,transparent 60%);
+    transform:translateX(-130%); animation:shine 4.6s ease-in-out infinite;
+  }
+  @keyframes shine{0%,58%{transform:translateX(-130%)} 78%,100%{transform:translateX(130%)}}
+  .ir{
+    position:relative; z-index:1; flex:0 0 46px; width:46px; height:46px; border-radius:50%;
+    background:rgba(0,0,0,.08); border:1px solid rgba(0,0,0,.2);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1.4), background .2s ease;
+  }
+  .ir svg{width:21px; height:21px}
+  .cta:hover .ir{transform:translateX(4px); background:rgba(0,0,0,.14)}
+
+  /* ================= BOTONES CON NOMBRE ================= */
+  .actions{display:flex; flex-direction:column; gap:9px}
+  .action{
+    display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:6px;
+    color:var(--hueso); text-decoration:none; text-align:left; width:100%;
+    font-family:var(--sans); cursor:pointer;
+    background:var(--vidrio); border:1px solid var(--filo);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    transition:transform .16s ease, background .2s ease, border-color .2s ease;
+  }
+  .action:hover{transform:translateY(-2px); background:rgba(25,27,30,.9); border-color:var(--filo2)}
+  .action:active{transform:translateY(1px)}
+  .action .ico{
+    flex:0 0 40px; height:40px; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(232,205,138,.06); border:1px solid var(--filo-oro); color:var(--oro-lt);
+    transition:transform .2s ease, background .2s ease;
+  }
+  .action:hover .ico{transform:rotate(-5deg) scale(1.06); background:rgba(232,205,138,.15)}
+  .action .ico svg{width:18px; height:18px}
+  .action .lbl{flex:1; display:flex; flex-direction:column; gap:3px; min-width:0}
+  .action .lbl strong{font-family:var(--cond); font-size:14px; font-weight:500; letter-spacing:.18em; text-transform:uppercase}
+  .action .lbl small{color:var(--gris); font-size:11.5px; font-weight:300}
+  .action .chev{flex:0 0 20px; text-align:right; color:var(--oro); font-size:17px; line-height:1}
+
+  /* ================= SELLOS ================= */
+  .sellos{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .sello{
+    padding:15px 6px; border-radius:6px;
+    background:var(--vidrio); border:1px solid var(--filo);
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    font-size:8.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gris); line-height:1.5;
+    transition:transform .18s ease, border-color .18s ease;
+  }
+  .sello:hover{transform:translateY(-3px); border-color:var(--filo2)}
+  .sello svg{width:21px; height:21px; color:var(--hueso2)}
+  .sello b{font-family:var(--cond); font-size:24px; font-weight:400; letter-spacing:.02em; color:var(--hueso); line-height:1}
+  /* el número al LADO de la palabra, no encima: así lo pidió el cliente */
+  .sello .par{display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap}
+
+  /* ================= SECCIONES ================= */
+  .bloque{
+    position:relative; padding:26px 15px 22px; border:1px solid var(--filo); border-radius:8px;
+    background:var(--vidrio); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 22px 54px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
+    text-align:center;
+  }
+  /* esquinas de filete dorado, como el marco impreso de sus flyers */
+  .bloque::before,.bloque::after{
+    content:""; position:absolute; width:22px; height:22px; pointer-events:none;
+  }
+  .bloque::before{top:7px; left:7px; border-top:1px solid var(--filo-oro); border-left:1px solid var(--filo-oro)}
+  .bloque::after{bottom:7px; right:7px; border-bottom:1px solid var(--filo-oro); border-right:1px solid var(--filo-oro)}
+  .bloque > h2{
+    font-family:var(--deco); font-size:23px; font-weight:500; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--hueso); line-height:1.2; padding-left:.22em;
+  }
+  .subt{
+    display:block; margin-top:9px; font-size:8.5px; font-weight:600;
+    letter-spacing:.38em; text-transform:uppercase; color:var(--oro); padding-left:.38em;
+  }
+  .ayuda{margin:12px 0 18px; font-size:12.5px; font-weight:300; color:var(--gris); line-height:1.7}
+  .ayuda b{color:var(--hueso2); font-weight:500}
+
+  /* ---- LA PIZARRA DE PRECIOS ----
+     Igual que su menú impreso: icono, nombre, guía punteada y precio.
+     Toda la fila es el botón de reservar; no hay acordeón que esconda
+     precios porque en su carta se leen todos de un golpe. */
+  .carta{display:flex; flex-direction:column; margin-top:2px}
+  .linea{
+    display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+    padding:13px 3px; background:none; border:none; cursor:pointer;
+    font-family:var(--sans); color:var(--hueso);
+    border-bottom:1px solid rgba(198,204,210,.11);
+    transition:background .2s ease, padding-left .2s ease;
+  }
+  .linea:last-child{border-bottom:none}
+  .linea:hover{background:rgba(198,204,210,.05); padding-left:8px}
+  .linea:active{transform:translateY(1px)}
+  .linea .ic{flex:0 0 25px; height:25px; display:flex; align-items:center; justify-content:center; color:var(--hueso2)}
+  .linea .ic svg{width:23px; height:23px}
+  .linea .n{flex:0 0 auto; max-width:56%}
+  .linea .n strong{
+    display:block; font-family:var(--cond); font-size:14.5px; font-weight:400;
+    letter-spacing:.09em; text-transform:uppercase; line-height:1.2; color:var(--hueso);
+  }
+  .linea .n small{display:block; margin-top:2px; font-size:10px; font-weight:300; letter-spacing:.06em; color:var(--gris2)}
+  .linea .guion{flex:1; min-width:14px; height:1px;
+    background:repeating-linear-gradient(90deg,rgba(198,204,210,.42) 0 2px,transparent 2px 6px)}
+  .linea .p{
+    flex:0 0 auto; font-family:var(--cond); font-size:21px; font-weight:400; letter-spacing:.01em;
+    line-height:1; color:var(--hueso);
+    background:var(--cromo); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .linea .mas{
+    flex:0 0 20px; height:20px; border-radius:50%; margin-left:-2px;
+    border:1px solid rgba(198,204,210,.3); color:var(--gris);
+    display:flex; align-items:center; justify-content:center; font-size:13px; line-height:0;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .linea:hover .mas{background:rgba(232,205,138,.16); color:var(--oro-lt); border-color:var(--filo-oro)}
+  .nota{margin-top:16px; font-size:11px; font-weight:300; color:var(--gris); line-height:1.65; text-align:left}
+
+  /* ---- CORTESÍAS: la banda de abajo de su menú ---- */
+  /* cuatro cortesías: black mask, bebida, música y masaje */
+  .cortesias{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin-top:18px;
+    border-top:1px solid var(--filo-oro); border-bottom:1px solid var(--filo-oro);
+  }
+  .cortesia{
+    padding:14px 3px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-size:8px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--gris); line-height:1.5;
+  }
+  .cortesia + .cortesia{border-left:1px solid rgba(198,204,210,.12)}
+  .cortesia svg{width:22px; height:22px; color:var(--hueso2)}
+
+  /* ================= PROMOCIONES =================
+     Sus recuadros de flyer, tal cual: marco con filete, el precio grande
+     en cromo y el círculo de "NORMALMENTE $200" con el precio tachado
+     encima de la esquina. */
+  .promos{display:flex; flex-direction:column; gap:14px; margin-top:6px}
+  .promo{
+    position:relative; display:block; width:100%; cursor:pointer; text-decoration:none;
+    font-family:var(--sans); text-align:center; color:var(--hueso);
+    padding:22px 16px 20px; border-radius:4px;
+    background:linear-gradient(150deg,rgba(25,27,30,.9),rgba(0,0,0,.92));
+    border:1px solid rgba(198,204,210,.24);
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.7), inset 0 0 26px rgba(0,0,0,.9), 0 14px 34px rgba(0,0,0,.6);
+    transition:transform .18s ease, border-color .2s ease;
+  }
+  .promo:hover{transform:translateY(-3px); border-color:var(--filo2)}
+  .promo:active{transform:translateY(0)}
+  /* las que llevan círculo de "antes" dejan su carril libre a la derecha:
+     el precio queda a la izquierda y el círculo encima, como en el flyer */
+  .promo.con-antes{padding-right:104px}
+  /* filete interior, como el marco impreso */
+  .promo .marco{position:absolute; inset:8px; pointer-events:none;
+    border:1px solid rgba(201,162,72,.3); border-radius:2px}
+  /* etiqueta de "solo en tal sucursal": va cosida a la orilla de arriba,
+     como un sello, para que nadie llegue a la otra sucursal con este precio */
+  .promo .solo{
+    position:absolute; top:0; left:50%; transform:translate(-50%,-50%);
+    padding:4px 12px; border-radius:99px; white-space:nowrap;
+    background:var(--oro-grad); color:#14100a;
+    font-family:var(--cond); font-size:8.5px; font-weight:600; letter-spacing:.18em;
+    text-transform:uppercase; box-shadow:0 4px 12px rgba(0,0,0,.7);
+  }
+  .promo:has(.solo){margin-top:6px}
+  .promo .dia{
+    position:relative; display:block; margin-bottom:9px;
+    font-family:var(--cond); font-size:10px; font-weight:500; letter-spacing:.34em;
+    text-transform:uppercase; color:var(--oro-lt); padding-left:.34em;
+  }
+  .promo .que{
+    position:relative; display:block; font-family:var(--cond); font-size:15px; font-weight:400;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--hueso2); line-height:1.3;
+    padding-left:.18em;
+  }
+  .promo-precio{
+    position:relative; display:block; margin-top:4px;
+    font-family:var(--cond); font-size:clamp(48px,15vw,64px); font-weight:600;
+    letter-spacing:-.01em; line-height:1.05;
+    background:var(--cromo); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:brillo 6s ease-in-out infinite alternate;
+    filter:drop-shadow(0 4px 14px rgba(255,255,255,.14));
+  }
+  .promo-precio.dorado{background-image:var(--oro-grad); filter:drop-shadow(0 4px 16px rgba(232,205,138,.22))}
+  .promo .pesos{
+    position:relative; display:block; margin-top:-2px;
+    font-family:var(--cond); font-size:10px; font-weight:400; letter-spacing:.42em;
+    text-transform:uppercase; color:var(--gris); padding-left:.42em;
+  }
+  /* el círculo de "NORMALMENTE $200", tachado */
+  .antes{
+    position:absolute; right:14px; top:50%; transform:translateY(-42%);
+    width:82px; height:82px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:radial-gradient(120% 120% at 34% 26%,#ffffff,#c3cad0 46%,#7d858c 100%);
+    box-shadow:0 8px 22px rgba(0,0,0,.75), inset 0 -6px 14px rgba(0,0,0,.22);
+    color:#0a0b0c; pointer-events:none;
+  }
+  .antes .et{font-family:var(--cond); font-size:7.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; opacity:.8}
+  .antes .v{position:relative; font-family:var(--cond); font-size:26px; font-weight:500; line-height:1}
+  .antes .v::after{
+    content:""; position:absolute; left:-10%; right:-10%; top:52%; height:2px;
+    background:#0a0b0c; transform:rotate(-13deg);
+  }
+  .promo .ver{
+    position:relative; display:inline-flex; align-items:center; gap:8px; margin-top:14px;
+    font-family:var(--cond); font-size:9.5px; font-weight:500; letter-spacing:.26em;
+    text-transform:uppercase; color:var(--oro);
+  }
+  .promo .ver svg{width:11px; height:11px}
+  .promo.membresia{background:linear-gradient(150deg,rgba(35,28,10,.72),rgba(0,0,0,.94))}
+  .promo.membresia .marco{border-color:rgba(232,205,138,.5)}
+  .promo .corona{width:30px; height:30px; margin:0 auto 4px; color:var(--oro-lt); display:block; position:relative}
+  .letra-chica{margin-top:12px; font-size:10px; font-weight:300; color:var(--gris2); letter-spacing:.1em; line-height:1.6}
+
+  /* ================= BARBEROS ================= */
+  .eq-suc{
+    display:flex; align-items:center; gap:10px; margin-top:20px;
+    font-family:var(--cond); font-size:9.5px; font-weight:500; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--oro-lt);
+  }
+  .eq-suc::before,.eq-suc::after{content:""; flex:1; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,162,72,.5),transparent)}
+  .equipo{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px}
+  /* un solo barbero suelto en una rejilla de 3 se ve abandonado en la esquina:
+     con uno o dos, la rejilla se encoge y se centra */
+  .equipo.uno{grid-template-columns:minmax(0,142px); justify-content:center}
+  .equipo.dos{grid-template-columns:repeat(2,minmax(0,1fr)); max-width:296px; margin-inline:auto}
+  .barbero{
+    display:flex; flex-direction:column; align-items:center; gap:9px;
+    padding:13px 4px 12px; border-radius:6px; text-decoration:none; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .barbero:hover{transform:translateY(-4px); border-color:var(--filo2); background:rgba(232,205,138,.07)}
+  .barbero:active{transform:translateY(-1px)}
+  .barbero .foto{
+    width:74px; height:74px; border-radius:50%; object-fit:cover; display:block;
+    border:1.5px solid var(--filo2);
+    box-shadow:0 8px 20px rgba(0,0,0,.75), 0 0 0 4px rgba(198,204,210,.07);
+    filter:grayscale(.35) contrast(1.08);
+    transition:transform .3s cubic-bezier(.2,.7,.3,1.3), filter .3s ease, box-shadow .3s ease;
+  }
+  /* sin foto en el panel: su inicial en el mismo círculo */
+  .barbero .foto.ini{display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.05); font-family:var(--cond); font-size:28px; color:var(--oro-lt)}
+  .barbero:hover .foto{transform:scale(1.07); filter:none; box-shadow:0 10px 26px rgba(0,0,0,.8), 0 0 0 5px rgba(232,205,138,.18)}
+  .barbero .n{font-family:var(--cond); font-size:13px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; text-align:center; line-height:1.1}
+  .barbero .ag{font-size:7.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--oro)}
+
+  /* ================= SUCURSALES ================= */
+  .sucs{display:flex; flex-direction:column; gap:12px; margin-top:14px}
+  /* cada sede es una ficha: su dirección arriba y su horario abajo, en la
+     misma caja, para que nadie confunda los horarios de una con los de la otra */
+  .sede{border:1px solid var(--filo); border-radius:6px; overflow:hidden;
+    background:rgba(255,255,255,.03)}
+  .sede .suc{border:none; background:none; border-radius:0}
+  .sede .suc:hover{transform:none; background:rgba(232,205,138,.06)}
+  .sede .horario{border-top:1px solid rgba(198,204,210,.12)}
+  .suc{
+    display:flex; align-items:center; gap:13px; text-align:left; text-decoration:none;
+    padding:15px 14px; border-radius:6px; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .18s ease, border-color .2s ease, background .2s ease;
+  }
+  .suc:hover{transform:translateY(-3px); border-color:var(--filo2); background:rgba(232,205,138,.06)}
+  .suc .ico{
+    flex:0 0 42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(232,205,138,.08); border:1px solid var(--filo-oro); color:var(--oro-lt);
+  }
+  .suc .ico svg{width:19px; height:19px}
+  .suc .d{flex:1; min-width:0}
+  .suc .d strong{display:block; font-family:var(--cond); font-size:16px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; line-height:1.2}
+  .suc .d small{display:block; margin-top:4px; font-size:11.5px; font-weight:300; color:var(--gris); line-height:1.5}
+  .suc .chev{color:var(--oro); font-size:17px}
+
+  /* ---- HORARIO ---- */
+  .panel{border:1px solid var(--filo); border-radius:6px; overflow:hidden; margin-top:14px}
+  /* ---- HORARIO: tres columnas, día · primera cita · última cita ----
+     Cada hora lleva su nombre encima. Antes iban las dos en un solo renglón
+     (11:00 – 20:30) con una nota al pie explicando que la segunda NO era la
+     hora de cierre; el cliente leyó eso y no lo entendió.
+
+     UNA sola rejilla para todo el horario, no una por renglón: si cada fila
+     mide sus columnas por su cuenta, el rótulo "Primera cita" no cae exactamente
+     encima de su hora. Y las columnas de horas se miden SOLAS (auto) mientras
+     el que cede el ancho es el nombre del día (minmax(0,1fr)): así, mida lo
+     que mida "Última cita" en el teléfono del cliente, la fila no se puede
+     salir de la ficha —que recorta lo que se desborde (overflow:hidden). */
+  .horario{
+    display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+    padding:4px 15px 8px; font-size:12.5px; font-weight:300; color:var(--hueso2);
+  }
+  /* las celdas se estiran a la altura del renglón (no `align-items:center`):
+     así las tres rayitas de abajo quedan a la misma altura y se leen como
+     una sola línea. El contenido se centra dentro de cada celda. */
+  .horario > *{
+    display:flex; align-items:center; padding:12px 0;
+    border-bottom:1px solid rgba(198,204,210,.1);
+  }
+  .horario > b{
+    font-family:var(--cond); font-weight:400; letter-spacing:.16em;
+    text-transform:uppercase; font-size:11px; color:var(--gris);
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .horario > .v{
+    justify-content:flex-end; text-align:right; padding-left:14px; min-width:42px;
+    letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  }
+  .horario > .cerrado{grid-column:2 / -1}
+  /* el último renglón (día + "cerrado") va sin raya */
+  .horario > *:nth-last-child(-n+2){border-bottom:none}
+  .horario > .rot{
+    padding-top:10px; padding-bottom:7px;
+    font-family:var(--cond); font-size:8.5px; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--oro); line-height:1.3;
+  }
+
+  /* ================= CIERRE ================= */
+  .cierre{padding:10px 0 0; text-align:center}
+  .tel{
+    display:inline-flex; align-items:center; gap:12px; justify-content:center;
+    color:var(--hueso); text-decoration:none;
+    font-family:var(--cond); font-size:28px; font-weight:300; letter-spacing:.08em;
+  }
+  .tel svg{width:17px;height:17px; color:var(--oro)}
+  .dir{display:block; margin-top:14px; font-size:11.5px; font-weight:300; color:var(--gris); line-height:1.85; letter-spacing:.07em}
+  .dir b{color:var(--hueso2); font-weight:500}
+  .firma{margin-top:10px; font-family:var(--script); font-size:29px; line-height:1;
+    background:var(--oro-grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .mini{display:flex; gap:9px; justify-content:center; margin-top:20px; flex-wrap:wrap}
+  .mini button,.mini a{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 18px;
+    font-size:9.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+    cursor:pointer; font-family:var(--sans); border-radius:99px;
+    color:var(--hueso2); text-decoration:none;
+    background:rgba(10,11,12,.7); border:1px solid rgba(198,204,210,.24);
+    transition:transform .16s ease, background .2s ease;
+  }
+  .mini button:hover,.mini a:hover{transform:translateY(-2px); background:rgba(198,204,210,.12)}
+  .mini svg{width:12px;height:12px; color:var(--oro)}
+  .madeby{margin-top:22px; font-size:10.5px; font-weight:300; color:var(--gris2); letter-spacing:.08em}
+  .madeby a{color:var(--hueso2); text-decoration:none; font-weight:500}
+
+  /* ================= DIÁLOGO: ELEGIR SUCURSAL ================= */
+  dialog.suc-dlg{
+    /* margin:auto es lo que centra un <dialog> modal; el reset *{margin:0} se lo quita */
+    margin:auto; border:none; padding:0; background:none;
+    width:100%; max-width:min(92vw,420px); color:var(--hueso); overflow:visible;
+  }
+  dialog.suc-dlg::backdrop{background:rgba(0,0,0,.88); backdrop-filter:blur(5px)}
+  .dlg-caja{
+    position:relative; padding:24px 18px 18px; border-radius:10px; text-align:center;
+    background:var(--carbon); border:1px solid var(--filo2);
+    box-shadow:0 30px 70px rgba(0,0,0,.85);
+  }
+  .dlg-caja h3{font-family:var(--deco); font-size:21px; font-weight:500; letter-spacing:.18em; text-transform:uppercase}
+  .dlg-caja .que{margin:10px 0 16px; font-size:12.5px; font-weight:300; color:var(--gris); line-height:1.65}
+  .dlg-caja .que b{color:var(--hueso2); font-weight:500}
+  .dlg-ops{display:flex; flex-direction:column; gap:9px}
+  .dlg-ops a{
+    display:flex; align-items:center; gap:12px; padding:14px 13px; border-radius:6px;
+    text-align:left; text-decoration:none; color:var(--hueso);
+    background:rgba(255,255,255,.03); border:1px solid var(--filo);
+    transition:transform .16s ease, border-color .2s ease, background .2s ease;
+  }
+  .dlg-ops a:hover{transform:translateY(-2px); border-color:var(--filo2); background:rgba(232,205,138,.07)}
+  .dlg-ops .num{
+    flex:0 0 34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--cond); font-size:15px; font-weight:400; color:var(--oro-lt);
+    background:rgba(232,205,138,.08); border:1px solid var(--filo-oro);
+  }
+  .dlg-ops .n{flex:1; min-width:0}
+  .dlg-ops .n strong{display:block; font-family:var(--cond); font-size:15px; font-weight:400; letter-spacing:.14em; text-transform:uppercase}
+  .dlg-ops .n small{display:block; margin-top:3px; font-size:11px; font-weight:300; color:var(--gris); line-height:1.5}
+  .dlg-cerrar{
+    margin-top:14px; width:100%; padding:12px; border-radius:6px; cursor:pointer;
+    font-family:var(--sans); font-size:9.5px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+    background:transparent; color:var(--gris); border:1px solid rgba(198,204,210,.18);
+    transition:background .2s ease, color .2s ease;
+  }
+  .dlg-cerrar:hover{background:rgba(198,204,210,.08); color:var(--hueso2)}
+
+  /* ================= PROGRESO Y RESERVA FLOTANTE ================= */
+  .progreso{
+    position:fixed; left:0; top:0; height:2px; z-index:8; pointer-events:none;
+    width:100%; transform-origin:0 50%; transform:scaleX(var(--prog,0));
+    background:var(--cromo); box-shadow:0 0 12px rgba(198,204,210,.5);
+  }
+  .flota{
+    position:fixed; left:0; right:0; bottom:0; z-index:7;
+    display:flex; justify-content:center;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(0deg,rgba(0,0,0,.98) 62%,rgba(0,0,0,0));
+    transform:translateY(140%); transition:transform .34s cubic-bezier(.2,.7,.3,1);
+    pointer-events:none;
+  }
+  .flota.on{transform:none; pointer-events:auto}
+  .flota button{
+    width:100%; max-width:444px; cursor:pointer; font-family:var(--cond);
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    padding:15px; border-radius:6px; border:none;
+    color:#000; background:var(--cromo); background-size:190% 100%;
+    font-size:14px; font-weight:600; letter-spacing:.24em; text-transform:uppercase;
+    box-shadow:0 -6px 30px rgba(0,0,0,.8);
+    transition:background-position .6s ease, transform .14s ease;
+  }
+  .flota button:hover{background-position:100% 0}
+  .flota button:active{transform:scale(.99)}
+  .flota button svg{width:16px; height:16px}
+
+  /* ================= TARJETA DE LEALTAD =================
+     Una sola tarjeta para las DOS sucursales (los datos viven en
+     barberstudiomb-quemada, la dueña; La Morena la comparte con las
+     llaves grupo/comparte del panel). El fondo es SU foto: las
+     herramientas sobre el tapete negro que mandó el cliente. Encima
+     lleva un velo oscuro porque lo que pidió, con esas palabras, es
+     que los sellos SE VEAN BIEN: todo lo que va sobre la foto carga
+     su propia sombra o su propio fondo. La sección solo aparece si
+     la API confirma que los sellos están encendidos.
+     Va en PLATA (el cromo de la casa), no en oro: la primera versión
+     salió dorada y el cliente la rechazó el mismo 28-ago — "esto
+     plata bro". El oro de la tarjeta se queda para acentos chicos. */
+  .leal{
+    position:relative; overflow:hidden; text-align:center; margin-top:18px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.62), rgba(0,0,0,.44) 40%, rgba(0,0,0,.76)),
+      url("img/mb-lealtad.jpg?v=f348d8bc") center 38%/cover no-repeat var(--negro2);
+    border:1px solid var(--filo2); border-radius:14px;
+    padding:26px 18px 22px;
+    box-shadow:0 18px 44px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .leal-donde{
+    display:inline-flex; align-items:center; gap:6px; margin:0 0 14px; padding:6px 13px;
+    border:1px solid rgba(198,204,210,.5); border-radius:999px;
+    font-family:var(--cond); font-size:9.5px; font-weight:400; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--hueso2); background:rgba(0,0,0,.5);
+  }
+  .leal-gancho{
+    position:relative; margin:0 0 18px; font-size:16px; font-weight:500;
+    line-height:1.55; color:var(--hueso); text-shadow:0 1px 10px rgba(0,0,0,.85);
+  }
+  .leal-gancho b{
+    font-weight:600;
+    background:var(--cromo); -webkit-background-clip:text; background-clip:text;
+    color:transparent; filter:drop-shadow(0 1px 6px rgba(0,0,0,.8));
+  }
+  .leal-sellos{
+    position:relative; display:grid; gap:10px; margin:0 auto 14px; max-width:330px;
+    grid-template-columns:repeat(var(--cols,5),1fr);
+  }
+  /* el sello vacío lleva su propio fondo oscuro: sobre la foto, un aro
+     punteado pelón desaparecía justo donde caiga una herramienta clara */
+  .leal-sello{
+    aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
+    border:1.5px dashed rgba(243,245,247,.55); color:transparent;
+    background:rgba(0,0,0,.46); box-shadow:0 2px 10px rgba(0,0,0,.55);
+  }
+  .leal-sello svg{width:48%; height:48%}
+  .leal-sello.on{
+    border:1.5px solid rgba(255,255,255,.9); color:#0d0f11;
+    background:var(--cromo);
+    box-shadow:0 0 16px rgba(230,235,239,.45), 0 2px 10px rgba(0,0,0,.55);
+  }
+  /* sellos de ejemplo, antes de que active su tarjeta: a media luz */
+  .leal-sellos.muestra .leal-sello.on{opacity:.45; box-shadow:0 2px 10px rgba(0,0,0,.55)}
+  .leal-sello.nuevo{animation:leal-cae .5s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes leal-cae{from{transform:scale(.35); opacity:0} to{transform:scale(1); opacity:1}}
+  .leal-cuenta{
+    position:relative; margin:0 0 16px; font-size:12.5px; color:var(--hueso2);
+    font-weight:400; text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+  .leal-cuenta b{color:var(--hueso); font-weight:600}
+  .leal-btn{
+    position:relative; width:100%; padding:14px; border:0; border-radius:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    background:var(--cromo); color:#000;
+    font-family:var(--cond); font-size:13.5px; font-weight:500;
+    letter-spacing:.14em; text-transform:uppercase;
+  }
+  .leal-btn svg{width:17px; height:17px}
+  .leal-btn:active{transform:scale(.99)}
+  .leal-btn[disabled]{opacity:.55}
+  .leal-err{margin:0 0 9px; min-height:1em; font-size:12.5px; color:#ff8b7a; font-weight:600}
+  .leal-fino{
+    position:relative; margin:11px 0 0; font-size:11.5px; color:var(--hueso2);
+    line-height:1.6; font-weight:400; text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+  .leal-fino.ojo{color:var(--hueso); font-weight:600}
+  .leal-fino b{color:var(--hueso)}
+  /* el botón de Google es su asset oficial: no se le cambia nada, solo se centra */
+  .leal-wallet{
+    display:block; margin:0 auto; padding:0; border:0; background:none;
+    cursor:pointer; line-height:0;
+  }
+  .leal-wallet img{display:block; height:55px; width:auto}
+  .leal-wallet:active{opacity:.85}
+  .leal-wallet[disabled]{opacity:.5}
+  .leal-doble{
+    position:relative; display:inline-block; margin:0 0 14px; padding:5px 11px; border-radius:999px;
+    font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    color:#0a0b0c; background:var(--cromo);
+  }
+  /* ---- el popup del alta ----
+     Vive FUERA de <main> a propósito, junto a los <dialog> de sucursal:
+     un velo a pantalla completa no va dentro de un contenedor animado. */
+  .leal-velo{
+    position:fixed; inset:0; z-index:60; display:flex;
+    align-items:center; justify-content:center;
+    padding:20px; overflow-y:auto;
+    background:rgba(0,0,0,.74); backdrop-filter:blur(3px);
+    opacity:1; animation:leal-vela .22s ease both;
+  }
+  @keyframes leal-vela{from{opacity:0} to{opacity:1}}
+  .leal-pop{
+    position:relative; width:100%; max-width:400px; margin:auto; text-align:center;
+    background:linear-gradient(165deg,var(--carbon2),var(--negro2));
+    border:1px solid var(--filo2);
+    border-radius:18px;
+    padding:38px 22px 26px;
+    box-shadow:0 22px 60px rgba(0,0,0,.65);
+    animation:leal-sube .3s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes leal-sube{from{transform:scale(.95); opacity:0} to{transform:none; opacity:1}}
+  .leal-x{
+    position:absolute; top:13px; right:13px; width:34px; height:34px; padding:0;
+    border:1px solid var(--filo); border-radius:50%;
+    background:rgba(0,0,0,.3); color:var(--gris); cursor:pointer;
+    display:grid; place-items:center;
+  }
+  .leal-x svg{width:15px; height:15px}
+  .leal-regalo{
+    display:block; width:46px; height:46px; margin:0 auto 14px; color:var(--hueso2);
+    filter:drop-shadow(0 3px 12px rgba(198,204,210,.35));
+  }
+  .leal-regalo svg{width:100%; height:100%}
+  .leal-pop-tit{
+    margin:0; font-family:var(--deco); font-size:18px; font-weight:500;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--hueso);
+  }
+  .leal-pop-sub{margin:7px 0 20px; font-size:13px; color:var(--gris); font-weight:400; line-height:1.55}
+  .leal-pop input{
+    width:100%; margin-bottom:10px; padding:14px 15px; font-size:16px; font-family:var(--sans);
+    border:1.5px solid var(--filo2); border-radius:10px;
+    background:rgba(0,0,0,.38); color:var(--hueso); outline:none; text-align:center;
+  }
+  .leal-pop input::placeholder{color:var(--gris2)}
+  .leal-pop input:focus-visible{border-color:var(--hueso2)}
+  .leal-pop .leal-wallet{margin-top:14px}
+  .leal-pop .leal-btn{margin-top:14px}
+  /* el cumpleaños que se pide después, ya con la tarjeta activa */
+  .leal-cum{position:relative; display:flex; gap:8px; margin-top:12px}
+  .leal-cum input{
+    flex:1; min-width:0; padding:11px 12px; font-size:16px; font-family:var(--sans);
+    border:1.5px solid var(--filo2); border-radius:9px;
+    background:rgba(0,0,0,.38); color:var(--hueso); outline:none; text-align:center;
+  }
+  .leal-cum input::placeholder{color:var(--gris2)}
+  .leal-cum button{
+    padding:0 16px; border:0; border-radius:9px; cursor:pointer; font-family:var(--cond);
+    font-size:12.5px; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+    color:#000; background:var(--cromo);
+  }
+  .leal-cum-liga{
+    position:relative; margin:10px 0 0; background:none; border:0; padding:0; cursor:pointer;
+    color:var(--hueso2); font-family:var(--sans); font-size:12.5px; font-weight:600;
+    text-decoration:underline; text-underline-offset:3px;
+    text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+
+  /* ================= MARCA DE AGUA DEMO ================= */
+  .wm{position:fixed; inset:0; z-index:5; pointer-events:none; display:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='220'%3E%3Ctext x='170' y='110' fill='rgba(243,245,247,0.08)' transform='rotate(-24 170 110)' text-anchor='middle' font-family='Arial' font-size='24' font-weight='700'%3EDEMO %C2%B7 mitarjeta.mx%3C/text%3E%3C/svg%3E");
+  }
+  .wm-pill{
+    position:fixed; left:50%; top:10px; transform:translateX(-50%); z-index:9;
+    display:none; padding:8px 18px; border-radius:99px; pointer-events:none;
+    background:var(--carbon2); border:1px solid var(--filo); color:var(--hueso2);
+    max-width:calc(100vw - 20px); text-align:center;
+    font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  }
+  [data-demo="1"] .wm, [data-demo="1"] .wm-pill{display:block}
+
+</style>
+</head>
+<body>
+
+<div class="amb" aria-hidden="true" data-mtx="e0">
+  <div class="esc e1 on" data-marca="1" data-mtx="e1"><span class="mk izq" data-mtx="e2"></span><span class="mk der" data-mtx="e3"></span></div>
+  <div class="esc e2" data-marca="2" data-mtx="e4"><span class="mk izq" data-mtx="e5"></span><span class="mk der" data-mtx="e6"></span></div>
+  <div class="esc e3" data-marca="3" data-mtx="e7"><span class="mk izq" data-mtx="e8"></span><span class="mk der" data-mtx="e9"></span></div>
+  <div class="esc e4" data-marca="4" data-mtx="e10"><span class="mk izq" data-mtx="e11"></span><span class="mk der" data-mtx="e12"></span></div>
+  <div class="esc e5" data-marca="5" data-mtx="e13"><span class="mk izq" data-mtx="e14"></span><span class="mk der" data-mtx="e15"></span></div>
+</div>
+<div class="velo" aria-hidden="true" data-mtx="e16"></div>
+<div class="grano" aria-hidden="true" data-mtx="e17"></div>
+<div class="plumas hondo" aria-hidden="true" data-mtx="e18">
+  <span class="pluma" style="left:14%; animation-delay:-3s" data-mtx="e19"></span>
+  <span class="pluma" style="left:78%; animation-delay:-13s" data-mtx="e20"></span>
+</div>
+<div class="plumas" aria-hidden="true" data-mtx="e21">
+  <span class="pluma" style="left:32%; animation-delay:0s" data-mtx="e22"></span>
+  <span class="pluma" style="left:64%; animation-delay:-7s" data-mtx="e23"></span>
+  <span class="pluma" style="left:88%; animation-delay:-11s" data-mtx="e24"></span>
+</div>
+<div class="progreso" aria-hidden="true" data-mtx="e25"></div>
+<div class="wm" data-mtx="e26"></div>
+<div class="wm-pill" data-mtx="e27">Vista previa · la versión final va sin marca de agua</div>
+
+<main class="hoja" data-mtx="e28">
+
+  <!-- ============ PORTADA ============ -->
+  <header class="rev vis" data-fondo="1" data-mtx="e29" style="transition-delay: 0.06s;">
+    <div class="rotulo" data-mtx="e30">
+      <span class="halo" aria-hidden="true" data-mtx="e31"></span>
+      <span class="aro" aria-hidden="true" data-mtx="e32"></span>
+      <span class="aro dos" aria-hidden="true" data-mtx="e33"></span>
+      <img src="img/mb-logo.png?v=3ffe87d3" alt="Barber Studio MB · The Gentleman's House" width="900" height="900" fetchpriority="high" data-mtx="e34">
+    </div>
+    <span class="ciudad" data-mtx="e35">Narvarte · CDMX</span>
+    <h1 data-mtx="e36">Barber Studio<b data-mtx="e37">MB</b></h1>
+    <p class="lema" data-mtx="e38">The Gentleman's House</p>
+    <!-- Tres renglones, tal cual los escribió el cliente. Los cortes van con
+         <br> a propósito: no se dejan al azar del ancho de pantalla. -->
+    <p class="sub-lema" data-mtx="e39">No es solo un corte, es una experiencia.<br data-mtx="e40">Dos sucursales en la Narvarte.<br data-mtx="e41">Elige la tuya, tu barbero y tu hora.</p>
+  </header>
+
+  <div class="tick rev vis" aria-hidden="true" data-mtx="e42" style="transition-delay: 0.16s;">
+    <div class="tick-track" data-mtx="e43">
+      <span data-mtx="e44"><i data-mtx="e45">◆</i>Cortes</span><span data-mtx="e46"><i data-mtx="e47">◆</i>Barba ritual</span><span data-mtx="e48"><i data-mtx="e49">◆</i>Faciales</span><span data-mtx="e50"><i data-mtx="e51">◆</i>Grecas</span><span data-mtx="e52"><i data-mtx="e53">◆</i>Servicio luxury</span><span data-mtx="e54"><i data-mtx="e55">◆</i>Bebida de cortesía</span><span data-mtx="e56"><i data-mtx="e57">◆</i>Dos sucursales</span>
+      <span data-mtx="e58"><i data-mtx="e59">◆</i>Cortes</span><span data-mtx="e60"><i data-mtx="e61">◆</i>Barba ritual</span><span data-mtx="e62"><i data-mtx="e63">◆</i>Faciales</span><span data-mtx="e64"><i data-mtx="e65">◆</i>Grecas</span><span data-mtx="e66"><i data-mtx="e67">◆</i>Servicio luxury</span><span data-mtx="e68"><i data-mtx="e69">◆</i>Bebida de cortesía</span><span data-mtx="e70"><i data-mtx="e71">◆</i>Dos sucursales</span>
+    </div>
+  </div>
+
+  <nav class="actions rev vis" data-mtx="e72" style="transition-delay: 0.26s;">
+    <button class="cta" type="button" data-reserva="" data-ligado="1" data-mtx="e73">
+      <span class="txt" data-mtx="e74">
+        <strong data-mtx="e75">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"></path><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"></path></svg>
+          Agenda tu cita
+        </strong>
+        <small data-mtx="e76">Elige sucursal, barbero, día y hora · te confirmamos por WhatsApp</small>
+      </span>
+      <span class="ir" aria-hidden="true" data-mtx="e77">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.5 12h14"></path><path d="M13 6.5 18.5 12 13 17.5"></path>
+        </svg>
+      </span>
+    </button>
+
+    <a class="action" href="https://wa.me/525581066554?text=Hola%20Barber%20Studio%20MB!%20Vi%20su%20tarjeta%20digital%20y%20quiero%20agendar%20una%20cita" target="_blank" rel="noopener" data-mtx="e78">
+      <span class="ico" data-mtx="e79"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"></path></svg></span>
+      <span class="lbl" data-mtx="e80"><strong data-mtx="e81">WhatsApp</strong><small data-mtx="e82">55 8106 6554 · Escríbenos directo</small></span>
+      <span class="chev" data-mtx="e83">›</span>
+    </a>
+
+    <a class="action" href="tel:+525581066554" data-mtx="e84">
+      <span class="ico" data-mtx="e85"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"></path></svg></span>
+      <span class="lbl" data-mtx="e86"><strong data-mtx="e87">Llamar</strong><small data-mtx="e88">55 8106 6554</small></span>
+      <span class="chev" data-mtx="e89">›</span>
+    </a>
+
+    <a class="action" href="https://www.instagram.com/barber_studio_mb" target="_blank" rel="noopener" data-mtx="e90">
+      <span class="ico" data-mtx="e91"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.919c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.919.598-.281.11-.705.24-1.485.276-.844.038-1.097.047-3.233.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"></path></svg></span>
+      <span class="lbl" data-mtx="e92"><strong data-mtx="e93">Instagram</strong><small data-mtx="e94">@barber_studio_mb</small></span>
+      <span class="chev" data-mtx="e95">›</span>
+    </a>
+
+    <!-- el link de Facebook va en su forma estable (profile.php?id=…), no el
+         de "share/…" que manda WhatsApp: ese caduca -->
+    <a class="action" href="https://www.facebook.com/profile.php?id=61572546343653" target="_blank" rel="noopener" data-mtx="e96">
+      <span class="ico" data-mtx="e97"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"></path></svg></span>
+      <span class="lbl" data-mtx="e98"><strong data-mtx="e99">Facebook</strong><small data-mtx="e100">Barber Studio MB</small></span>
+      <span class="chev" data-mtx="e101">›</span>
+    </a>
+
+    <a class="action" href="https://www.tiktok.com/@barber.studio.mb" target="_blank" rel="noopener" data-mtx="e102">
+      <span class="ico" data-mtx="e103"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z"></path></svg></span>
+      <span class="lbl" data-mtx="e104"><strong data-mtx="e105">TikTok</strong><small data-mtx="e106">@barber.studio.mb</small></span>
+      <span class="chev" data-mtx="e107">›</span>
+    </a>
+
+    <button class="action" type="button" id="btnUbi" data-mtx="e108">
+      <span class="ico" data-mtx="e109"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"></path></svg></span>
+      <span class="lbl" data-mtx="e110"><strong data-mtx="e111">Cómo llegar</strong><small data-mtx="e112">Elige sucursal y te lleva a Maps</small></span>
+      <span class="chev" data-mtx="e113">›</span>
+    </button>
+  </nav>
+
+  <div class="poste rev" aria-hidden="true" data-mtx="e114" style="transition-delay: 0.36s;"></div>
+
+  <section class="sellos rev" data-mtx="e115" style="transition-delay: 0.46s;">
+    <div class="sello" data-mtx="e116">
+      <span class="par" data-mtx="e117"><b data-mtx="e118">2</b>Sucursales</span>
+      en la Narvarte
+    </div>
+    <div class="sello" data-mtx="e119">
+      <!-- vaso de cortesía, como en la banda de su menú -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 5h10.8l-1.1 13.2a1.6 1.6 0 0 1-1.6 1.5H9.3a1.6 1.6 0 0 1-1.6-1.5z"></path><path d="M6.9 9.2h10.2"></path></svg>
+      Bebida<br data-mtx="e120">de cortesía
+    </div>
+    <div class="sello" data-mtx="e121">
+      <!-- masaje al finalizar -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.4" cy="6.2" r="2.2"></circle><path d="M3.6 18.4c1.4-3.2 4-4.9 7.4-4.9h3.2"></path><path d="M13.6 11.4c1.6 0 2.9.7 3.9 2M16.6 16.9h3.8"></path></svg>
+      Masaje<br data-mtx="e122">al finalizar
+    </div>
+  </section>
+
+  <!-- ============ SERVICIOS ============ -->
+  <section class="bloque rev" id="servicios" data-fondo="2" data-mtx="e123">
+    <h2 data-mtx="e124">Servicios</h2>
+    <span class="subt" data-mtx="e125">The Gentleman's House</span>
+    <p class="ayuda" data-mtx="e126">Precio directo, sin sorpresas. Toca el servicio que quieras: eliges <b data-mtx="e127">sucursal, barbero, día y hora</b>, y el servicio llega escrito en tu WhatsApp.</p>
+
+    <div class="carta" id="carta" data-mtx="e128"><button class="linea" type="button" data-reserva="Corte de cabello" data-precio="220" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.2" cy="17.6" r="2.6"></circle><circle cx="17.8" cy="17.6" r="2.6"></circle><path d="M8.2 15.8 18.4 3.6M15.8 15.8 5.6 3.6"></path></svg></span><span class="n"><strong>Corte de cabello</strong><small>Corte a tu estilo, con máquina y tijera.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$220</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Corte de barba (ritual)" data-precio="220" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5.4 4.6h13.2v6.2a6.6 6.6 0 0 1-6.6 6.6 6.6 6.6 0 0 1-6.6-6.6z"></path><path d="M9 9.4h.02M15 9.4h.02"></path><path d="M10.1 13.4c.6.5 1.2.7 1.9.7s1.3-.2 1.9-.7"></path></svg></span><span class="n"><strong>Corte de barba (ritual)</strong><small>Ritual completo de barba.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$220</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Corte y barba" data-precio="380" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.6" cy="17.9" r="1.9"></circle><circle cx="4.6" cy="6.1" r="1.9"></circle><path d="M6.2 16.7 12 9.6M6.2 7.3 9.4 11"></path><path d="M13.4 5.4h6.2v5.4a3.1 3.1 0 0 1-3.1 3.1 3.1 3.1 0 0 1-3.1-3.1z"></path><path d="M15.4 8.6h.02M17.7 8.6h.02"></path></svg></span><span class="n"><strong>Corte y barba</strong><small>Corte completo.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$380</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Tinte de barba" data-precio="120" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="m16.6 3.4 4 4-8.4 8.4-4-4z"></path><path d="M8.2 11.8 4.4 19a1 1 0 0 0 1.3 1.3l7.2-3.8"></path></svg></span><span class="n"><strong>Tinte de barba</strong><small>Cubre canas y empareja el tono.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$120</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Servicio express" data-precio="120" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.4" r="7.2"></circle><path d="M12 9.6v3.8l2.5 1.5"></path><path d="M9.6 2.6h4.8M12 2.6v3.6"></path><path d="m18.4 5.2 1.6 1.6"></path></svg></span><span class="n"><strong>Servicio express</strong><small>Retoque o limpieza de contornos.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$120</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Servicio luxury" data-precio="550" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 4.4h11.2l4 5-9.6 10.4L2.4 9.4z"></path><path d="m2.4 9.4 19.2 0M8.6 4.4 6.4 9.4l5.6 10.4 5.6-10.4-2.2-5"></path></svg></span><span class="n"><strong>Servicio luxury</strong><small>La experiencia completa de la casa.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$550</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Grecas" data-precio="80" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 19.2 15.2 7.4l3.6 3.6L7 22.8z" transform="translate(0,-2.4)"></path><path d="m16.4 4.2 3.4 3.4-1.4 1.4-3.4-3.4z"></path></svg></span><span class="n"><strong>Grecas</strong><small>Diseño a mano alzada.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$80</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Perfilado de cejas" data-precio="80" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 14.4C5.6 9.2 9.4 6.6 14 6.6c3 0 5.4.9 7.2 2.6"></path><path d="M4.4 17.6c2.6-3.8 5.8-5.8 9.6-5.8 2.4 0 4.4.7 6 2"></path></svg></span><span class="n"><strong>Perfilado de cejas</strong><small>Perfilado y limpieza de cejas.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$80</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Limpieza facial" data-precio="180" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8c4.4 0 7.6 2.6 7.6 6.4 0 5.6-3.4 12-7.6 12S4.4 14.8 4.4 9.2c0-3.8 3.2-6.4 7.6-6.4z"></path><path d="M8.6 9.6h1.8M13.6 9.6h1.8M10.4 15.2c.5.4 1 .6 1.6.6s1.1-.2 1.6-.6"></path></svg></span><span class="n"><strong>Limpieza facial</strong><small>Limpieza profunda con productos rejuvenecedores.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$180</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Facial y corte" data-precio="330" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M8.4 3.6c3.4 0 5.8 2 5.8 4.9 0 4.3-2.6 9.2-5.8 9.2s-5.8-4.9-5.8-9.2c0-2.9 2.4-4.9 5.8-4.9z"></path><path d="M6.2 8.6h.02M10.6 8.6h.02"></path><circle cx="18.6" cy="17.8" r="1.8"></circle><path d="M17.2 16.6 20.8 6.4"></path></svg></span><span class="n"><strong>Facial y corte</strong><small>Corte completo más limpieza facial.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$330</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Facial, corte y barba" data-precio="480" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 3.4c2.8 0 4.8 1.7 4.8 4.1 0 3.6-2.2 7.7-4.8 7.7S1.6 11.1 1.6 7.5c0-2.4 2-4.1 4.8-4.1z"></path><path d="M4.6 7.6h.02M8.2 7.6h.02"></path><path d="M13.8 8.2h6.6v4.6a3.3 3.3 0 0 1-3.3 3.3 3.3 3.3 0 0 1-3.3-3.3z"></path><path d="M15.9 11h.02M18.3 11h.02"></path><circle cx="7.2" cy="20.2" r="1.6"></circle><path d="M8.6 19.2 13 13.6"></path></svg></span><span class="n"><strong>Facial, corte y barba</strong><small>Corte, barba y limpieza facial.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$480</span><span class="mas" aria-hidden="true">›</span></button><button class="linea" type="button" data-reserva="Facial y barba" data-precio="330" data-ligado="1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 3.4c3.2 0 5.4 1.9 5.4 4.6 0 4-2.4 8.6-5.4 8.6S2.2 12 2.2 8c0-2.7 2.2-4.6 5.4-4.6z"></path><path d="M5.6 8.2h.02M9.6 8.2h.02"></path><path d="M15 8.6h6.4v4.4a3.2 3.2 0 0 1-3.2 3.2 3.2 3.2 0 0 1-3.2-3.2z"></path><path d="M17 11.2h.02M19.4 11.2h.02"></path></svg></span><span class="n"><strong>Facial y barba</strong><small>Barba al ritual más limpieza facial.</small></span><span class="guion" aria-hidden="true"></span><span class="p">$330</span><span class="mas" aria-hidden="true">›</span></button></div>
+
+    <!-- la banda de cortesías de su menú impreso -->
+    <div class="cortesias" data-mtx="e218">
+      <div class="cortesia" data-mtx="e219">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c4.2 0 7.2 2.5 7.2 6.1 0 5.3-3.2 11.4-7.2 11.4S4.8 14.6 4.8 9.3c0-3.6 3-6.1 7.2-6.1z"></path><path d="M8.6 9.4h1.8M13.6 9.4h1.8M9.4 14.6h5.2"></path></svg>
+        Black<br data-mtx="e220">mask
+      </div>
+      <div class="cortesia" data-mtx="e221">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 5h10.8l-1.1 13.2a1.6 1.6 0 0 1-1.6 1.5H9.3a1.6 1.6 0 0 1-1.6-1.5z"></path><path d="M6.9 9.2h10.2"></path></svg>
+        Bebida<br data-mtx="e222">de cortesía
+      </div>
+      <!-- cortesía nueva: la pone el cliente en su lista de "todo incluye" -->
+      <div class="cortesia" data-mtx="e223">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 18.2V6.4l9.2-2.2v11.6"></path><circle cx="7" cy="18.4" r="2.4"></circle><circle cx="16.2" cy="16.2" r="2.4"></circle></svg>
+        Música a<br data-mtx="e224">tu elección
+      </div>
+      <div class="cortesia" data-mtx="e225">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.4" cy="6.2" r="2.2"></circle><path d="M3.6 18.4c1.4-3.2 4-4.9 7.4-4.9h3.2"></path><path d="M13.6 11.4c1.6 0 2.9.7 3.9 2M16.6 16.9h3.8"></path></svg>
+        Masaje al<br data-mtx="e226">finalizar
+      </div>
+    </div>
+
+    <p class="nota" data-mtx="e227">Todos nuestros servicios incluyen black mask, bebida de cortesía, música a tu elección y masaje al finalizar. Si no encuentras algo de la lista, escríbenos por WhatsApp y resolveremos todas tus dudas.</p>
+  </section>
+
+  <!-- ============ TARJETA DE LEALTAD ============
+       Una sola tarjeta para las dos sucursales: la config y la lista de
+       clientes viven en barberstudiomb-quemada (la dueña) y La Morena la
+       comparte — llaves grupo/comparte, prendidas el 28-ago-2026 junto con
+       los avisos por un solo WhatsApp y el mismo Google Calendar para las
+       dos agendas. OJO servidor: quemada lleva copia del `gcal` de morena
+       (mismo refresh token): si una sucursal toca "Desconectar Google",
+       revoca el token y las DESCONECTA A LAS DOS.
+       Sin data-fondo a propósito: nace [hidden] y el resolver de fondos
+       mide rectángulos — un rect en ceros secuestraría la escena. -->
+  <section class="bloque rev" id="secLealtad" data-mtx="e228">
+    <h2 data-mtx="e229">Lealtad</h2>
+    <span class="subt" data-mtx="e230">Una tarjeta · las dos sucursales</span>
+
+    <div class="leal" data-mtx="e231">
+      <span class="leal-donde" data-mtx="e232">La Morena · La Quemada</span>
+      <p class="leal-gancho" data-mtx="e233">Junta <b id="lealMeta" data-mtx="e234">8</b> sellos y obtén tu <b id="lealPremio" data-mtx="e235">corte gratis</b></p>
+      <span class="leal-doble" id="lealDoble" hidden="" data-mtx="e236">Hoy tu sello vale doble</span>
+
+      <div class="leal-sellos muestra" id="lealSellos" data-mtx="e237" style="--cols: 5;"><div class="leal-sello on"><svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="-4.8" cy="5.6" r="3"></circle><circle cx="4.8" cy="5.6" r="3"></circle><path d="M-2.8 3.2 6.2 -9.2M2.8 3.2 -6.2 -9.2"></path></svg></div><div class="leal-sello on"><svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="-4.8" cy="5.6" r="3"></circle><circle cx="4.8" cy="5.6" r="3"></circle><path d="M-2.8 3.2 6.2 -9.2M2.8 3.2 -6.2 -9.2"></path></svg></div><div class="leal-sello"></div><div class="leal-sello"></div><div class="leal-sello"></div><div class="leal-sello"></div><div class="leal-sello"></div><div class="leal-sello"></div></div>
+      <p class="leal-cuenta" id="lealCuenta" data-mtx="e238">Ejemplo · así se te va llenando</p>
+
+      <div id="lealAlta" data-mtx="e239">
+        <button class="leal-btn" id="lealAbrir" type="button" data-mtx="e240">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="9.4" width="17.2" height="11.2" rx="1.8"></rect><path d="M2.6 9.4h18.8v3.4H2.6zM12 9.4v11.2"></path><path d="M12 9.4C10.6 6 9 4.2 7.2 4.2A2.2 2.2 0 0 0 7.2 8.6c1.9 0 3.5.3 4.8.8zM12 9.4c1.4-3.4 3-5.2 4.8-5.2a2.2 2.2 0 0 1 0 4.4c-1.9 0-3.5.3-4.8.8z"></path></svg>
+          Activar mi tarjeta de lealtad
+        </button>
+      </div>
+
+      <div id="lealYa" hidden="" data-mtx="e241">
+        <!-- el cumpleaños se pide DESPUÉS, cuando ya tiene su tarjeta: un dato
+             más en el alta es un cliente menos que la activa -->
+        <button type="button" class="leal-cum-liga" id="lealCumAbrir" hidden="" data-mtx="e242">Regálanos tu cumpleaños y te tenemos un detalle</button>
+        <div class="leal-cum" id="lealCum" hidden="" data-mtx="e243">
+          <input type="text" id="lealCumIn" maxlength="5" inputmode="numeric" placeholder="dd/mm" aria-label="Tu cumpleaños, día y mes" data-mtx="e244">
+          <button type="button" id="lealCumOk" data-mtx="e245">Guardar</button>
+        </div>
+        <button class="leal-wallet" id="lealWallet" hidden="" aria-label="Añadir a Google Wallet" data-mtx="e246">
+          <img src="/img/wallet-boton.svg?v=0cf21c67" alt="Añadir a Google Wallet" width="239" height="55" data-mtx="e247">
+        </button>
+        <p class="leal-fino" id="lealPie" data-mtx="e248"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROMOCIONES ============ -->
+  <section class="bloque rev" id="promociones" data-fondo="3" data-mtx="e249">
+    <h2 data-mtx="e250">Promociones</h2>
+    <span class="subt" data-mtx="e251">Por apertura</span>
+    <p class="ayuda" data-mtx="e252">Los precios de abajo ya son con descuento. Toca la promo y la reservas al momento.</p>
+
+    <div class="promos" data-mtx="e253">
+      <button class="promo con-antes" type="button" data-reserva="Promo Lunes · Corte de cabello" data-precio="180" data-ligado="1" data-mtx="e254">
+        <span class="marco" aria-hidden="true" data-mtx="e255"></span>
+        <span class="dia" data-mtx="e256">Promo Lunes</span>
+        <span class="que" data-mtx="e257">Corte de cabello</span>
+        <span class="promo-precio" data-mtx="e258">$180</span>
+        <span class="pesos" data-mtx="e259">Pesos</span>
+        <span class="antes" aria-hidden="true" data-mtx="e260">
+          <span class="et" data-mtx="e261">Normalmente</span>
+          <span class="v" data-mtx="e262">$220</span>
+        </span>
+        <span class="ver" data-mtx="e263">Reservar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+
+      <button class="promo con-antes" type="button" data-reserva="Promo Martes Barbones · Corte y barba" data-precio="320" data-ligado="1" data-mtx="e264">
+        <span class="marco" aria-hidden="true" data-mtx="e265"></span>
+        <span class="dia" data-mtx="e266">Martes Barbones</span>
+        <span class="que" data-mtx="e267">Corte + Barba</span>
+        <span class="promo-precio" data-mtx="e268">$320</span>
+        <span class="pesos" data-mtx="e269">Pesos</span>
+        <span class="antes" aria-hidden="true" data-mtx="e270">
+          <span class="et" data-mtx="e271">Antes</span>
+          <span class="v" data-mtx="e272">$380</span>
+        </span>
+        <span class="ver" data-mtx="e273">Reservar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+
+      <button class="promo con-antes" type="button" data-reserva="Promo apertura · Corte de cabello" data-precio="150" data-suc="quemada" data-ligado="1" data-mtx="e274">
+        <span class="marco" aria-hidden="true" data-mtx="e275"></span>
+        <span class="solo" data-mtx="e276">Solo en La Quemada</span>
+        <span class="dia" data-mtx="e277">Apertura</span>
+        <span class="que" data-mtx="e278">Corte de cabello</span>
+        <span class="promo-precio" data-mtx="e279">$150</span>
+        <span class="pesos" data-mtx="e280">Pesos</span>
+        <span class="antes" aria-hidden="true" data-mtx="e281">
+          <span class="et" data-mtx="e282">Normalmente</span>
+          <span class="v" data-mtx="e283">$220</span>
+        </span>
+        <span class="ver" data-mtx="e284">Reservar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+
+      <button class="promo con-antes" type="button" data-reserva="Promo apertura · Corte y barba" data-precio="300" data-suc="quemada" data-ligado="1" data-mtx="e285">
+        <span class="marco" aria-hidden="true" data-mtx="e286"></span>
+        <span class="solo" data-mtx="e287">Solo en La Quemada</span>
+        <span class="dia" data-mtx="e288">Apertura</span>
+        <span class="que" data-mtx="e289">Corte y Barba</span>
+        <span class="promo-precio" data-mtx="e290">$300</span>
+        <span class="pesos" data-mtx="e291">Pesos</span>
+        <span class="antes" aria-hidden="true" data-mtx="e292">
+          <span class="et" data-mtx="e293">Antes</span>
+          <span class="v" data-mtx="e294">$380</span>
+        </span>
+        <span class="ver" data-mtx="e295">Reservar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+
+      <!-- la joya del flyer: la membresía. Va en oro y sin círculo de "antes",
+           porque no compite contra un precio anterior sino contra pagar por corte.
+           Hay UNA POR SUCURSAL y cada una cuesta distinto ($700 La Quemada,
+           $800 La Morena): por eso llevan `solo` y `data-suc`, que las manda
+           directo al calendario de su sede sin preguntar. -->
+      <button class="promo membresia" type="button" data-reserva="Membresía mensual · La Quemada" data-precio="700" data-suc="quemada" data-ligado="1" data-mtx="e296">
+        <span class="marco" aria-hidden="true" data-mtx="e297"></span>
+        <span class="solo" data-mtx="e298">Solo en La Quemada</span>
+        <svg class="corona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.4 6.4 17h11.2L21 8.4l-4.6 3.2L12 5.4l-4.4 6.2z"></path><circle cx="3" cy="7" r="1.2"></circle><circle cx="21" cy="7" r="1.2"></circle><circle cx="12" cy="4" r="1.2"></circle><path d="M6.4 19.6h11.2"></path></svg>
+        <span class="dia" data-mtx="e299">Membresía Mensual</span>
+        <span class="que" data-mtx="e300">Todos los cortes que<br data-mtx="e301">necesites al mes</span>
+        <span class="promo-precio dorado" data-mtx="e302">$700</span>
+        <span class="pesos" data-mtx="e303">Pesos al mes</span>
+        <span class="ver" data-mtx="e304">Quiero la membresía
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+
+      <button class="promo membresia" type="button" data-reserva="Membresía mensual · La Morena" data-precio="800" data-suc="morena" data-ligado="1" data-mtx="e305">
+        <span class="marco" aria-hidden="true" data-mtx="e306"></span>
+        <span class="solo" data-mtx="e307">Solo en La Morena</span>
+        <svg class="corona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.4 6.4 17h11.2L21 8.4l-4.6 3.2L12 5.4l-4.4 6.2z"></path><circle cx="3" cy="7" r="1.2"></circle><circle cx="21" cy="7" r="1.2"></circle><circle cx="12" cy="4" r="1.2"></circle><path d="M6.4 19.6h11.2"></path></svg>
+        <span class="dia" data-mtx="e308">Membresía Mensual</span>
+        <span class="que" data-mtx="e309">Todos los cortes que<br data-mtx="e310">necesites al mes</span>
+        <span class="promo-precio dorado" data-mtx="e311">$800</span>
+        <span class="pesos" data-mtx="e312">Pesos al mes</span>
+        <span class="ver" data-mtx="e313">Quiero la membresía
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m12.5 6 6 6-6 6"></path></svg>
+        </span>
+      </button>
+    </div>
+
+    <p class="letra-chica" data-mtx="e314">Consulta términos y condiciones · Promoción intransferible</p>
+  </section>
+
+  <!-- ============ BARBEROS ============ -->
+  <section class="bloque rev" id="barberos" data-fondo="4" data-mtx="e315">
+    <h2 data-mtx="e316">Barberos</h2>
+    <span class="subt" data-mtx="e317">Elige con quién te atiendes</span>
+    <p class="ayuda" data-mtx="e318">Cada uno lleva su propia agenda: elige con quién te atiendes y ves solo sus horas libres.</p>
+
+    <!-- Horneado de respaldo: el equipo de verdad lo pinta el script
+         «EL EQUIPO VIVE EN EL PANEL» con lo que el dueño tiene en cada
+         sucursal. Esto solo se ve si la API no contesta. -->
+    <span class="eq-suc" data-mtx="e319">Sucursal La Quemada</span>
+    <div class="equipo dos" id="eqQuemada" data-mtx="e320"><a class="barbero" href="citas.html?s=barberstudiomb-quemada&amp;b=carlos" data-mtx="e321"><img class="foto" src="/eq/barberstudiomb-quemada-carlos.jpg?v=1790716677" alt="Carlos" width="500" height="500" loading="lazy" data-mtx="e322"><span class="n" data-mtx="e323">Carlos</span><span class="ag" data-mtx="e324">Agendar</span></a><a class="barbero" href="citas.html?s=barberstudiomb-quemada&amp;b=eq" data-mtx="e325"><img class="foto" src="/eq/barberstudiomb-quemada-eq.jpg?v=1790716729" alt="Sebas aprendis" width="500" height="500" loading="lazy" data-mtx="e326"><span class="n" data-mtx="e327">Sebas aprendis</span><span class="ag" data-mtx="e328">Agendar</span></a></div>
+
+    <span class="eq-suc" data-mtx="e329">Sucursal La Morena</span>
+    <div class="equipo" id="eqMorena" data-mtx="e330"><a class="barbero" href="citas.html?s=barberstudiomb-morena&amp;b=mario" data-mtx="e331"><img class="foto" src="/eq/barberstudiomb-morena-mario.jpg?v=1790715895" alt="Mario" width="500" height="500" loading="lazy" data-mtx="e332"><span class="n" data-mtx="e333">Mario</span><span class="ag" data-mtx="e334">Agendar</span></a><a class="barbero" href="citas.html?s=barberstudiomb-morena&amp;b=david" data-mtx="e335"><img class="foto" src="/eq/barberstudiomb-morena-david.jpg?v=1790716243" alt="David" width="500" height="500" loading="lazy" data-mtx="e336"><span class="n" data-mtx="e337">David</span><span class="ag" data-mtx="e338">Agendar</span></a><a class="barbero" href="citas.html?s=barberstudiomb-morena&amp;b=brandon" data-mtx="e339"><img class="foto" src="/eq/barberstudiomb-morena-brandon.jpg?v=1790715870" alt="Brandon" width="500" height="500" loading="lazy" data-mtx="e340"><span class="n" data-mtx="e341">Brandon</span><span class="ag" data-mtx="e342">Agendar</span></a></div>
+  </section>
+
+  <!-- ============ SUCURSALES ============ -->
+  <section class="bloque rev" id="sucursales" data-fondo="5" data-mtx="e343">
+    <h2 data-mtx="e344">Sucursales</h2>
+    <span class="subt" data-mtx="e345">Narvarte Oriente · CDMX</span>
+
+    <!-- cada sucursal con SU horario: no cierran a la misma hora -->
+    <div class="sucs" data-mtx="e346">
+      <div class="sede" data-mtx="e347">
+        <a class="suc" href="https://maps.app.goo.gl/h2pvvNUWdeTBtkqZA" target="_blank" rel="noopener" data-mtx="e348">
+          <span class="ico" data-mtx="e349"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"></path></svg></span>
+          <span class="d" data-mtx="e350"><strong data-mtx="e351">La Morena</strong><small data-mtx="e352">La Morena 1556 · Narvarte Oriente<br data-mtx="e353">Barber Studio MB &amp; Spa</small></span>
+          <span class="chev" data-mtx="e354">›</span>
+        </a>
+        <div class="horario" data-mtx="e355">
+          <b class="rot" data-mtx="e356"></b><span class="v rot" data-mtx="e357">Primera cita</span><span class="v rot" data-mtx="e358">Última cita</span>
+          <b data-mtx="e359">Lunes a viernes</b><span class="v" data-mtx="e360">11:00</span><span class="v" data-mtx="e361">20:30</span>
+          <b data-mtx="e362">Sábados</b><span class="v" data-mtx="e363">11:00</span><span class="v" data-mtx="e364">18:00</span>
+          <b data-mtx="e365">Domingos</b><span class="v cerrado" data-mtx="e366">Cerrado</span>
+        </div>
+      </div>
+
+      <div class="sede" data-mtx="e367">
+        <a class="suc" href="https://maps.app.goo.gl/F4Yp9HGhQx8s5nm98" target="_blank" rel="noopener" data-mtx="e368">
+          <span class="ico" data-mtx="e369"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"></path></svg></span>
+          <span class="d" data-mtx="e370"><strong data-mtx="e371">La Quemada</strong><small data-mtx="e372">La Quemada 143 · Narvarte Oriente<br data-mtx="e373">Barber Studio MB La Quemada</small></span>
+          <span class="chev" data-mtx="e374">›</span>
+        </a>
+        <div class="horario" data-mtx="e375">
+          <b class="rot" data-mtx="e376"></b><span class="v rot" data-mtx="e377">Primera cita</span><span class="v rot" data-mtx="e378">Última cita</span>
+          <b data-mtx="e379">Lunes a viernes</b><span class="v" data-mtx="e380">11:00</span><span class="v" data-mtx="e381">18:30</span>
+          <b data-mtx="e382">Sábados</b><span class="v" data-mtx="e383">10:00</span><span class="v" data-mtx="e384">16:30</span>
+          <b data-mtx="e385">Domingos</b><span class="v cerrado" data-mtx="e386">Cerrado</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CIERRE ============ -->
+  <footer class="cierre rev" data-mtx="e387">
+    <a class="tel" href="tel:+525581066554" data-mtx="e388">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"></path></svg>
+      55 8106 6554
+    </a>
+    <span class="dir" data-mtx="e389"><b data-mtx="e390">Barber Studio MB</b><br data-mtx="e391">La Morena 1556 · La Quemada 143<br data-mtx="e392">Narvarte Oriente, Benito Juárez, CDMX</span>
+    <p class="firma" data-mtx="e393">The Gentleman's House</p>
+    <div class="mini" data-mtx="e394">
+      <button id="btnShare" type="button" data-mtx="e395">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"></path></svg>
+        Compartir
+      </button>
+      <a id="btnVcf" download="Barber_Studio_MB.vcf" href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AFN%3ABarber%20Studio%20MB%0AORG%3ABarber%20Studio%20MB%20%C2%B7%20The%20Gentleman's%20House%0ATEL%3BTYPE%3DCELL%3A%2B525581066554%0AADR%3BTYPE%3DWORK%3A%3B%3BLa%20Quemada%20143%2C%20Narvarte%20Oriente%3BCiudad%20de%20M%C3%A9xico%3BCDMX%3B03020%3BM%C3%A9xico%0AURL%3Ahttps%3A%2F%2Fmitarjeta.mx%2Fbarberstudiomb%0AEND%3AVCARD" data-mtx="e396">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"></path></svg>
+        Guardar contacto
+      </a>
+    </div>
+    <p class="madeby" data-mtx="e397">Tarjeta Digital · <a href="https://mitarjeta.mx" data-mtx="e398">mitarjeta.mx</a></p>
+  </footer>
+</main>
+
+<div class="flota" id="flota" data-mtx="e399">
+  <button type="button" data-reserva="" data-ligado="1" data-mtx="e400">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"></path></svg>
+    Agendar cita
+  </button>
+</div>
+
+<!-- ============ ELEGIR SUCURSAL ANTES DE RESERVAR ============ -->
+<dialog class="suc-dlg" id="dlgSuc" closedby="any" aria-label="Elige la sucursal" data-mtx="e401">
+  <div class="dlg-caja" data-mtx="e402">
+    <h3 data-mtx="e403">¿En qué sucursal?</h3>
+    <p class="que" id="dlgQue" data-mtx="e404">Elige el lugar y enseguida ves a los barberos disponibles.</p>
+    <div class="dlg-ops" data-mtx="e405">
+      <a id="opMorena" href="citas.html?s=barberstudiomb-morena" data-mtx="e406">
+        <span class="num" data-mtx="e407">1</span>
+        <span class="n" data-mtx="e408"><strong data-mtx="e409">La Morena</strong><small id="dlgNomMorena" data-mtx="e410">La Morena 1556 · Mario, David y Brandon</small></span>
+        <span class="chev" style="color:var(--oro)" data-mtx="e411">›</span>
+      </a>
+      <a id="opQuemada" href="citas.html?s=barberstudiomb-quemada" data-mtx="e412">
+        <span class="num" data-mtx="e413">2</span>
+        <span class="n" data-mtx="e414"><strong data-mtx="e415">La Quemada</strong><small id="dlgNomQuemada" data-mtx="e416">La Quemada 143 · Carlos y Sebas aprendis</small></span>
+        <span class="chev" style="color:var(--oro)" data-mtx="e417">›</span>
+      </a>
+      <!-- salida para quien no sabe cuál le queda o no encuentra hora libre:
+           contestan por las dos y lo acomodan -->
+      <a id="opWa" href="https://wa.me/525581066554" target="_blank" rel="noopener" data-mtx="e418">
+        <span class="num" data-mtx="e419"><svg viewBox="0 0 16 16" fill="currentColor" width="15" height="15"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"></path></svg></span>
+        <span class="n" data-mtx="e420"><strong data-mtx="e421">No sé cuál</strong><small data-mtx="e422">Escríbenos y te acomodamos · 55 8106 6554</small></span>
+        <span class="chev" style="color:var(--oro)" data-mtx="e423">›</span>
+      </a>
+    </div>
+    <button class="dlg-cerrar" type="button" id="dlgCerrar" data-mtx="e424">Cancelar</button>
+  </div>
+</dialog>
+
+<dialog class="suc-dlg" id="dlgUbi" closedby="any" aria-label="Elige la sucursal" data-mtx="e425">
+  <div class="dlg-caja" data-mtx="e426">
+    <h3 data-mtx="e427">Sucursales</h3>
+    <p class="que" data-mtx="e428">Narvarte Oriente, Benito Juárez · CDMX</p>
+    <div class="dlg-ops" data-mtx="e429">
+      <a href="https://maps.app.goo.gl/h2pvvNUWdeTBtkqZA" target="_blank" rel="noopener" data-mtx="e430">
+        <span class="num" data-mtx="e431"><svg viewBox="0 0 16 16" fill="currentColor" width="15" height="15"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"></path></svg></span>
+        <span class="n" data-mtx="e432"><strong data-mtx="e433">La Morena</strong><small data-mtx="e434">La Morena 1556 · Ver cómo llegar</small></span>
+        <span class="chev" style="color:var(--oro)" data-mtx="e435">›</span>
+      </a>
+      <a href="https://maps.app.goo.gl/F4Yp9HGhQx8s5nm98" target="_blank" rel="noopener" data-mtx="e436">
+        <span class="num" data-mtx="e437"><svg viewBox="0 0 16 16" fill="currentColor" width="15" height="15"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"></path></svg></span>
+        <span class="n" data-mtx="e438"><strong data-mtx="e439">La Quemada</strong><small data-mtx="e440">La Quemada 143 · Ver cómo llegar</small></span>
+        <span class="chev" style="color:var(--oro)" data-mtx="e441">›</span>
+      </a>
+    </div>
+    <button class="dlg-cerrar" type="button" id="ubiCerrar" data-mtx="e442">Cerrar</button>
+  </div>
+</dialog>
+
+<!-- el popup del alta de la tarjeta de lealtad -->
+<div class="leal-velo" id="lealVelo" hidden="" data-mtx="e443">
+  <div class="leal-pop" role="dialog" aria-modal="true" aria-labelledby="lealPopTit" data-mtx="e444">
+    <button class="leal-x" id="lealCerrar" type="button" aria-label="Cerrar" data-mtx="e445">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"></path></svg>
+    </button>
+    <span class="leal-regalo" aria-hidden="true" data-mtx="e446">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="9.4" width="17.2" height="11.2" rx="1.8"></rect><path d="M2.6 9.4h18.8v3.4H2.6zM12 9.4v11.2"></path><path d="M12 9.4C10.6 6 9 4.2 7.2 4.2A2.2 2.2 0 0 0 7.2 8.6c1.9 0 3.5.3 4.8.8zM12 9.4c1.4-3.4 3-5.2 4.8-5.2a2.2 2.2 0 0 1 0 4.4c-1.9 0-3.5.3-4.8.8z"></path></svg>
+    </span>
+    <p class="leal-pop-tit" id="lealPopTit" data-mtx="e447">Tu tarjeta de lealtad</p>
+    <p class="leal-pop-sub" id="lealPopSub" data-mtx="e448">Junta 8 sellos y obtén tu corte gratis · vale en las dos sucursales</p>
+
+    <p class="leal-err" id="lealErr" data-mtx="e449"></p>
+    <input type="text" id="lealN" maxlength="40" autocomplete="given-name" placeholder="Tu nombre" data-mtx="e450">
+    <input type="tel" id="lealW" maxlength="18" inputmode="numeric" autocomplete="tel" placeholder="Tu WhatsApp" data-mtx="e451">
+    <input type="text" id="lealC" maxlength="5" inputmode="numeric" placeholder="Tu cumpleaños dd/mm (opcional)" hidden="" data-mtx="e452">
+
+    <button class="leal-wallet" id="lealAdd" aria-label="Añadir a Google Wallet" data-mtx="e453" hidden="">
+      <img src="/img/wallet-boton.svg?v=0cf21c67" alt="Añadir a Google Wallet" width="239" height="55" data-mtx="e454">
+    </button>
+    <button class="leal-btn" id="lealAddSimple" type="button" data-mtx="e455">Activar mi tarjeta</button>
+    <p class="leal-fino" data-mtx="e456">Solo lo usamos para avisarte cuando tengas tu premio.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  // solo si este script corre se esconde el contenido para revelarlo al scroll:
+  // si algo fallara, la tarjeta se ve completa igual
+  document.documentElement.classList.add("js");
+
+  // DEMO: en true sale con marca de agua. Cuando paguen → false y ./deploy.sh
+  const DEMO = false;
+  document.documentElement.dataset.demo = DEMO ? "1" : "";
+
+  const URL_TARJETA = "https://mitarjeta.mx/barberstudiomb";
+  const SUC_MORENA  = "citas.html?s=barberstudiomb-morena";
+  const SUC_QUEMADA = "citas.html?s=barberstudiomb-quemada";
+
+  const vcf = "BEGIN:VCARD\nVERSION:3.0\nFN:Barber Studio MB\nORG:Barber Studio MB · The Gentleman's House\nTEL;TYPE=CELL:+525581066554\nADR;TYPE=WORK:;;La Quemada 143, Narvarte Oriente;Ciudad de México;CDMX;03020;México\nURL:"+URL_TARJETA+"\nEND:VCARD";
+  document.getElementById("btnVcf").href = "data:text/vcard;charset=utf-8,"+encodeURIComponent(vcf);
+
+  document.getElementById("btnShare").addEventListener("click", async ()=>{
+    try{
+      if(navigator.share){ await navigator.share({title:"Barber Studio MB · The Gentleman's House", url:URL_TARJETA}); return; }
+    }catch(e){ return; }
+    try{ await navigator.clipboard.writeText(URL_TARJETA); alert("¡Link copiado!"); }
+    catch(e){ prompt("Copia el link:", URL_TARJETA); }
+  });
+
+  /* ============================================================
+     RESERVAR: primero la sucursal, luego el calendario de ESA
+     sucursal (ahí se listan sus barberos). El servicio elegido
+     viaja en ?sv= para que llegue escrito en el WhatsApp.
+     ============================================================ */
+  const dlg = document.getElementById("dlgSuc");
+  const que = document.getElementById("dlgQue");
+  const opMorena = document.getElementById("opMorena");
+  const opQuemada = document.getElementById("opQuemada");
+
+  /* Con `data-suc` el botón ya sabe a qué sucursal va (las promos de apertura
+     son solo de La Quemada): en ese caso no se pregunta nada y se va directo
+     a su calendario. Sin `data-suc`, primero se elige el lugar. */
+  const SEDES = {morena: SUC_MORENA, quemada: SUC_QUEMADA};
+
+  function abrirSucursal(servicio, precio, sede){
+    const sv = servicio ? "&sv=" + encodeURIComponent(servicio + "~" + (precio||0)) : "";
+    if(sede && SEDES[sede]){ location.href = SEDES[sede] + sv; return; }
+    opMorena.href  = SUC_MORENA  + sv;
+    opQuemada.href = SUC_QUEMADA + sv;
+    que.textContent = servicio
+      ? "Vas a reservar " + servicio + ". Elige el lugar y enseguida ves a los barberos disponibles."
+      : "Elige el lugar y enseguida ves a los barberos disponibles.";
+    dlg.showModal();
+  }
+
+  // se vuelve a llamar sobre lo que se repinta desde el panel
+  function ligaReservas(raiz){
+    (raiz || document).querySelectorAll("[data-reserva]").forEach(b=>{
+      if(b.dataset.ligado) return;
+      b.dataset.ligado = "1";
+      b.addEventListener("click", ()=> abrirSucursal(b.dataset.reserva || "", b.dataset.precio, b.dataset.suc));
+    });
+  }
+  ligaReservas();
+
+  document.getElementById("dlgCerrar").addEventListener("click", ()=> dlg.close());
+  // Safari aún no soporta closedby: se cierra tocando fuera de la caja
+  dlg.addEventListener("click", e=>{
+    const c = dlg.getBoundingClientRect();
+    if(e.clientX < c.left || e.clientX > c.right || e.clientY < c.top || e.clientY > c.bottom) dlg.close();
+  });
+
+  // el botón de Cómo llegar abre la misma hoja, pero rumbo a Maps
+  const dlgUbi = document.getElementById("dlgUbi");
+  document.getElementById("btnUbi").addEventListener("click", ()=> dlgUbi.showModal());
+  document.getElementById("ubiCerrar").addEventListener("click", ()=> dlgUbi.close());
+  dlgUbi.addEventListener("click", e=>{
+    const c = dlgUbi.getBoundingClientRect();
+    if(e.clientX < c.left || e.clientX > c.right || e.clientY < c.top || e.clientY > c.bottom) dlgUbi.close();
+  });
+  // al tocar una sucursal la hoja se cierra sola, para que al volver de Maps
+  // no se encuentren el diálogo abierto encima de la tarjeta
+  dlgUbi.querySelectorAll(".dlg-ops a").forEach(a=> a.addEventListener("click", ()=> dlgUbi.close()));
+
+  /* ============================================================
+     PIEZAS EDITABLES  ·  copia idéntica en la tarjeta y en el panel
+     Si se cambia aquí, se cambia en los dos lados o los parches
+     dejan de encontrar su elemento.
+
+     Recorre la página en orden y le pone nombre a cada pedazo:
+       · cada texto suelto   -> t<n>-<firma>
+       · cada imagen         -> i<n>-<firma>
+       · cada elemento       -> e<n>          (para orden y botones nuevos)
+     La firma son 4 caracteres sacados del contenido ORIGINAL. Sirve de
+     seguro: si Adrian reescribe la tarjeta, el parche viejo ya no
+     coincide y simplemente no se aplica, en vez de aplicarse al
+     elemento equivocado.
+     ============================================================ */
+  /* ============================================================
+     ICONOS PARA LOS BOTONES QUE AGREGA EL DUEÑO
+     Copia idéntica en la tarjeta y en el panel (allá solo los nombres).
+     Son los MISMOS que ya usa la tarjeta más unos de línea, para que un
+     botón nuevo no se note nuevo. El dueño elige por nombre; el dibujo
+     sale de aquí y nunca de lo que él escriba.
+     ============================================================ */
+  const MTX_ICONOS = {
+    whatsapp: "<path d=\"M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232\"/>",
+    instagram: "<rect x=\"2.1\" y=\"2.1\" width=\"11.8\" height=\"11.8\" rx=\"3.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"8\" cy=\"8\" r=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"11.7\" cy=\"4.3\" r=\".95\"/>",
+    facebook: "<path d=\"M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951\"/>",
+    tiktok: "<path d=\"M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z\"/>",
+    telefono: "<path fill-rule=\"evenodd\" d=\"M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z\"/>",
+    correo: "<rect x=\"1.6\" y=\"3.4\" width=\"12.8\" height=\"9.2\" rx=\"1.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><path d=\"m2.4 4.8 5.6 4 5.6-4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
+    mapa: "<path d=\"M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6\"/>",
+    web: "<circle cx=\"8\" cy=\"8\" r=\"6.3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><ellipse cx=\"8\" cy=\"8\" rx=\"2.6\" ry=\"6.3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><path d=\"M1.9 5.8h12.2M1.9 10.2h12.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/>",
+    reloj: "<circle cx=\"8\" cy=\"8\" r=\"6.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\"/><path d=\"M8 4.2V8l2.6 1.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>",
+    estrella: "<path d=\"M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.3\" stroke-linejoin=\"round\"/>"
+  };
+
+  // A dónde puede apuntar un botón. Sin "javascript:" ni nada raro: esto lo
+  // escribe el dueño en su panel y lo toca su cliente en su teléfono.
+  function mtxUrlOk(u){
+    return /^(https?:\/\/|tel:|mailto:|\/)/i.test(String(u || "").trim());
+  }
+
+  function mtxFirma(s){
+    let h = 5381;
+    s = String(s || "").trim().replace(/\s+/g, " ");
+    for(let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+    return h.toString(36).slice(-4);
+  }
+
+  function mtxPiezas(doc){
+    const fuera = {SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, SVG:1, HEAD:1};
+    const out = [];
+    let nt = 0, ni = 0, ne = 0, nh = 0;
+    (function anda(nodo){
+      for(const hijo of Array.prototype.slice.call(nodo.childNodes)){
+        if(hijo.nodeType === 3){
+          const t = String(hijo.nodeValue || "").trim();
+          if(t) out.push({tipo:"texto", nodo:hijo, padre:nodo, clave:"t" + (nt++) + "-" + mtxFirma(t)});
+          continue;
+        }
+        if(hijo.nodeType !== 1) continue;
+        const tag = String(hijo.tagName || "").toUpperCase();
+        if(fuera[tag]) continue;
+        hijo.setAttribute("data-mtx", "e" + (ne++));
+        if(tag === "IMG"){
+          out.push({tipo:"img", nodo:hijo, clave:"i" + (ni++) + "-" + mtxFirma(hijo.getAttribute("src") || "")});
+          continue;
+        }
+        /* A DÓNDE lleva cada botón. Cuenta aparte (h0, h1…) para no correr la
+           numeración de los textos: los parches que el dueño ya guardó tienen
+           que seguir encontrando su elemento. Y se sigue caminando hacia
+           adentro — la liga es del <a>, pero su texto es de sus hijos. */
+        if(tag === "A" && hijo.getAttribute("href")){
+          out.push({tipo:"liga", nodo:hijo,
+                    clave:"h" + (nh++) + "-" + mtxFirma(hijo.getAttribute("href"))});
+        }
+        anda(hijo);
+      }
+    })(doc.body);
+    return out;
+  }
+
+  /* Aplica lo que el dueño cambió desde su panel. Tres clases de parche:
+       t…/i…      texto e imágenes
+       ord-e<n>   el orden de los botones dentro de ese elemento
+       add-e<n>   botones que agregó ("texto|liga;;texto|liga")
+     Nunca innerHTML con lo que escribió el cliente. */
+  function mtxAplica(doc, edit){
+    // Se enumera SIEMPRE y se deja a la vista en `window.__mtxPiezas`: el
+    // editor del panel necesita los nombres ORIGINALES, y si los recalculara
+    // después de aplicar los parches sacaría otra firma y guardaría parches
+    // que ya no encuentran a nadie.
+    const piezas = mtxPiezas(doc);
+    try{ doc.defaultView.__mtxPiezas = piezas; }catch(e){}
+    if(!edit || typeof edit !== "object") return;
+    piezas.forEach(function(p){
+      const v = edit[p.clave];
+      if(typeof v !== "string" || !v) return;
+      if(p.tipo === "img") p.nodo.setAttribute("src", v);
+      else if(p.tipo === "liga"){ if(mtxUrlOk(v)) p.nodo.setAttribute("href", v); }
+      else p.nodo.nodeValue = v;
+    });
+    Object.keys(edit).forEach(function(k){
+      const m = /^(ord|add)-(e\d+)$/.exec(k);
+      if(!m) return;
+      const cont = doc.querySelector('[data-mtx="' + m[2] + '"]');
+      if(!cont) return;
+      if(m[1] === "ord") mtxOrdena(cont, edit[k]);
+      else mtxAgrega(cont, edit[k]);
+    });
+  }
+
+  function mtxBotones(cont){
+    return Array.prototype.slice.call(cont.children).filter(function(x){
+      return /^(A|BUTTON)$/.test(x.tagName) && !x.hasAttribute("data-mtx-nuevo");
+    });
+  }
+
+  function mtxOrdena(cont, orden){
+    const bs = mtxBotones(cont);
+    const pos = String(orden).split(",").map(Number).filter(function(n){
+      return Number.isInteger(n) && n >= 0 && n < bs.length;
+    });
+    if(pos.length !== bs.length) return;          // el orden es de otra versión
+    pos.forEach(function(i){ cont.appendChild(bs[i]); });
+  }
+
+  function mtxAgrega(cont, lista){
+    const molde = mtxBotones(cont).slice(-1)[0];
+    String(lista).split(";;").slice(0, 6).forEach(function(par){
+      const p = String(par).split("|");
+      const txt = (p[0] || "").trim();
+      const url = (p[1] || "").trim();
+      const ico = (p[2] || "").trim();
+      const sub = (p[3] || "").trim();
+      if(!txt) return;
+      let a;
+      if(molde){
+        a = molde.cloneNode(true);
+        a.removeAttribute("data-mtx");            // los nombres de pieza son del molde
+        a.querySelectorAll("[data-mtx]").forEach(function(x){ x.removeAttribute("data-mtx"); });
+        const t = a.querySelector("strong");
+        if(t) t.textContent = txt; else a.textContent = txt;   // textContent, nunca innerHTML
+        const s2 = a.querySelector("small");
+        if(s2){
+          if(sub) s2.textContent = sub;
+          else s2.remove();                       // sin segunda línea, no se deja el hueco
+        }
+        const svg = a.querySelector("svg");
+        if(svg && MTX_ICONOS[ico]){
+          // se le imponen las señas del catálogo: si el molde de esta tarjeta
+          // dibuja con línea y no con relleno, el icono saldría invisible
+          svg.setAttribute("viewBox", "0 0 16 16");
+          svg.setAttribute("fill", "currentColor");
+          svg.removeAttribute("stroke");
+          svg.removeAttribute("stroke-width");
+          svg.innerHTML = MTX_ICONOS[ico];        // del catálogo de arriba, jamás del cliente
+        }
+        a.removeAttribute("href");
+      }else{
+        a = document.createElement("a");
+        a.textContent = txt;
+      }
+      if(mtxUrlOk(url)) a.setAttribute("href", url);
+      a.setAttribute("data-mtx-nuevo", "1");
+      cont.appendChild(a);
+    });
+  }
+
+  /* ============================================================
+     EL EQUIPO VIVE EN EL PANEL (30-sep)
+     El dueño da de alta, quita y cambia la foto de sus barberos en el
+     panel de cada sucursal; aquí se pintan tal cual. La API pública ya
+     no trae a quien no agenda (recepción), así que solo sale quien toma
+     citas. Si la API falla, se queda el horneado de arriba.
+     ============================================================ */
+  (function(){
+    const SUCS = [
+      {slug:"barberstudiomb-quemada", caja:"eqQuemada", nom:"dlgNomQuemada", dir:"La Quemada 143"},
+      {slug:"barberstudiomb-morena",  caja:"eqMorena",  nom:"dlgNomMorena",  dir:"La Morena 1556"}
+    ];
+    function juntaNombres(ns){
+      if(ns.length < 2) return ns.join("");
+      return ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1];
+    }
+    SUCS.forEach(async function(s){
+      const caja = document.getElementById(s.caja);
+      if(!caja) return;
+      let d;
+      try{
+        const r = await fetch("/api/agenda/" + s.slug, {cache:"no-store"});
+        if(!r.ok) return;
+        d = await r.json();
+      }catch(e){ return; }
+      const gente = (Array.isArray(d.barberos) ? d.barberos : [])
+        .filter(function(b){ return b && b.id && b.n && !b.pausa; });
+      if(!gente.length) return;
+      const frag = document.createDocumentFragment();
+      gente.forEach(function(b){
+        const a = document.createElement("a");
+        a.className = "barbero";
+        a.href = "citas.html?s=" + encodeURIComponent(s.slug) + "&b=" + encodeURIComponent(b.id);
+        if(b.foto && /^\/(eq|img)\//.test(b.foto)){
+          const im = document.createElement("img");
+          im.className = "foto";
+          im.src = b.foto;
+          im.alt = b.n;
+          im.width = 500; im.height = 500;
+          im.loading = "lazy";
+          a.appendChild(im);
+        }else{
+          const ini = document.createElement("span");
+          ini.className = "foto ini";
+          ini.textContent = String(b.n).trim().charAt(0).toUpperCase();
+          a.appendChild(ini);
+        }
+        const n = document.createElement("span");
+        n.className = "n";
+        n.textContent = b.n;
+        a.appendChild(n);
+        const ag = document.createElement("span");
+        ag.className = "ag";
+        ag.textContent = "Agendar";
+        a.appendChild(ag);
+        frag.appendChild(a);
+      });
+      caja.textContent = "";
+      caja.appendChild(frag);
+      caja.className = "equipo" + (gente.length === 1 ? " uno" : gente.length === 2 ? " dos" : "");
+      const nom = document.getElementById(s.nom);
+      if(nom) nom.textContent = s.dir + " · " + juntaNombres(gente.map(function(b){ return b.n; }));
+    });
+  })();
+
+  /* ============================================================
+     LA CARTA VIVE EN LA CONFIG, NO EN ESTE ARCHIVO
+     Los servicios se pintan con lo que hay en
+     /api/agenda/barberstudiomb-quemada, que es justo lo que el cliente
+     edita en su panel. La Quemada guarda la única copia: las dos
+     sucursales cobran lo mismo, así que no puede haber dos cartas.
+     Va DESPUÉS de que la página ya se vio: si la API tarda o falla, se
+     queda la carta escrita a mano de arriba —que dice lo mismo— y la
+     tarjeta nunca se ve vacía.
+     ============================================================ */
+  (async function(){
+    const caja = document.getElementById("carta");
+    if(!caja) return;
+    let d;
+    try{
+      const r = await fetch("/api/agenda/barberstudiomb-quemada", {cache:"no-store"});
+      if(!r.ok) return;
+      d = await r.json();
+    }catch(e){ return; }
+    mtxAplica(document, d.edit);
+    if(!Array.isArray(d.servicios) || !d.servicios.length) return;
+
+    const frag = document.createDocumentFragment();
+    d.servicios.forEach(s=>{
+      if(!s || !s.t) return;
+      const b = document.createElement("button");
+      b.className = "linea";
+      b.type = "button";
+      b.dataset.reserva = s.t;
+      b.dataset.precio = String(s.p || "").replace(/\D/g, "") || "0";
+
+      // el icono se hereda del renglón que tenía ese mismo nombre en el HTML,
+      // para que la carta editada no se quede sin los iconos de su menú
+      const ic = document.createElement("span");
+      ic.className = "ic";
+      const viejo = Array.prototype.slice.call(caja.querySelectorAll(".linea")).find(function(x){
+        return (x.dataset.reserva || "").toLowerCase() === String(s.t).toLowerCase();
+      });
+      const svgViejo = viejo && viejo.querySelector(".ic svg");
+      if(svgViejo) ic.appendChild(svgViejo.cloneNode(true));
+      b.appendChild(ic);
+
+      const n = document.createElement("span");
+      n.className = "n";
+      const fuerte = document.createElement("strong");
+      fuerte.textContent = s.t;                    // textContent: nunca innerHTML con datos del cliente
+      n.appendChild(fuerte);
+      const primerItem = (s.items || []).filter(Boolean)[0];
+      if(primerItem){
+        const small = document.createElement("small");
+        small.textContent = primerItem;
+        n.appendChild(small);
+      }
+      b.appendChild(n);
+
+      const guion = document.createElement("span");
+      guion.className = "guion";
+      guion.setAttribute("aria-hidden", "true");
+      b.appendChild(guion);
+
+      const p = document.createElement("span");
+      p.className = "p";
+      p.textContent = s.p || "";
+      b.appendChild(p);
+
+      const mas = document.createElement("span");
+      mas.className = "mas";
+      mas.setAttribute("aria-hidden", "true");
+      mas.textContent = "›";
+      b.appendChild(mas);
+
+      frag.appendChild(b);
+    });
+    if(!frag.childNodes.length) return;
+    caja.textContent = "";
+    caja.appendChild(frag);
+    ligaReservas(caja);
+  })();
+
+  /* ============================================================
+     SCROLL: la pieza de fondo que toca, parallax, progreso y botón
+     flotante. Todo en un solo rAF.
+     ============================================================ */
+  const raiz = document.documentElement;
+  const flota = document.getElementById("flota");
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let tick = false, hero = 520;
+
+  /* Gana la sección que cruza el centro de la pantalla; si ninguna lo
+     cruza (entre dos bloques), la más cercana. Sin esa preferencia, al
+     ir rápido el fondo parpadea entre dos piezas. */
+  const marcas = {};
+  document.querySelectorAll(".esc").forEach(m => marcas[m.dataset.marca] = m);
+  const marcados = Array.prototype.slice.call(document.querySelectorAll("[data-fondo]"));
+  let marcaActual = "1";
+  function resolverFondo(){
+    if(!marcados.length) return;
+    const centro = window.innerHeight / 2;
+    let elegido = marcados[0], mejor = Infinity;
+    marcados.forEach(el=>{
+      const r = el.getBoundingClientRect();
+      const cubre = r.top <= centro && r.bottom >= centro;
+      const d = Math.abs(r.top + r.height/2 - centro);
+      const peso = cubre ? d - 1e6 : d;   // la que cruza el centro manda
+      if(peso < mejor){ mejor = peso; elegido = el; }
+    });
+    const n = elegido.dataset.fondo;
+    if(n === marcaActual) return;
+    marcaActual = n;
+    for(const k in marcas) marcas[k].classList.toggle("on", k === n);
+  }
+
+  function alScroll(){
+    const y = window.scrollY || window.pageYOffset || 0;
+    if(suave) raiz.style.setProperty("--sy", y);
+    const alto = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    raiz.style.setProperty("--prog", Math.min(1, y / alto).toFixed(4));
+    flota.classList.toggle("on", y > hero && (alto - y) > 220);
+    tick = false;
+  }
+  function pedir(){
+    resolverFondo();
+    if(!tick){ tick = true; requestAnimationFrame(alScroll); }
+  }
+  window.addEventListener("scroll", pedir, {passive:true});
+  window.addEventListener("resize", ()=>{
+    const cta = document.querySelector(".cta");
+    hero = cta ? cta.getBoundingClientRect().top + window.scrollY : 520;
+    pedir();
+  });
+
+  /* ---- revelado al entrar (mejora progresiva) ---- */
+  const piezas = Array.prototype.slice.call(document.querySelectorAll(".rev"));
+  if("IntersectionObserver" in window){
+    const obs = new IntersectionObserver(es=>{
+      es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add("vis"); });
+    }, {rootMargin:"0px 0px -8% 0px", threshold:.06});
+    piezas.forEach((el,i)=>{
+      if(i < 5) el.style.transitionDelay = (0.06 + i*0.1) + "s";
+      obs.observe(el);
+    });
+  } else {
+    piezas.forEach(el => el.classList.add("vis"));
+  }
+  // red de seguridad: pase lo que pase, a los 2.5 s todo está visible
+  setTimeout(()=> piezas.forEach(el => el.classList.add("vis")), 2500);
+
+  requestAnimationFrame(()=>{
+    const cta = document.querySelector(".cta");
+    hero = cta ? cta.getBoundingClientRect().top + window.scrollY : 520;
+    alScroll();
+  });
+})();
+</script>
+
+<script>
+/* ---------------- tarjeta de lealtad ----------------
+   Misma maquinaria que foro-barber. El slug es el de LA DUEÑA de los
+   sellos (barberstudiomb-quemada): la API contesta la misma tarjeta por
+   cualquiera de las dos sucursales, pero anclarse a la dueña deja la
+   llave de localStorage estable aunque el compartir se reacomode.
+   La sección arranca oculta y solo se enseña si la API confirma que el
+   negocio tiene sellos encendidos. Si la API no contesta, la tarjeta se
+   ve igual que siempre: nunca se enseña una promesa que no se pueda
+   cumplir. */
+(function lealtad(){
+  const SLUG = "barberstudiomb-quemada";
+  const LLAVE = "mtx-sellos-" + SLUG;
+  const $ = id => document.getElementById(id);
+  const ES_ANDROID = /android/i.test(navigator.userAgent);
+  const ES_IPHONE = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let CFG = null, YO = null;
+
+  // las mismas tijeras que dibuja el panel en la franja del pase (dsIcono
+  // "tijeras", calcadas a SVG): el sello se ve igual aquí y en la cartera
+  const TIJERAS = '<svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="-4.8" cy="5.6" r="3"/><circle cx="4.8" cy="5.6" r="3"/><path d="M-2.8 3.2 6.2 -9.2M2.8 3.2 -6.2 -9.2"/></svg>';
+
+  function guardado(){
+    try{ const v = JSON.parse(localStorage.getItem(LLAVE) || "null");
+         return (v && v.id && v.tk) ? v : null; }catch(e){ return null; }
+  }
+
+  async function api(cuerpo){
+    const r = await fetch("/api/fidelidad/" + SLUG, {
+      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(cuerpo)
+    });
+    return {ok:r.ok, data: await r.json().catch(()=>({}))};
+  }
+
+  // `muestra` = los sellos son de ejemplo (todavía no tiene tarjeta): se pintan
+  // atenuados para que no se confundan con los suyos
+  function pintarSellos(s, meta, recien, muestra){
+    const c = $("lealSellos");
+    c.textContent = "";
+    c.style.setProperty("--cols", Math.min(meta, 5));
+    c.classList.toggle("muestra", !!muestra);
+    const puestos = Math.min(s, meta);
+    for(let i = 0; i < meta; i++){
+      const d = document.createElement("div");
+      d.className = "leal-sello" + (i < puestos ? " on" : "") + (recien && i === puestos - 1 ? " nuevo" : "");
+      if(i < puestos) d.innerHTML = TIJERAS;
+      c.appendChild(d);
+    }
+  }
+
+  function pintar(st, recien){
+    const meta = st.meta, s = st.s;
+    pintarSellos(s, meta, recien);
+    const faltan = Math.max(0, meta - s);
+    $("lealCuenta").innerHTML = "";
+    const b = document.createElement("b");
+    b.textContent = s + " de " + meta;
+    $("lealCuenta").appendChild(b);
+    $("lealCuenta").appendChild(document.createTextNode(
+      faltan === 0 ? " · tu premio está listo, pídelo en el mostrador"
+      : faltan === 1 ? " · te falta 1 visita"
+      : " · te faltan " + faltan + " visitas"));
+
+    $("lealAlta").hidden = true;
+    $("lealYa").hidden = false;
+    pintarCumple(st);
+    /* El pase de cartera según el teléfono: Google en Android, Apple en
+       iPhone. El mismo botón cambia de cara y de destino. */
+    const puedeGoogle = CFG.wallet && ES_ANDROID && !st.gw;
+    const puedeApple = CFG.aw && ES_IPHONE && !st.aw;
+    const img = $("lealWallet").querySelector("img");
+    if(puedeApple){
+      img.src = "/img/wallet-boton-apple.svg?v=5d439301"; img.alt = "Añadir a Apple Wallet";
+      img.width = 234;
+      $("lealWallet").setAttribute("aria-label", "Añadir a Apple Wallet");
+    }
+    $("lealWallet").hidden = !(puedeGoogle || puedeApple);
+    if(puedeApple) pie("Llévatela en tu Apple Wallet. Se abre la vista previa: toca |Agregar|, arriba a la derecha.");
+    else pie(puedeGoogle
+      ? "Llévatela en tu Google Wallet y se actualiza sola."
+      : (st.gw ? "Ya la tienes en tu Google Wallet."
+        : st.aw ? "Ya la tienes en tu Apple Wallet."
+                : "Enséñala en el mostrador de cualquiera de las dos sucursales para sumar tu sello."));
+  }
+
+  /* El pie bajo el botón. Lo que va entre |barras| sale en negritas. */
+  function pie(txt, ojo){
+    const p = $("lealPie");
+    p.textContent = "";
+    p.className = "leal-fino" + (ojo ? " ojo" : "");
+    txt.split("|").forEach(function(t, i){
+      if(i % 2){ const b = document.createElement("b"); b.textContent = t; p.appendChild(b); }
+      else p.appendChild(document.createTextNode(t));
+    });
+  }
+
+  /* ---- Apple Wallet: la hoja de Apple solo guarda el pase si tocan "Agregar"
+     arriba a la derecha, y mucha gente cree que con ver la tarjeta ya quedó.
+     La única señal de que sí la guardó es que su iPhone se registra en el
+     servidor (`aw`), y eso tarda segundos. Así que después de mandarlo a la
+     hoja, la tarjeta se queda preguntando un rato: si llega, lo festeja; si
+     no llega, se lo dice con todas sus letras y le deja el botón para
+     reintentar. Ni la hoja ni el "Agregar" se pueden saltar: son de iOS. */
+  let VIG = 0, VIG_HASTA = 0;
+  const IMG_APPLE = "/img/wallet-boton-apple.svg?v=5d439301";
+  function imgWallet(){ return $("lealWallet").querySelector("img"); }
+  function irApple(url){
+    /* Safari cancela las descargas en vuelo cuando arranca una navegación: si
+       el botón de Apple acaba de aparecer y su imagen todavía baja, mandarlo al
+       pase en ese instante la deja rota. Se espera a que cargue (un parpadeo)
+       y luego sí. La página sigue viva detrás de la hoja de Wallet. */
+    const img = imgWallet();
+    let hecho = false;
+    const go = function(){ if(hecho) return; hecho = true; location.href = url; vigilaApple(45000); };
+    if(img.complete && img.naturalWidth > 0) return go();
+    img.addEventListener("load", go, {once:true});
+    img.addEventListener("error", go, {once:true});
+    setTimeout(go, 700);
+  }
+  function vigilaApple(ms){
+    VIG_HASTA = Date.now() + ms;
+    clearInterval(VIG);
+    // el pase tarda unos segundos en bajar antes de que Safari abra la hoja:
+    // que mientras tanto se sepa que algo está pasando
+    pie("Preparando tu pase, un momento…", true);
+    setTimeout(function(){ if(VIG) pie("En la vista previa toca |Agregar|, arriba a la derecha, para guardarla en tu Wallet.", true); }, 3500);
+    VIG = setInterval(async function(){
+      if(!YO){ clearInterval(VIG); VIG = 0; return; }
+      const img = imgWallet();     // si la imagen quedó rota, se vuelve a pedir
+      if(img.complete && !img.naturalWidth) img.src = IMG_APPLE + "?r=" + Date.now();
+      let r = null;
+      try{ r = await api({id:YO.id, tk:YO.tk}); }catch(e){}
+      if(r && r.ok && r.data.aw){
+        clearInterval(VIG); VIG = 0;
+        pintar(r.data, false);
+        pie("Listo: ya está en tu Apple Wallet y se actualiza sola.", true);
+        return;
+      }
+      if(Date.now() > VIG_HASTA){
+        clearInterval(VIG); VIG = 0;
+        $("lealWallet").disabled = false;
+        pie("Parece que no se agregó. Vuelve a tocar el botón y pulsa |Agregar|, arriba a la derecha.", true);
+      }
+    }, 3000);
+  }
+  // si se fue a otra app y regresa, se le da otro rato de margen
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible" && VIG) VIG_HASTA = Math.max(VIG_HASTA, Date.now() + 15000);
+  });
+
+  /* Al VOLVER a la tarjeta (de Google Wallet, de la hoja de Apple, de otra
+     app) el navegador la restaura tal como quedó — "Preparando tu pase…" con
+     el botón apagado — y nadie la repinta. Se vuelve a preguntar su estado y
+     se pinta de nuevo: si ya guardó el pase, lo dice. */
+  let REFRESCANDO = false;
+  async function refrescar(){
+    if(!YO || REFRESCANDO) return;
+    REFRESCANDO = true;
+    try{
+      const r = await api({id:YO.id, tk:YO.tk});
+      if(r.ok){ $("lealWallet").disabled = false; if(!VIG) pintar(r.data, false); }
+    }catch(e){}
+    REFRESCANDO = false;
+  }
+  window.addEventListener("pageshow", function(e){ if(e.persisted) refrescar(); });
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible" && !VIG) refrescar();
+  });
+
+  function err(t){ $("lealErr").textContent = t || ""; }
+
+  /* "dd/mm" → "MM-DD" como lo guarda la API; null si no se entiende; "" si vacío */
+  function cumpleLimpio(v){
+    const t = String(v || "").trim();
+    if(!t) return "";
+    // el teclado del celular no trae "/": se acepta ddmm pelón además de dd/mm
+    const m = t.match(/^(\d{1,2})\s*[\/\-.]\s*(\d{1,2})$/) || t.match(/^(\d{2})(\d{2})$/);
+    if(!m) return null;
+    const d = +m[1], mes = +m[2], tope = [0,31,29,31,30,31,30,31,31,30,31,30,31];
+    if(mes < 1 || mes > 12 || d < 1 || d > tope[mes]) return null;
+    return String(mes).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+  }
+  /* El teclado numérico del celular no tiene "/". Se la ponemos nosotros
+     mientras escribe, para que nadie se atore en "02" y abandone el alta. */
+  function mascaraCumple(el){
+    el.addEventListener("input", ()=>{
+      const d = el.value.replace(/\D/g, "").slice(0, 4);
+      el.value = d.length > 2 ? d.slice(0,2) + "/" + d.slice(2) : d;
+    });
+  }
+  function pintarCumple(st){
+    const pide = !!(CFG && CFG.cumple) && !st.cumple;
+    $("lealCumAbrir").hidden = !pide;
+    if(!pide) $("lealCum").hidden = true;
+  }
+  async function guardarCumple(){
+    const v = cumpleLimpio($("lealCumIn").value);
+    if(v === null || v === ""){ $("lealCumIn").focus(); $("lealCumIn").placeholder = "día/mes, ej. 15/03"; return; }
+    $("lealCumOk").disabled = true;
+    const r = await api({id:YO.id, tk:YO.tk, cumple:v});
+    $("lealCumOk").disabled = false;
+    if(r.ok){ pintar(r.data, false); pie("Gracias. El día de tu cumpleaños te tenemos un detalle.", true); }
+  }
+
+  /* ---- popup ---- */
+  function abrirPop(){
+    $("lealVelo").hidden = false;
+    document.body.style.overflow = "hidden";
+    err("");
+    setTimeout(()=> $("lealN").focus({preventScroll:true}), 60);
+  }
+  function cerrarPop(){
+    $("lealVelo").hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  /* Un solo botón hace todo: valida, crea la tarjeta y se va a Google Wallet.
+     En iPhone no hay wallet que valga, así que ahí el botón solo la activa. */
+  async function activar(btn){
+    const n = $("lealN").value.trim();
+    const w = $("lealW").value.replace(/\D/g, "");
+    if(n.length < 2) return err("Escribe tu nombre");
+    if(w.length < 10) return err("Escribe tu WhatsApp a 10 dígitos");
+    // el cumpleaños es opcional de verdad: si quedó a medias NO le estorba el
+    // alta. Se le vuelve a pedir solo, ya con su tarjeta viva, y el negocio
+    // también puede apuntarlo en el mostrador.
+    const cum = ($("lealC").hidden ? "" : cumpleLimpio($("lealC").value)) || "";
+    err("");
+    btn.disabled = true;
+    const cuerpo = {alta:1, n:n, w:w};
+    if(cum) cuerpo.cumple = cum;
+    const r = await api(cuerpo);
+    if(!r.ok){ btn.disabled = false; return err(r.data.error || "No se pudo, intenta de nuevo"); }
+    if(cum) r.data.cumple = cum;          // la respuesta del alta no lo repite
+    YO = {id:r.data.id, tk:r.data.tk};
+    try{ localStorage.setItem(LLAVE, JSON.stringify(YO)); }catch(e){}
+
+    if(CFG.wallet && ES_ANDROID){
+      err("Preparando tu pase…");
+      const p = await ligaWallet({id:YO.id, tk:YO.tk, wallet:1});
+      if(p.ok && p.data.link){ location.href = p.data.link; return; }
+      err("");
+    }
+    // en iPhone, el mismo gesto abre el pase de Apple Wallet — con la tarjeta
+    // ya pintada detrás y vigilando si de verdad la guardó
+    if(CFG.aw && ES_IPHONE){
+      err("Preparando tu pase…");
+      const p = await ligaWallet({id:YO.id, tk:YO.tk, applewallet:1});
+      if(p.ok && p.data.url){
+        btn.disabled = false; cerrarPop(); pintar(r.data, false);
+        irApple(p.data.url); return;
+      }
+      err("");
+    }
+    btn.disabled = false;
+    cerrarPop();
+    pintar(r.data, false);
+  }
+
+  /* La liga del pase (Google o Apple). Si la red o el servidor fallan en ese
+     instante, se reintenta UNA vez antes de rendirse: un reinicio de la API
+     de dos segundos no debe dejar al cliente con el botón otra vez. */
+  async function ligaWallet(cuerpo){
+    let r = null;
+    for(let i = 0; i < 2; i++){
+      try{ r = await api(cuerpo); }catch(e){ r = {ok:false, data:{}}; }
+      if(r.ok) return r;
+      await new Promise(res=> setTimeout(res, 1400));
+    }
+    return r;
+  }
+
+  async function aWallet(){
+    const b = $("lealWallet");
+    b.disabled = true;
+    $("lealPie").textContent = "Preparando tu pase…";
+    const apple = CFG.aw && ES_IPHONE;
+    const r = await ligaWallet(apple ? {id:YO.id, tk:YO.tk, applewallet:1}
+                                     : {id:YO.id, tk:YO.tk, wallet:1});
+    const destino = apple ? r.data.url : r.data.link;
+    if(r.ok && destino){
+      if(apple) irApple(destino); else location.href = destino;
+      return;
+    }
+    b.disabled = false;
+    $("lealPie").textContent = "No se pudo ahora, inténtalo más tarde.";
+  }
+
+  (async function arranca(){
+    try{
+      const r = await fetch("/api/fidelidad/" + SLUG, {cache:"no-store"});
+      if(!r.ok) return;                       // este negocio no tiene sellos: ni se enseña
+      CFG = await r.json();
+    }catch(e){ return; }
+
+    const premio = (CFG.premio || "premio").toLowerCase().replace(/\.$/, "");
+    $("lealMeta").textContent = CFG.meta;
+    $("lealPremio").textContent = premio;
+    $("lealPopSub").textContent = "Junta " + CFG.meta + " sellos y obtén tu " + premio + " · vale en las dos sucursales";
+    $("secLealtad").hidden = false;
+    // lo que el negocio prendió: cumpleaños en el alta, y si HOY el sello vale doble
+    $("lealC").hidden = !CFG.cumple;
+    $("lealDoble").hidden = !CFG.doble;
+    $("lealCumAbrir").addEventListener("click", function(){ $("lealCum").hidden = false; $("lealCumIn").focus(); });
+    $("lealCumOk").addEventListener("click", guardarCumple);
+    $("lealCumIn").addEventListener("keydown", e=>{ if(e.key === "Enter") guardarCumple(); });
+    mascaraCumple($("lealCumIn"));
+    mascaraCumple($("lealC"));
+    // en iPhone el botón de Apple se precarga: cuando aparezca, ya está en caché
+    if(CFG.aw && ES_IPHONE){ const pre = new Image(); pre.src = IMG_APPLE; }
+    // Antes de activarla se enseñan dos sellos puestos, a media luz: la fila de
+    // círculos vacíos se veía muerta y no explicaba nada. Van atenuados y con la
+    // palabra "Ejemplo" para que nadie crea que ya lleva dos — en cuanto activa
+    // su tarjeta, `pintar()` enseña su cuenta real.
+    pintarSellos(Math.min(2, CFG.meta - 1), CFG.meta, false, true);
+    $("lealCuenta").textContent = "Ejemplo · así se te va llenando";
+
+    // en Android el botón del popup es el oficial de Google; en iPhone, uno normal
+    const conWallet = CFG.wallet && ES_ANDROID;
+    $("lealAdd").hidden = !conWallet;
+    $("lealAddSimple").hidden = conWallet;
+    const btnActivar = conWallet ? $("lealAdd") : $("lealAddSimple");
+
+    $("lealAbrir").addEventListener("click", abrirPop);
+    $("lealCerrar").addEventListener("click", cerrarPop);
+    $("lealVelo").addEventListener("click", e=>{ if(e.target === $("lealVelo")) cerrarPop(); });
+    document.addEventListener("keydown", e=>{
+      if(e.key === "Escape" && !$("lealVelo").hidden) cerrarPop();
+    });
+    btnActivar.addEventListener("click", ()=> activar(btnActivar));
+    $("lealW").addEventListener("keydown", e=>{ if(e.key === "Enter") activar(btnActivar); });
+    $("lealWallet").addEventListener("click", aWallet);
+
+    YO = guardado();
+    if(!YO) return;
+    const r2 = await api({id:YO.id, tk:YO.tk});
+    if(r2.ok) pintar(r2.data, false);
+    else { localStorage.removeItem(LLAVE); YO = null; }   // su tarjeta ya no vale
+  })();
+})();
+</script>
+
+
+</body></html>

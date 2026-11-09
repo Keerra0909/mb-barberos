@@ -1,0 +1,411 @@
+﻿{
+    "n":  "Barber Studio MB \u0026 Spa",
+    "w":  "525581066554",
+    "card":  "/barberstudiomb",
+    "paso":  30,
+    "skin":  "plata",
+    "brand":  {
+                  "bg1":  "#0a0b0c",
+                  "bg2":  "#000000",
+                  "ink":  "#f3f5f7",
+                  "muted":  "#8b9299",
+                  "accent":  "#c9a248",
+                  "btn":  "rgba(10,11,12,.72)",
+                  "line":  "rgba(198,204,210,.24)",
+                  "chip":  "rgba(232,205,138,.10)",
+                  "sel":  "#e6ebef",
+                  "selink":  "#0a0b0c"
+              },
+    "dias":  {
+                 "0":  null,
+                 "1":  {
+                           "desde":  "11:00",
+                           "hasta":  "20:30"
+                       },
+                 "2":  {
+                           "desde":  "11:00",
+                           "hasta":  "20:30"
+                       },
+                 "3":  {
+                           "desde":  "10:00",
+                           "hasta":  "18:00"
+                       },
+                 "4":  {
+                           "desde":  "11:00",
+                           "hasta":  "20:30"
+                       },
+                 "5":  {
+                           "desde":  "11:00",
+                           "hasta":  "20:30"
+                       },
+                 "6":  {
+                           "desde":  "11:00",
+                           "hasta":  "18:00"
+                       }
+             },
+    "panel":  true,
+    "tituloBarberos":  "Elige tu barbero",
+    "barberos":  [
+                     {
+                         "id":  "mario",
+                         "n":  "Mario",
+                         "rol":  "Barbero",
+                         "foto":  "/eq/barberstudiomb-morena-mario.jpg?v=1790715895",
+                         "dias":  {
+                                      "0":  null,
+                                      "1":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "20:30"
+                                            },
+                                      "2":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "20:30"
+                                            },
+                                      "3":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "20:30"
+                                            },
+                                      "4":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "20:30"
+                                            },
+                                      "5":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "20:30"
+                                            },
+                                      "6":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:00"
+                                            }
+                                  },
+                         "w":  "525539070433",
+                         "tieneClave":  true
+                     },
+                     {
+                         "id":  "david",
+                         "n":  "David",
+                         "rol":  "Barbero",
+                         "foto":  "/eq/barberstudiomb-morena-david.jpg?v=1790716243",
+                         "w":  "525568781552",
+                         "tieneClave":  true
+                     },
+                     {
+                         "id":  "brandon",
+                         "n":  "Brandon",
+                         "w":  "525648111080",
+                         "foto":  "/eq/barberstudiomb-morena-brandon.jpg?v=1790715870",
+                         "off":  true,
+                         "tieneClave":  true
+                     }
+                 ],
+    "servicios":  [
+                      {
+                          "t":  "Corte de cabello",
+                          "p":  "$220",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte a tu estilo, con máquina y tijera.",
+                                        "Perfilado de contornos y acabado.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Corte de barba (ritual)",
+                          "p":  "$220",
+                          "dur":  "1 hora",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Ritual completo de barba.",
+                                        "Toalla caliente, navaja y bálsamo.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Corte y barba",
+                          "p":  "$380",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte completo.",
+                                        "Barba perfilada con navaja.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Tinte de barba",
+                          "p":  "$120",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Cubre canas y empareja el tono.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Servicio express",
+                          "p":  "$120",
+                          "dur":  "60 min",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Retoque o limpieza de contornos.",
+                                        "Para llegar entre corte y corte.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Servicio luxury",
+                          "p":  "$550",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "La experiencia completa de la casa.",
+                                        "Corte, barba y facial sin prisa.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Grecas",
+                          "p":  "$80",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Diseño a mano alzada.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Perfilado de cejas",
+                          "p":  "$80",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Perfilado y limpieza de cejas.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Limpieza facial",
+                          "p":  "$180",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Limpieza profunda con productos rejuvenecedores.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial y corte",
+                          "p":  "$330",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte completo más limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial, corte y barba",
+                          "p":  "$480",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte, barba y limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial y barba",
+                          "p":  "$330",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "mario",
+                                        "david",
+                                        "brandon"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Barba al ritual más limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      }
+                  ],
+    "modulos":  {
+                    "agendaPro":  false,
+                    "equipo":  true,
+                    "accesos":  true,
+                    "pagos":  false,
+                    "recordatorios":  true,
+                    "sync":  true,
+                    "editor":  false,
+                    "clientes":  false,
+                    "sellos":  true
+                },
+    "sucursales":  [
+                       {
+                           "s":  "barberstudiomb-morena",
+                           "n":  "La Morena"
+                       },
+                       {
+                           "s":  "barberstudiomb-quemada",
+                           "n":  "La Quemada"
+                       }
+                   ],
+    "bienvenida":  true,
+    "formulario":  {
+                       "servicio":  true,
+                       "nombre":  true,
+                       "tel":  true,
+                       "cierre":  "directo"
+                   },
+    "grupo":  "barberstudiomb-quemada",
+    "comparte":  [
+                     "sellos",
+                     "avisos"
+                 ],
+    "cliente":  {
+                    "mover":  true,
+                    "aviso":  1
+                },
+    "icalOn":  true,
+    "gcalOn":  true,
+    "fidelidad":  {
+                      "premios":  [
+                                      {
+                                          "cuesta":  8,
+                                          "que":  "Corte gratis"
+                                      }
+                                  ],
+                      "meta":  8,
+                      "premio":  "Corte gratis",
+                      "quien":  "negocio"
+                  },
+    "avisosVivos":  true
+}

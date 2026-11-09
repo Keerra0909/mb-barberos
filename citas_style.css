@@ -1,0 +1,1713 @@
+
+  :root{
+    --serif:"Didot","Bodoni 72","Playfair Display",Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  [data-theme="noir"]{
+    --bg1:#0b0b0d; --bg2:#191920; --ink:#f4efe6; --muted:#b3ac9e;
+    --accent:#c9a961; --btn:rgba(255,255,255,.045); --line:rgba(201,169,97,.38);
+    --chip:rgba(201,169,97,.12); --sel:#c9a961; --selink:#141414;
+  }
+  [data-theme="rosa"]{
+    --bg1:#fdf6f1; --bg2:#f1dcd2; --ink:#46342e; --muted:#8a7266;
+    --accent:#b76e79; --btn:rgba(255,255,255,.72); --line:rgba(183,110,121,.4);
+    --chip:rgba(183,110,121,.12); --sel:#b76e79; --selink:#fff;
+  }
+  [data-theme="azul"]{
+    --bg1:#0c1526; --bg2:#1a2a45; --ink:#eef2f8; --muted:#9fadc4;
+    --accent:#c3a05f; --btn:rgba(255,255,255,.05); --line:rgba(195,160,95,.4);
+    --chip:rgba(195,160,95,.12); --sel:#c3a05f; --selink:#141414;
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{min-height:100%}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:linear-gradient(170deg,var(--bg1),var(--bg2) 55%,var(--bg1));
+    background-attachment:fixed;
+    display:flex; justify-content:center;
+  }
+  .wrap{width:100%; max-width:470px; padding:30px 22px 40px; text-align:center}
+  /* "Volver a la tarjeta" — los cuatro colores salen de variables CON RESPALDO:
+     sin sembrar nada, `var(--volver-bg, var(--btn))` cae en lo de siempre y
+     cada negocio se ve EXACTAMENTE igual que antes. Un negocio que quiera este
+     botón más llamativo (lo pidió Mafia Barber, que tiene 25 sucursales y la
+     gente entra y sale de su carta) siembra `volver-bg`, `volver-ink`,
+     `volver-line` y `volver-ico` en su `brand`. Los skins que ya lo pintan a su
+     modo siguen mandando: sus reglas van más abajo en la hoja. */
+  .back{
+    display:inline-flex; align-items:center; gap:10px; margin-bottom:24px;
+    padding:13px 26px; border-radius:99px;
+    border:1.5px solid var(--volver-line, var(--line));
+    background:var(--volver-bg, var(--btn));
+    color:var(--volver-ink, var(--ink)); text-decoration:none;
+    font-size:14.5px; font-weight:700; letter-spacing:.02em;
+    box-shadow:0 8px 22px rgba(0,0,0,.12);
+    transition:transform .13s ease;
+  }
+  .back:active{transform:scale(.97)}
+  .back .flechita{color:var(--volver-ico, var(--accent)); font-size:18px; line-height:1}
+  h1{font-family:var(--serif); font-weight:500; font-size:clamp(26px,7vw,32px)}
+  .sub{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.22em; margin-top:6px}
+  .orn{display:flex; align-items:center; gap:12px; margin:18px 0 22px; color:var(--accent)}
+  .orn::before,.orn::after{content:""; flex:1; height:1px; background:var(--line)}
+  .orn span{font-size:11px}
+  .navmes{display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px}
+  .navmes button{
+    flex:0 0 38px; height:38px; border-radius:50%; cursor:pointer;
+    border:1.5px solid var(--line); background:var(--btn); color:var(--accent);
+    font-size:20px; line-height:0; padding-bottom:3px; font-family:var(--sans);
+    transition:transform .13s ease, opacity .13s ease;
+  }
+  .navmes button:disabled{opacity:.25; cursor:default}
+  .navmes button:not(:disabled):active{transform:scale(.92)}
+  .month{
+    flex:1; font-size:14px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin:0;
+  }
+  .month small{display:block; font-size:10.5px; letter-spacing:.1em; color:var(--muted); margin-top:2px; text-transform:none}
+  /* elegir barbero/estilista: solo aparece si el negocio tiene varios */
+  .barberos{display:grid; grid-template-columns:repeat(auto-fit,minmax(94px,1fr)); gap:10px; margin-bottom:26px}
+  .barbero{
+    padding:14px 8px 12px; border-radius:16px; border:1px solid var(--line); background:var(--btn);
+    color:var(--ink); font-size:14px; font-weight:700; cursor:pointer; font-family:var(--sans);
+    display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .barbero .av{
+    width:58px; height:58px; border-radius:50%; object-fit:cover; display:block;
+    border:2px solid var(--line); background:var(--chip);
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .barbero .ini{
+    width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--chip); border:2px solid var(--line); color:var(--accent);
+    font-size:20px; font-weight:800; letter-spacing:.02em;
+  }
+  /* El renglón chico de cada persona (su rol). Para una cadena es la ALCALDÍA de
+     la sucursal, y en gris se pierde — lo pidió Mafia Barber. Mismo trato que el
+     botón de volver: variable nueva con el valor viejo de respaldo, así quien no
+     siembre `rol-color` en su `brand` se ve idéntico a como estaba. */
+  .barbero small{font-size:10px; font-weight:600; color:var(--rol-color, var(--muted)); letter-spacing:.08em; text-transform:uppercase; line-height:1.3}
+  @media (hover:hover){.barbero:not(.sel):hover{transform:translateY(-3px); border-color:var(--accent)}}
+  @media (hover:hover){.barbero:not(.sel):hover .av{transform:scale(1.05); border-color:var(--accent)}}
+  .barbero.sel{background:var(--sel); color:var(--selink); border-color:var(--sel)}
+  .barbero.sel .av,.barbero.sel .ini{border-color:var(--selink); opacity:.95}
+  .barbero.sel small{color:var(--selink); opacity:.72}
+  .barbero.sel .ini svg{color:var(--selink)}     /* «cualquiera disponible»: su icono se lee sobre lo seleccionado */
+  .grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:24px}
+  .dow{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; padding:4px 0}
+  /* ============================================================
+     QUE EL DEDO MANDE
+     El calendario se usa con el pulgar, no con un ratón. Tres cosas
+     que lo vuelven ligero: nada de cuadro gris del navegador al tocar,
+     `touch-action` para que no espere el doble-tap del zoom, y una
+     respuesta que se ve en el momento (:active) en vez de esperar a
+     que el JS repinte. Los :hover viven dentro de @media (hover:hover)
+     porque en el teléfono se comían el primer toque.
+     ============================================================ */
+  button,select,a,.chip{-webkit-tap-highlight-color:transparent; touch-action:manipulation}
+  .day,.slot,.barbero,.svs button{
+    transition:background .16s ease, color .16s ease, border-color .16s ease,
+               box-shadow .16s ease, transform .12s ease;
+  }
+  .day:not(:disabled):active,.slot:not(:disabled):active,
+  .barbero:active,.svs button:active{transform:scale(.94)}
+  @media (prefers-reduced-motion: reduce){
+    .day,.slot,.barbero,.svs button{transition:background .1s ease, color .1s ease}
+    .day:active,.slot:active,.barbero:active,.svs button:active{transform:none}
+  }
+  .day{
+    position:relative;
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    font-size:14.5px; border-radius:10px; border:1px solid transparent;
+    background:var(--btn); cursor:pointer; color:var(--ink); font-family:var(--sans);
+  }
+  .day:disabled{opacity:.28; cursor:default; background:none; border-color:transparent}
+  .day.sel{background:var(--sel); color:var(--selink); font-weight:700; border-color:var(--sel)}
+  @media (hover:hover){.day:not(:disabled):not(.sel):hover{border-color:var(--line)}}
+  /* día con alguna hora ya apartada: punto abajo, para que no se lea como día entero libre */
+  .day.parcial::after{
+    content:""; position:absolute; bottom:5px; left:50%; transform:translateX(-50%);
+    width:4px; height:4px; border-radius:50%; background:var(--accent); opacity:.9;
+  }
+  .day.parcial.sel::after{background:var(--selink)}
+  .leyenda{display:flex; align-items:center; gap:7px; margin:-18px 0 22px; font-size:11.5px; color:var(--muted)}
+  .leyenda .pt{width:5px; height:5px; border-radius:50%; background:var(--accent); flex:none}
+  h2{font-size:13px; font-weight:600; letter-spacing:.3em; text-transform:uppercase; color:var(--accent);
+     display:flex; align-items:center; gap:12px; margin-bottom:14px}
+  h2::before,h2::after{content:""; flex:1; height:1px; background:var(--line)}
+  .slots{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:28px}
+  .slot{
+    padding:12px 0; border-radius:12px; border:1px solid var(--line); background:var(--btn);
+    color:var(--ink); font-size:14px; cursor:pointer; font-family:var(--sans);
+  }
+  .slot.sel{background:var(--sel); color:var(--selink); font-weight:700}
+  /* hora ya apartada: se ve pero no se puede elegir */
+  .slot:disabled{
+    cursor:default; opacity:.4; text-decoration:line-through;
+    background:none; box-shadow:none !important; transform:none !important;
+  }
+  .slot:disabled::after{
+    content:"apartada"; display:block; margin-top:3px;
+    font-size:9px; letter-spacing:.1em; text-transform:uppercase; text-decoration:none;
+  }
+  /* Libre, pero el servicio elegido no termina antes de la siguiente cita o
+     del cierre (22-sep, Menta Spa: su clienta veía «apartada» a las 6:00 y
+     nadie la había apartado). Se sigue sin poder elegir; solo cambia la
+     palabra, y no se tacha porque nadie la ocupó. */
+  .slot.nocabe:disabled{text-decoration:none}
+  .slot.nocabe:disabled::after{content:"no alcanza"}
+  /* En inglés (módulo `traduccion`, 28-sep): el <html> dice lang="en" solo
+     entonces. Con la página en español estas dos reglas no casan con nada. */
+  html[lang="en"] .slot:disabled::after{content:"booked"}
+  html[lang="en"] .slot.slot.nocabe:disabled::after{content:"no time"}
+  .aviso{color:var(--muted); font-size:13px; grid-column:1/-1; padding:8px 0}
+  .confirm{
+    width:100%; padding:16px; border:none; border-radius:14px; cursor:pointer;
+    background:#1fa855; color:#fff; font-size:16px; font-weight:700; font-family:var(--sans);
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    opacity:.45; pointer-events:none; transition:opacity .15s ease;
+  }
+  .confirm.on{opacity:1; pointer-events:auto}
+  .confirm svg{width:19px; height:19px}
+  .fine{margin-top:14px; font-size:12px; color:var(--muted)}
+  /* las condiciones del negocio (8-sep): se leen antes de apartar */
+  .condiciones{margin:0 0 14px; padding:12px 14px; border:1px solid rgba(128,128,128,.35); border-radius:12px;
+    font-size:13px; line-height:1.55; color:var(--muted); white-space:pre-line}
+  .condiciones b{display:block; margin-bottom:4px; font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+  .listo-cond{margin:12px 0 0; font-size:12.5px; line-height:1.5; color:var(--muted); white-space:pre-line}
+
+  /* ============================================================
+     TU SELECCIÓN — servicios que la persona eligió en la tarjeta
+     y llegan aquí por ?sv=nombre~precio|nombre~precio
+     ============================================================ */
+  .sel-caja{
+    text-align:left; margin-bottom:26px; padding:16px 16px 14px;
+    border:1.5px solid var(--line); border-radius:18px; background:var(--btn);
+    box-shadow:0 8px 22px rgba(0,0,0,.08);
+  }
+  .sel-caja h2{margin-bottom:13px}
+
+  /* ---- elegir servicio aquí mismo (quien llega por /cita no viene de la carta) ---- */
+  /* ---- los servicios, en renglones parejos ----
+     Antes eran cajas que se acomodaban solas y cada una medía distinto según
+     lo largo del nombre: se veía revuelto y pesaba. Un renglón por servicio,
+     el precio siempre en la misma columna, y el borde solo se enciende en el
+     elegido — igual que los días y las horas, para que sea la misma página. */
+  #secServicio{margin-bottom:26px}
+  .sv-nota{font-size:12.5px; opacity:.72; margin:-6px 0 13px}
+  .svs{display:flex; flex-direction:column; gap:8px}
+  .svs button{
+    display:flex; align-items:center; gap:14px; width:100%;
+    padding:14px 16px; border:1px solid var(--line); border-radius:14px;
+    background:var(--btn); color:inherit; font:inherit; cursor:pointer; text-align:left;
+  }
+  .svs button b{flex:1; min-width:0; font-weight:600; font-size:14.5px; line-height:1.3}
+  .svs button small{flex:none; font-size:13px; opacity:.7; font-variant-numeric:tabular-nums}
+  .svs button.sel{background:var(--sel); color:var(--selink); border-color:var(--sel)}
+  .svs button.sel b{font-weight:700}
+  .svs button.sel small{opacity:.85}
+  #svs > .sv-nota{margin:14px 0 4px; overflow-wrap:anywhere}
+  #svs > button:disabled{opacity:.5; cursor:default}
+  /* "todavía no sé" no es un servicio: no compite con la carta */
+  .svs .salta{
+    justify-content:center; gap:8px; padding:12px; margin-top:4px;
+    background:none; border:1px dashed var(--line); opacity:.7;
+  }
+  .svs .salta b{flex:none; font-size:13.5px; font-weight:600}
+  .svs .salta small{font-size:12.5px}
+  .svs .salta.sel{
+    background:none; opacity:1; color:inherit;
+    border-style:solid; border-color:var(--accent);
+  }
+  /* ¿En qué sucursal? (módulo `sedes`, 15-sep): la misma lista de la carta,
+     con un pin y la dirección DEBAJO del nombre — a la derecha, donde va el
+     precio, una dirección no cabe. Estas clases solo existen en la página
+     cuando el negocio tiene sucursales: a los demás no les pinta nada. */
+  #secSede:not(.plegado){margin-bottom:26px}
+  .svs button .sd-pin{flex:none; width:20px; height:20px; opacity:.75}
+  .svs button .sd-txt{flex:1; min-width:0; display:flex; flex-direction:column; gap:3px}
+  .svs button .sd-txt small{flex:none; font-size:12.5px; line-height:1.4; font-variant-numeric:normal}
+
+  /* ---- datos del cliente, solo si el negocio los pide ---- */
+  #secDatos{margin-bottom:26px}
+  .datos{display:flex; flex-direction:column; gap:12px}
+  .datos label{display:block; text-align:left}
+  .datos span{display:block; font-size:12.5px; opacity:.72; margin-bottom:6px}
+  .datos input{
+    width:100%; padding:13px 15px; border:1.5px solid var(--line); border-radius:14px;
+    background:var(--btn); color:inherit; font:inherit; font-size:15px;
+  }
+  .datos input:focus{outline:none; border-color:var(--accent)}
+
+  /* ---- pago híbrido: el cliente elige cuándo paga ----
+     Se viste con los MISMOS tokens que ya usan los servicios y los horarios
+     (`--line`, `--btn`, y el par `--sel`/`--selink` para lo elegido), que es
+     con lo que cada uno de los 11 skins pinta lo seleccionado. Estilizarlo
+     desde cero habría salido bien en uno y mal en diez. */
+  .pago-elige{margin-top:16px; text-align:left}
+  /* «¿Tienes una tarjeta de regalo?» (módulo `regalos`): solo existe con el módulo */
+  .rg-tienes{margin:0 0 16px; text-align:center}
+  .rg-tienes-abre{border:none; background:none; color:inherit; font:inherit; font-size:14px; font-weight:600;
+    text-decoration:underline; text-underline-offset:3px; opacity:.85; cursor:pointer; padding:6px}
+  .rg-tienes > div{margin-top:10px; text-align:left}
+  .rg-tienes .datos input{font-family:ui-monospace,Menlo,monospace; letter-spacing:.08em; text-transform:uppercase}
+  .rg-tienes-usar{width:100%; margin-top:10px; padding:13px; border-radius:14px; border:1.5px solid var(--line);
+    background:var(--btn); color:inherit; font:inherit; font-size:15px; font-weight:700; cursor:pointer}
+  .rg-tienes-err{margin-top:8px; font-size:13px; color:#c0392b; font-weight:600; text-align:center}
+  .rg-tienes-err:empty{display:none}
+  .pe-tit{font-size:12.5px; opacity:.72; margin-bottom:8px}
+  .pe-ops{display:flex; gap:9px; flex-wrap:wrap}
+  .pe-op{
+    flex:1 1 140px; min-width:0; padding:13px 14px; border:1.5px solid var(--line);
+    border-radius:14px; background:var(--btn); color:inherit; font:inherit;
+    cursor:pointer; text-align:left; touch-action:manipulation;
+  }
+  .pe-op b{display:block; font-weight:600; font-size:14.5px; line-height:1.25}
+  .pe-op small{display:block; font-size:12.5px; opacity:.7; margin-top:4px; line-height:1.35}
+  .pe-op.on{background:var(--sel); color:var(--selink); border-color:var(--sel)}
+  .pe-op.on b{font-weight:700}
+  .pe-op.on small{opacity:.85}
+  .pe-op:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---- cita apartada sin pasar por WhatsApp ---- */
+  /* ---- el recibo ----
+     Lee tres tokens propios con respaldo a los base, y cada skin los conecta
+     con un renglón (busca "--rc-metal" más abajo). Así hereda el oro de King,
+     el acero de Legado o el rojo de Guerrero's sin escribir un bloque por
+     skin, y un skin que no diga nada se sigue viendo bien. */
+  .listo{
+    border:1.5px solid var(--rc-filo, var(--line)); border-radius:20px;
+    background:var(--btn); box-shadow:0 10px 28px rgba(0,0,0,.10); overflow:hidden;
+    text-align:left;
+  }
+  .listo .rc-cab{padding:28px 20px 20px; text-align:center}
+  .listo .paloma{
+    display:grid; place-items:center; width:56px; height:56px; margin:0 auto 15px;
+    border-radius:50%; background:var(--rc-metal, var(--accent)); color:var(--selink, #fff);
+  }
+  .listo .paloma svg{width:28px; height:28px}
+  .listo b{display:block; font-family:var(--rc-titulo, var(--serif)); font-size:21px; font-weight:600; line-height:1.25}
+  .rc-neg{display:block; margin-top:7px; font-size:10.5px; font-weight:700;
+    letter-spacing:.19em; text-transform:uppercase; color:var(--rc-metal, var(--accent))}
+  /* Que la cita está pendiente de pago se dice ARRIBA y con color: es lo
+     único que puede hacer que no exista, así que no puede ir de nota al pie. */
+  .rc-pendiente{
+    margin:0 20px 18px; padding:11px 13px; border-radius:11px;
+    background:var(--chip); border:1px solid var(--line);
+    font-size:12.5px; line-height:1.5; text-align:center;
+  }
+  .rc-pendiente b{color:var(--rc-metal, var(--accent))}
+  .rc-corte{height:0; border-top:1px dashed var(--rc-filo, var(--line)); opacity:.75}
+  .rc-cuerpo{padding:20px 20px 8px}
+  .rc-cuando{text-align:center; padding-bottom:16px}
+  .rc-cuando .et{display:block; font-size:9.5px; font-weight:700; letter-spacing:.19em; text-transform:uppercase; opacity:.6; margin-bottom:9px}
+  .rc-cuando .dia{display:block; font-size:15px; font-weight:600}
+  .rc-cuando .hora{display:block; margin-top:4px; font-family:var(--rc-titulo, var(--serif));
+    font-size:40px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--rc-metal, var(--accent))}
+  .rc-fila{display:flex; align-items:baseline; gap:14px; padding:11px 0; border-top:1px solid var(--line)}
+  .rc-fila .et{flex:0 0 82px; font-size:9.5px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; opacity:.6}
+  .rc-fila .va{flex:1; min-width:0; font-size:14.5px; font-weight:600; text-align:right}
+  /* la sucursal en el recibo (módulo `sedes`): dirección y «Cómo llegar» en
+     letra chica debajo del nombre */
+  .rc-fila .va .sd-dir{display:block; margin-top:3px; font-size:12.5px; font-weight:400; line-height:1.4; opacity:.72}
+  .rc-fila .va .sd-dir a{color:inherit; text-decoration:underline; text-underline-offset:2px}
+  .rc-money{font-variant-numeric:tabular-nums}
+  .listo .chico{font-size:12.5px; line-height:1.55; opacity:.72; padding:12px 0 4px}
+  .rc-pie{display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:13px 20px; background:var(--chip)}
+  .rc-pie .et{font-size:9.5px; font-weight:700; letter-spacing:.19em; text-transform:uppercase; opacity:.6}
+  .rc-folio{font-size:17px; font-weight:700; letter-spacing:.26em; color:var(--rc-metal, var(--accent))}
+  .rc-acc{padding:16px 20px 20px}
+  .listo-cal{
+    display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    margin-top:10px; padding:14px; border:1.5px solid var(--rc-filo, var(--line)); border-radius:14px;
+    background:none; color:inherit; font-family:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+  }
+  .listo-cal svg{width:18px; height:18px}
+  .listo-btn{
+    display:inline-block; margin-top:16px; padding:12px 22px; border-radius:99px;
+    border:1.5px solid var(--line); text-decoration:none; color:inherit; font-size:14.5px; font-weight:600;
+  }
+  .sel-fila{
+    display:flex; align-items:baseline; gap:12px; padding:8px 0;
+    border-bottom:1px dashed var(--line); font-size:13.5px;
+  }
+  .sel-fila:last-of-type{border-bottom:none}
+  .sel-fila .t{flex:1; min-width:0; font-weight:600; line-height:1.35}
+  .sel-fila .p{flex:0 0 auto; color:var(--accent); font-weight:700; font-variant-numeric:tabular-nums}
+  .sel-tot{
+    display:flex; justify-content:space-between; gap:12px;
+    margin-top:11px; padding-top:11px; border-top:1.5px solid var(--line);
+    font-size:14px; font-weight:700;
+  }
+  .sel-tot em{font-style:normal; color:var(--accent)}
+  .sel-tot[hidden]{display:none}
+  /* `hidden` gana siempre: si no, un display del CSS deja visible lo oculto */
+  [hidden]{display:none !important}
+  .sel-nota{margin-top:10px; font-size:11.5px; color:var(--muted); line-height:1.5}
+  .sel-nota a{color:var(--accent); font-weight:600}
+
+  /* ============================================================
+     PASOS QUE SE PLIEGAN
+     Cada paso resuelto se encoge a una línea y el que sigue sube a
+     ocupar la pantalla. El plegado lleva también la clase .sel-caja
+     para heredar el color de los 11 skins: ellos solo le ponen fondo
+     y borde, el tamaño lo manda .chip (va después, así que gana).
+     ============================================================ */
+  .bloque > .chip{display:none}
+  .bloque.plegado > .chip{display:flex}
+  .bloque.plegado > :not(.chip){display:none}
+  .bloque.plegado{margin-bottom:0}
+  /* el paso que acaba de subir se anuncia solo, sin brincar */
+  .bloque.entra{animation:sube .3s ease both}
+  @keyframes sube{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+
+  .chip{
+    align-items:center; gap:12px; text-align:left;
+    margin-bottom:12px; padding:10px 12px 10px 14px;
+  }
+  .chip .cuerpo{flex:1; min-width:0}
+  .chip .et{
+    display:block; font-size:9.5px; font-weight:700; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:1px;
+  }
+  .chip .val{display:block; font-size:15px; font-weight:700; line-height:1.35}
+  .chip .val .extra{font-weight:400; opacity:.72}
+  .chip .av{width:36px; height:36px; border-radius:50%; object-fit:cover; flex:none; border:1.5px solid var(--line)}
+  .chip .ini{
+    width:36px; height:36px; border-radius:50%; flex:none; display:grid; place-items:center;
+    background:var(--chip); border:1.5px solid var(--line); color:var(--accent);
+    font-size:14px; font-weight:800;
+  }
+  /* el botón de cambiar: se ve, pero no compite con lo que el cliente
+     está eligiendo en el paso de abajo */
+  .cambiar{
+    flex:none; padding:7px 13px; border-radius:99px; cursor:pointer;
+    border:1px solid var(--line); background:transparent; color:var(--accent);
+    font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; opacity:.85;
+    transition:transform .12s ease, border-color .12s ease, opacity .12s ease;
+  }
+  .cambiar:hover{border-color:var(--accent); opacity:1}
+  .cambiar:active{transform:scale(.94)}
+
+  /* el carrito que llega de la tarjeta: plegado es una línea, y se abre
+     al tocarlo para ver el desglose completo */
+  #secSel .chip{cursor:pointer; width:100%; font:inherit; color:inherit}
+  #secSel .chip .flecha{flex:none; color:var(--accent); font-size:12px; transition:transform .18s ease}
+  #secSel.plegado .chip .flecha{transform:rotate(0)}
+
+  /* ---- teléfono: un solo campo, con la lada adentro ----
+     Dos cajas separadas se leían como dos preguntas. Aquí el borde es uno
+     solo y el número empieza justo donde termina el prefijo. */
+  .datos .tel-caja{
+    display:flex; align-items:stretch; width:100%;
+    border:1.5px solid var(--line); border-radius:14px; background:var(--btn);
+    transition:border-color .15s ease;
+  }
+  .datos .tel-caja:focus-within{border-color:var(--accent)}
+  .datos .lada{
+    flex:none; display:flex; align-items:center; gap:7px;
+    padding:0 11px 0 14px; position:relative; cursor:pointer;
+  }
+  /* la raya que separa el prefijo del número, corta: no llega a los bordes */
+  .datos .lada::after{
+    content:""; position:absolute; right:0; top:11px; bottom:11px;
+    width:1px; background:var(--line);
+  }
+  .datos .lada select{
+    position:absolute; inset:0; width:100%; height:100%;
+    opacity:0; border:none; cursor:pointer; font-size:16px;   /* 16px: iOS no hace zoom */
+  }
+  .datos .bandera{width:21px; height:14px; border-radius:2px; flex:none; display:block}
+  .datos .lada b{font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; opacity:.9}
+  .datos .lada .caret{
+    width:0; height:0; flex:none; border:4px solid transparent;
+    border-top-color:var(--accent); margin-top:3px; opacity:.75;
+  }
+  /* el input ya no es una caja: la caja es el padre */
+  .datos .tel-caja input{
+    flex:1; min-width:0; border:none; background:none; border-radius:0;
+    padding-left:12px;
+  }
+  .datos .tel-caja input:focus{border:none}
+
+  /* ---- pantalla final ---- */
+  .listo-wa{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    width:100%; margin-top:18px; padding:15px; border-radius:14px; border:none;
+    background:#1fa855; color:#fff; font-family:inherit; font-size:15.5px; font-weight:700;
+    text-decoration:none; cursor:pointer;
+  }
+  .listo-wa svg{width:18px; height:18px}
+  /* El anticipo. Usa el par --sel/--selink, que es el color con el que CADA
+     skin pinta lo seleccionado: así se lee en la tarjeta clara y en la negra.
+     Antes usaba --ink sobre --papel y en las tarjetas oscuras salía un botón
+     casi blanco con letras casi blancas. */
+  .listo-pago{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    width:100%; margin-top:18px; padding:15px; border-radius:14px; border:none;
+    background:var(--sel); color:var(--selink);
+    font-family:inherit; font-size:15.5px; font-weight:700;
+    text-decoration:none; cursor:pointer;
+  }
+  .listo-pago svg{color:var(--selink); opacity:.9}
+  .listo-pago svg{width:18px; height:18px}
+  .listo-pago + .listo-wa{margin-top:10px}
+  /* Dentro del acordeón el margen se anula para que la PRIMERA de estas dos no
+     abra un hueco de más. El problema era que ahí caía también el WhatsApp
+     cuando venía DESPUÉS de "Agregar a mi calendario": se le pegaba encima, sin
+     un pixel de por medio, mientras los botones de arriba sí respiraban. */
+  .rc-acc .listo-cal + .listo-wa, .rc-acc .listo-pago + .listo-wa{margin-top:10px}
+  .rc-acc .listo-pago, .rc-acc .listo-wa{margin-top:0}
+  .rc-acc .listo-pago + *, .rc-acc .listo-wa + *{margin-top:10px}
+  /* El otro "Volver a la tarjeta", el de la pantalla final. Mismo trato que
+     `.back`: sin claves sembradas queda el texto de siempre; con ellas se
+     vuelve un botón relleno, que es lo que pidió Mafia Barber. */
+  .listo .volver{
+    display:inline-block; margin-top:14px; font-size:13px; font-weight:600;
+    color:var(--volver-ico, var(--accent)); text-decoration:none; opacity:.85;
+    background:var(--volver-bg, transparent);
+    border:1px solid var(--volver-line, transparent);
+    border-radius:99px; padding:var(--volver-pad, 0);
+  }
+
+  /* ============================================================
+     SKIN "EDITORIAL" — se activa con "skin":"editorial" en la agenda.
+     Molde de taniaruvalcaba: borde negro, sombra dura, crema y lima.
+     Todo va anidado para no tocar a los demás clientes.
+     ============================================================ */
+  /* --- el recibo hereda la cara de cada negocio con un renglón --- */
+  [data-skin="barber"], [data-skin="king"], [data-skin="club"], [data-skin="acero"]{
+    --rc-metal:var(--bj-oro); --rc-titulo:var(--bj-deco); --rc-filo:var(--bj-filo2);
+  }
+  [data-skin="garage"]{--rc-metal:var(--gg-rojo-lt); --rc-titulo:var(--gg-disp); --rc-filo:var(--gg-filo)}
+  [data-skin="oro"], [data-skin="nacar"], [data-skin="plata"], [data-skin="rosas"], [data-skin="spa"]{
+    --rc-titulo:var(--or-serif, var(--serif));
+  }
+  [data-skin="editorial"]{--rc-metal:var(--tinta); --rc-titulo:var(--ed-serif); --rc-filo:var(--tinta)}
+  [data-skin="editorial"] .listo{border:2px solid var(--tinta); border-radius:4px; box-shadow:var(--dura)}
+
+  [data-skin="editorial"]{
+    --tinta:#12100f; --crema:#f7f4f1; --papel:#fff;
+    --rosa:#f3b6b0; --lima:#cbde4a; --azul:#bfe3f5;
+    --dura:4px 4px 0 var(--tinta); --dura-sm:3px 3px 0 var(--tinta);
+    --ed-sans:"Poppins",system-ui,-apple-system,sans-serif;
+    --ed-serif:"Playfair Display",Georgia,serif;
+  }
+  [data-skin="editorial"] body{
+    font-family:var(--ed-sans); background:var(--crema); color:var(--tinta);
+  }
+  /* fondo vivo, igual que la tarjeta */
+  [data-skin="editorial"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  /* más tenues que en la tarjeta: aquí el contenido es una retícula y necesita fondo limpio */
+  [data-skin="editorial"] .blob{position:absolute; border-radius:50%; filter:blur(75px); opacity:.42}
+  [data-skin="editorial"] .eb1{width:400px;height:400px; background:var(--rosa); left:-170px; top:-140px; animation:edrift1 27s ease-in-out infinite alternate}
+  [data-skin="editorial"] .eb2{width:320px;height:320px; background:var(--azul); right:-150px; top:34%; animation:edrift2 33s ease-in-out infinite alternate}
+  [data-skin="editorial"] .eb3{width:360px;height:360px; background:var(--lima); left:-130px; bottom:-160px; opacity:.26; animation:edrift3 30s ease-in-out infinite alternate}
+  @keyframes edrift1{to{transform:translate(70px,55px) scale(1.15)}}
+  @keyframes edrift2{to{transform:translate(-60px,-45px) scale(.94)}}
+  @keyframes edrift3{to{transform:translate(55px,-60px) scale(1.12)}}
+
+  [data-skin="editorial"] .back{
+    background:var(--papel); border:2px solid var(--tinta); box-shadow:var(--dura-sm);
+    color:var(--tinta); font-weight:700;
+    transition:transform .16s cubic-bezier(.2,.7,.3,1.4), box-shadow .16s ease;
+  }
+  [data-skin="editorial"] .back:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--tinta)}
+  [data-skin="editorial"] .back .flechita{color:var(--tinta)}
+  [data-skin="editorial"] h1{
+    font-family:var(--ed-sans); font-weight:800; text-transform:uppercase;
+    letter-spacing:-.03em; line-height:1.02;
+  }
+  [data-skin="editorial"] .sub{color:var(--tinta); opacity:.55; font-weight:600}
+  [data-skin="editorial"] .orn{color:var(--tinta)}
+  [data-skin="editorial"] .orn::before,
+  [data-skin="editorial"] .orn::after{background:var(--tinta); height:2px}
+
+  [data-skin="editorial"] .navmes button{
+    background:var(--papel); border:2px solid var(--tinta); box-shadow:var(--dura-sm);
+    color:var(--tinta); font-weight:800;
+  }
+  [data-skin="editorial"] .navmes button:not(:disabled):active{transform:translate(3px,3px); box-shadow:0 0 0 var(--tinta)}
+  [data-skin="editorial"] .month{color:var(--tinta); font-weight:800; letter-spacing:.1em}
+  [data-skin="editorial"] .month small{color:var(--tinta); opacity:.5}
+  [data-skin="editorial"] .dow{color:var(--tinta); opacity:.5; font-weight:700}
+  [data-skin="editorial"] .day{
+    background:var(--papel); border:2px solid var(--tinta); border-radius:12px;
+    font-weight:600; box-shadow:2px 2px 0 var(--tinta);
+    transition:transform .14s ease, box-shadow .14s ease;
+  }
+  [data-skin="editorial"] .day:disabled{
+    background:none; border-color:transparent; box-shadow:none; opacity:.25;
+  }
+  @media (hover:hover){[data-skin="editorial"] .day:not(:disabled):hover{transform:translate(1px,1px); box-shadow:1px 1px 0 var(--tinta)}}
+  [data-skin="editorial"] .day.sel{
+    background:var(--rosa); color:var(--selink,var(--tinta)); font-weight:800;
+    border-color:var(--tinta); box-shadow:var(--dura-sm);
+  }
+  [data-skin="editorial"] h2{color:var(--tinta); font-weight:800}
+  [data-skin="editorial"] h2::before,
+  [data-skin="editorial"] h2::after{background:var(--tinta); height:2px}
+  [data-skin="editorial"] .slot{
+    background:var(--papel); border:2px solid var(--tinta); border-radius:99px;
+    box-shadow:var(--dura-sm); font-weight:600;
+    transition:transform .16s cubic-bezier(.2,.7,.3,1.4), box-shadow .16s ease;
+  }
+  @media (hover:hover){[data-skin="editorial"] .slot:hover{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--tinta)}}
+  [data-skin="editorial"] .slot.sel{background:var(--lima); color:var(--selink,var(--tinta)); font-weight:800}
+  [data-skin="editorial"] .aviso{color:var(--tinta); opacity:.6}
+  [data-skin="editorial"] .sel-caja{
+    background:var(--papel); border:2px solid var(--tinta); border-radius:16px; box-shadow:var(--dura-sm);
+  }
+  [data-skin="editorial"] .cambiar{border:2px solid var(--tinta); color:var(--tinta); font-weight:800}
+  [data-skin="editorial"] .chip .et{color:var(--tinta); opacity:.55}
+  [data-skin="editorial"] .chip .av,[data-skin="editorial"] .chip .ini{border-color:var(--tinta)}
+  [data-skin="editorial"] .chip .ini{background:var(--rosa); color:var(--tinta)}
+  [data-skin="editorial"] .confirm{
+    background:var(--tinta); color:var(--crema); border:2px solid var(--tinta);
+    border-radius:99px; box-shadow:var(--dura); font-weight:800; text-transform:uppercase;
+    letter-spacing:.02em;
+    transition:transform .16s cubic-bezier(.2,.7,.3,1.4), box-shadow .16s ease, opacity .15s ease;
+  }
+  [data-skin="editorial"] .confirm.on:active{transform:translate(4px,4px); box-shadow:0 0 0 var(--tinta)}
+  [data-skin="editorial"] .fine{color:var(--tinta); opacity:.6}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="editorial"] .blob{animation:none}
+  }
+
+  /* ============================================================
+     SKIN "SPA" — se activa con "skin":"spa" en la agenda.
+     Molde de vaspabeauty: noche cálida, bokeh de vela, oro y serif.
+     ============================================================ */
+  .sp{display:none}
+  [data-skin="spa"] .sp{display:block}
+  [data-skin="spa"]{
+    --sp-serif:"Cormorant Garamond",Didot,Georgia,serif;
+    --sp-script:"Parisienne",cursive;
+    --sp-sans:"Poppins",system-ui,-apple-system,sans-serif;
+    --sp-oro-lt:#8b6f52;
+    --sp-vidrio:rgba(243,233,218,.90);
+    --sp-line2:rgba(155,124,96,.58);
+  }
+  [data-skin="spa"] *{-webkit-tap-highlight-color:transparent}
+  [data-skin="spa"] body{
+    font-family:var(--sp-sans);
+    background:linear-gradient(168deg,var(--bg1) 0%,var(--bg2) 48%,#e9dccb 100%);
+    background-attachment:fixed;
+  }
+  [data-skin="spa"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  /* misma foto de fondo que la tarjeta, con su velo oscuro para que se lea */
+  [data-skin="spa"] .sp-foto{
+    position:absolute; inset:0;
+    background:url("img/va-fondo-1.jpg?v=e81358c6") center/cover;
+  }
+  [data-skin="spa"] .sp-velo{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(180deg,rgba(253,250,245,.62) 0%,rgba(251,246,239,.42) 30%,rgba(249,243,234,.48) 66%,rgba(240,229,213,.72) 100%),
+      radial-gradient(135% 90% at 50% 28%, transparent 38%, rgba(196,171,142,.28) 100%);
+  }
+  /* titileo de las velas del fondo + vapor */
+  [data-skin="spa"] .sp-bokeh{position:absolute; border-radius:50%; filter:blur(46px)}
+  [data-skin="spa"] .sk1{width:300px;height:300px; left:34%; bottom:5%;  background:radial-gradient(circle,rgba(255,192,104,.50),transparent 70%); animation:sppalp 5.2s ease-in-out infinite}
+  [data-skin="spa"] .sk2{width:220px;height:220px; left:58%; bottom:2%;  background:radial-gradient(circle,rgba(255,203,130,.42),transparent 70%); animation:sppalp 6.6s ease-in-out infinite .7s}
+  [data-skin="spa"] .sk3{width:250px;height:250px; left:8%;  bottom:12%; background:radial-gradient(circle,rgba(255,198,118,.36),transparent 70%); animation:sppalp 7.4s ease-in-out infinite 1.4s}
+  [data-skin="spa"] .sk4{
+    width:120px; height:340px; left:40%; bottom:16%; border-radius:50%; filter:blur(28px);
+    background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 76%);
+    opacity:0; animation:sphumo 14s ease-in-out infinite;
+  }
+  @keyframes sppalp{
+    0%,100%{opacity:.62; transform:scale(1)}
+    18%{opacity:.95; transform:scale(1.06)}
+    34%{opacity:.72; transform:scale(1.01)}
+    56%{opacity:1; transform:scale(1.08)}
+    78%{opacity:.7; transform:scale(1.02)}
+  }
+  @keyframes sphumo{
+    0%{opacity:0; transform:translateY(60px) scaleX(.75)}
+    28%{opacity:.7} 70%{opacity:.32}
+    100%{opacity:0; transform:translateY(-200px) scaleX(1.3)}
+  }
+  [data-skin="spa"] .sp-vela{
+    position:absolute; width:190%; height:280px; left:-45%; top:6%;
+    transform:rotate(-22deg); filter:blur(42px);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
+    animation:spflama 28s ease-in-out infinite alternate;
+  }
+  @keyframes spflama{from{transform:rotate(-22deg) translateX(-70px)} to{transform:rotate(-22deg) translateX(70px)}}
+  [data-skin="spa"] .sp-rama{position:absolute; opacity:.22; width:230px}
+  [data-skin="spa"] .sp-rama svg{width:100%; height:auto; display:block}
+  [data-skin="spa"] .sp-tr{top:-30px; right:-58px; transform-origin:top right; animation:spmecer 14s ease-in-out infinite}
+  [data-skin="spa"] .sp-bl{bottom:-40px; left:-64px; transform-origin:bottom left; animation:spmecer 17s ease-in-out infinite reverse}
+  @keyframes spmecer{0%,100%{transform:rotate(0deg)} 50%{transform:rotate(3.5deg)}}
+  [data-skin="spa"] .sp-polvo{
+    position:absolute; width:4px; height:4px; border-radius:50%;
+    background:radial-gradient(circle,#fff1cd,rgba(217,185,120,.4) 45%,transparent 70%);
+    opacity:0; animation:spsubir 21s linear infinite;
+  }
+  @keyframes spsubir{
+    0%{transform:translateY(104vh) scale(.6); opacity:0}
+    12%{opacity:.95} 82%{opacity:.5}
+    100%{transform:translateY(-6vh) scale(1.3); opacity:0}
+  }
+
+  [data-skin="spa"] .back{
+    background:var(--sp-vidrio); border:1px solid var(--line); border-radius:99px;
+    color:var(--ink); font-weight:500; letter-spacing:.14em; text-transform:uppercase;
+    font-size:11.5px; backdrop-filter:blur(6px);
+    box-shadow:0 12px 26px rgba(122,96,71,.16);
+    transition:transform .16s ease, border-color .16s ease;
+  }
+  [data-skin="spa"] .back:hover{transform:translateY(-2px); border-color:var(--sp-line2); background:rgba(248,240,228,.97)}
+  [data-skin="spa"] .back:active{transform:scale(.97); background:linear-gradient(135deg,#f2e6d8,#e8d8c4)}
+  [data-skin="spa"] .back .flechita{color:var(--sp-oro-lt)}
+  [data-skin="spa"] h1{
+    font-family:var(--sp-serif); font-weight:600; text-transform:uppercase;
+    letter-spacing:.14em; line-height:1.06; color:var(--ink);
+    font-size:clamp(27px,7.4vw,34px);
+  }
+  [data-skin="spa"] .sub{
+    font-family:var(--sp-script); font-size:25px; color:var(--sp-oro-lt);
+    text-transform:none; letter-spacing:0; margin-top:8px;
+  }
+  [data-skin="spa"] .orn{color:var(--accent)}
+  [data-skin="spa"] .orn::before,
+  [data-skin="spa"] .orn::after{background:linear-gradient(90deg,transparent,var(--sp-line2),transparent)}
+  [data-skin="spa"] .orn span{
+    font-size:0; width:14px; height:22px; display:block;
+    background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 90'%3E%3Cpath d='M30 88V16' stroke='%23a98d74' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3Cg fill='%23a98d74'%3E%3Cellipse cx='18' cy='34' rx='12' ry='7.5' transform='rotate(-28 18 34)'/%3E%3Cellipse cx='42' cy='46' rx='12' ry='7.5' transform='rotate(28 42 46)'/%3E%3Cellipse cx='30' cy='16' rx='9' ry='6'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  [data-skin="spa"] .navmes button{
+    background:var(--sp-vidrio); border:1px solid var(--line); color:var(--sp-oro-lt);
+    backdrop-filter:blur(6px);
+  }
+  [data-skin="spa"] .month{
+    font-family:var(--sp-serif); font-size:18px; font-weight:600;
+    letter-spacing:.22em; color:var(--ink);
+  }
+  [data-skin="spa"] .month small{color:var(--muted); letter-spacing:.14em; font-family:var(--sp-sans); font-size:10px}
+  [data-skin="spa"] .dow{font-weight:600; letter-spacing:.1em; color:var(--muted)}
+  [data-skin="spa"] .day{
+    background:var(--sp-vidrio); border:1px solid var(--line); border-radius:13px;
+    font-family:var(--sp-serif); font-size:19px; font-weight:600; color:var(--ink);
+    transition:transform .14s ease, border-color .14s ease, background .14s ease;
+  }
+  [data-skin="spa"] .day:disabled{background:none; border-color:transparent; opacity:.22}
+  @media (hover:hover){[data-skin="spa"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--sp-line2); background:rgba(248,240,228,.97)}}
+  [data-skin="spa"] .day:not(:disabled):not(.sel):active{
+    background:linear-gradient(135deg,#f2e6d8,#e8d8c4);
+    border-color:var(--sp-oro-lt); transform:scale(.96);
+  }
+  [data-skin="spa"] .day.sel{
+    background:linear-gradient(135deg,#b3977d,#95795f); color:var(--selink);
+    border-color:transparent; font-weight:700;
+    box-shadow:0 8px 18px rgba(122,96,71,.30);
+  }
+  [data-skin="spa"] h2{
+    font-family:var(--sp-serif); font-size:15px; font-weight:600;
+    letter-spacing:.32em; color:var(--sp-oro-lt);
+  }
+  [data-skin="spa"] h2::before,
+  [data-skin="spa"] h2::after{background:linear-gradient(90deg,transparent,var(--sp-line2),transparent)}
+  [data-skin="spa"] .slot{
+    background:var(--sp-vidrio); border:1px solid var(--line); border-radius:99px;
+    font-family:var(--sp-serif); font-size:17px; font-weight:600; color:var(--ink);
+    backdrop-filter:blur(6px);
+    transition:transform .16s ease, border-color .16s ease;
+  }
+  @media (hover:hover){[data-skin="spa"] .slot:hover{transform:translateY(-2px); border-color:var(--sp-line2); background:rgba(248,240,228,.97)}}
+  [data-skin="spa"] .slot:not(.sel):active{
+    background:linear-gradient(135deg,#f2e6d8,#e8d8c4);
+    border-color:var(--sp-oro-lt); transform:scale(.97);
+  }
+  [data-skin="spa"] .slot.sel{
+    background:linear-gradient(135deg,#b3977d,#95795f); color:var(--selink);
+    border-color:transparent; font-weight:700;
+  }
+  [data-skin="spa"] .aviso{color:var(--muted); font-family:var(--sp-sans)}
+  [data-skin="spa"] .sel-caja{background:var(--sp-vidrio); border:1px solid var(--sp-line2); border-radius:20px}
+  [data-skin="spa"] .cambiar{border-color:var(--sp-line2); color:var(--sp-oro-lt)}
+  [data-skin="spa"] .confirm{
+    position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#b3977d,#a98d74 45%,#95795f 100%);
+    color:#fffaf3; border:1px solid rgba(255,255,255,.28); border-radius:99px;
+    font-family:var(--sp-sans); font-size:14px; font-weight:500;
+    letter-spacing:.2em; text-transform:uppercase; padding:20px;
+    box-shadow:0 16px 32px rgba(122,96,71,.30);
+  }
+  [data-skin="spa"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.34) 50%,transparent 60%);
+    transform:translateX(-130%); animation:spshine 4.4s ease-in-out infinite;
+  }
+  @keyframes spshine{0%,58%{transform:translateX(-130%)} 78%,100%{transform:translateX(130%)}}
+  [data-skin="spa"] .fine{color:var(--muted)}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="spa"] .sp-bokeh,[data-skin="spa"] .sp-vela,[data-skin="spa"] .sp-rama,
+    [data-skin="spa"] .sp-polvo,[data-skin="spa"] .confirm.on::after{animation:none}
+    [data-skin="spa"] .sp-polvo{display:none}
+  }
+
+  /* ============================================================
+     SKIN "PLATA" — se activa con "skin":"plata" en la agenda.
+     Molde de carlosleyva: negro, cromo y destellos de diamante.
+     ============================================================ */
+  .pl{display:none}
+  [data-skin="plata"] .pl{display:block}
+  [data-skin="plata"]{
+    --pl-serif:"Cormorant Garamond",Didot,Georgia,serif;
+    --pl-script:"Parisienne",cursive;
+    --pl-sans:"Poppins",system-ui,-apple-system,sans-serif;
+    --pl-vidrio:rgba(255,255,255,.055);
+    --pl-line2:rgba(230,234,242,.62);
+    --pl-cromo:linear-gradient(135deg,#ffffff 0%,#c9cdd6 22%,#8b8f99 42%,#ffffff 56%,#b9bec8 74%,#7e828c 100%);
+  }
+  [data-skin="plata"] *{-webkit-tap-highlight-color:transparent}
+  [data-skin="plata"] body{
+    font-family:var(--pl-sans);
+    background:
+      radial-gradient(120% 60% at 50% -6%, rgba(210,216,228,.16), transparent 60%),
+      linear-gradient(168deg,var(--bg1) 0%,var(--bg2) 46%,#050506 100%);
+    background-attachment:fixed;
+  }
+  [data-skin="plata"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  [data-skin="plata"] .pl-halo{position:absolute; border-radius:50%; filter:blur(80px)}
+  [data-skin="plata"] .ph1{width:400px;height:400px; left:-140px; top:-120px; background:rgba(200,208,224,.14); animation:plvagar 26s ease-in-out infinite alternate}
+  [data-skin="plata"] .ph2{width:340px;height:340px; right:-130px; bottom:6%; background:rgba(210,216,230,.11); animation:plvagar 32s ease-in-out infinite alternate-reverse}
+  @keyframes plvagar{from{transform:translate(0,0) scale(1)} to{transform:translate(60px,-46px) scale(1.14)}}
+  [data-skin="plata"] .pl-barra{
+    position:absolute; width:200%; height:220px; left:-50%; top:14%;
+    transform:rotate(-24deg); filter:blur(40px);
+    background:linear-gradient(90deg,transparent,rgba(226,232,244,.20),transparent);
+    animation:plbarrer 22s ease-in-out infinite alternate;
+  }
+  @keyframes plbarrer{from{transform:rotate(-24deg) translateX(-90px)} to{transform:rotate(-24deg) translateX(90px)}}
+  [data-skin="plata"] .pl-destello{position:absolute; opacity:0; animation:plbrillar 6s ease-in-out infinite}
+  [data-skin="plata"] .pl-destello::before,
+  [data-skin="plata"] .pl-destello::after{
+    content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background:linear-gradient(180deg,rgba(255,255,255,0),#fff 50%,rgba(255,255,255,0)); border-radius:50%;
+  }
+  [data-skin="plata"] .pl-destello::before{width:2px; height:100%}
+  [data-skin="plata"] .pl-destello::after{width:100%; height:2px; background:linear-gradient(90deg,rgba(255,255,255,0),#fff 50%,rgba(255,255,255,0))}
+  @keyframes plbrillar{
+    0%,100%{opacity:0; transform:scale(.4) rotate(0deg)}
+    8%{opacity:1; transform:scale(1.1) rotate(20deg)}
+    16%{opacity:.15; transform:scale(.8) rotate(35deg)}
+    24%{opacity:.9; transform:scale(1) rotate(50deg)}
+    40%{opacity:0; transform:scale(.5) rotate(70deg)}
+  }
+
+  [data-skin="plata"] .back{
+    background:var(--pl-vidrio); border:1px solid var(--line); border-radius:99px;
+    color:var(--ink); font-weight:400; letter-spacing:.16em; text-transform:uppercase;
+    font-size:11px; backdrop-filter:blur(6px); box-shadow:0 14px 30px rgba(0,0,0,.5);
+    transition:transform .16s ease, border-color .16s ease, background .16s ease;
+  }
+  [data-skin="plata"] .back:hover{transform:translateY(-2px); border-color:var(--pl-line2); background:rgba(255,255,255,.10)}
+  [data-skin="plata"] .back:active{transform:scale(.97); background:var(--pl-cromo); color:#14141a}
+  [data-skin="plata"] .back .flechita{color:var(--accent)}
+  [data-skin="plata"] h1{
+    font-family:var(--pl-serif); font-weight:600; text-transform:uppercase;
+    letter-spacing:.16em; line-height:1.06; font-size:clamp(26px,7.2vw,33px);
+    background:linear-gradient(100deg,#e8ebf1 0%,#e8ebf1 32%,#fff 45%,#fff 52%,#b6bbc6 62%,#e8ebf1 74%,#e8ebf1 100%);
+    background-size:250% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:plcromar 7s ease-in-out infinite;
+  }
+  @keyframes plcromar{0%,100%{background-position:125% 0} 50%{background-position:-25% 0}}
+  [data-skin="plata"] .sub{
+    font-family:var(--pl-script); font-size:25px; color:var(--accent);
+    text-transform:none; letter-spacing:0; margin-top:8px;
+  }
+  [data-skin="plata"] .orn{color:var(--accent)}
+  [data-skin="plata"] .orn::before,
+  [data-skin="plata"] .orn::after{background:linear-gradient(90deg,transparent,var(--pl-line2),transparent)}
+  [data-skin="plata"] .orn span{
+    font-size:0; width:9px; height:9px; display:block;
+    background:#e9edf5; transform:rotate(45deg);
+  }
+  [data-skin="plata"] .navmes button{
+    background:var(--pl-vidrio); border:1px solid var(--line); color:var(--ink);
+    backdrop-filter:blur(6px);
+  }
+  [data-skin="plata"] .month{
+    font-family:var(--pl-serif); font-size:18px; font-weight:600;
+    letter-spacing:.24em; color:var(--ink);
+  }
+  [data-skin="plata"] .month small{color:var(--muted); letter-spacing:.14em; font-family:var(--pl-sans); font-size:10px}
+  [data-skin="plata"] .dow{font-weight:500; letter-spacing:.12em; color:var(--muted)}
+  [data-skin="plata"] .day{
+    background:var(--pl-vidrio); border:1px solid var(--line); border-radius:13px;
+    font-family:var(--pl-serif); font-size:19px; font-weight:600; color:var(--ink);
+    transition:transform .14s ease, border-color .14s ease, background .14s ease;
+  }
+  [data-skin="plata"] .day:disabled{background:none; border-color:transparent; opacity:.22}
+  @media (hover:hover){[data-skin="plata"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--pl-line2); background:rgba(255,255,255,.10)}}
+  [data-skin="plata"] .day:not(:disabled):not(.sel):active{background:rgba(255,255,255,.22); border-color:#fff; transform:scale(.96)}
+  [data-skin="plata"] .day.sel{
+    background:var(--pl-cromo); color:var(--selink); border-color:rgba(255,255,255,.6);
+    font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,.5), 0 0 20px rgba(226,232,244,.28);
+  }
+  [data-skin="plata"] h2{
+    font-family:var(--pl-serif); font-size:15px; font-weight:600;
+    letter-spacing:.34em; color:var(--ink);
+  }
+  [data-skin="plata"] h2::before,
+  [data-skin="plata"] h2::after{background:linear-gradient(90deg,transparent,var(--pl-line2),transparent)}
+  [data-skin="plata"] .slot{
+    background:var(--pl-vidrio); border:1px solid var(--line); border-radius:99px;
+    font-family:var(--pl-serif); font-size:17px; font-weight:600; color:var(--ink);
+    backdrop-filter:blur(6px); transition:transform .16s ease, border-color .16s ease, background .16s ease;
+  }
+  @media (hover:hover){[data-skin="plata"] .slot:hover{transform:translateY(-2px); border-color:var(--pl-line2); background:rgba(255,255,255,.10)}}
+  [data-skin="plata"] .slot:not(.sel):active{background:rgba(255,255,255,.22); border-color:#fff; transform:scale(.97)}
+  [data-skin="plata"] .slot.sel{
+    background:var(--pl-cromo); color:var(--selink);
+    border-color:rgba(255,255,255,.6); font-weight:700;
+  }
+  [data-skin="plata"] .aviso{color:var(--muted); font-family:var(--pl-sans)}
+  [data-skin="plata"] .sel-caja{background:var(--pl-vidrio); border:1px solid var(--pl-line2); border-radius:20px}
+  [data-skin="plata"] .cambiar{border-color:var(--pl-line2)}
+  [data-skin="plata"] .confirm{
+    position:relative; overflow:hidden;
+    background:var(--pl-cromo); background-size:200% 100%;
+    color:#14141a; border:1px solid rgba(255,255,255,.55); border-radius:99px;
+    font-family:var(--pl-sans); font-size:14px; font-weight:600;
+    letter-spacing:.2em; text-transform:uppercase; padding:20px;
+    box-shadow:0 16px 34px rgba(0,0,0,.55), 0 0 24px rgba(226,232,244,.14);
+    transition:background-position .5s ease, opacity .15s ease;
+  }
+  [data-skin="plata"] .confirm.on:hover{background-position:100% 0}
+  [data-skin="plata"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%);
+    transform:translateX(-130%); animation:plshine 4.2s ease-in-out infinite;
+  }
+  @keyframes plshine{0%,58%{transform:translateX(-130%)} 78%,100%{transform:translateX(130%)}}
+  [data-skin="plata"] .fine{color:var(--muted)}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="plata"] .pl-halo,[data-skin="plata"] .pl-barra,
+    [data-skin="plata"] .pl-destello,[data-skin="plata"] .confirm.on::after,
+    [data-skin="plata"] h1{animation:none}
+    [data-skin="plata"] .pl-destello{display:none}
+    [data-skin="plata"] h1{background:none; color:var(--ink)}
+  }
+
+  /* ============================================================
+     SKIN "ORO ROSA" — se activa con "skin":"oro" en la agenda.
+     Molde de studionails: nude rosado, filos dorados, texto de oro
+     y purpurina subiendo. Anidado para no tocar a los demás.
+     ============================================================ */
+  .or{display:none}
+  [data-skin="oro"] .or{display:block}
+  [data-skin="oro"]{
+    --or-sans:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --or-serif:"Playfair Display",Georgia,"Times New Roman",serif;
+    --or-foil:linear-gradient(102deg,#96762c 0%,#c9a24d 18%,#f3e0a8 38%,#fffaea 48%,#e6c979 58%,#c9a24d 76%,#96762c 100%);
+    --or-filo:linear-gradient(135deg,#e2c47f,#96762c 32%,#f3e0a8 55%,#c9a24d 78%,#8d6d26);
+    --or-papel:#fffaf8;
+  }
+  [data-skin="oro"] body{
+    font-family:var(--or-sans);
+    background:linear-gradient(174deg,#fdf3f2 0%,#fbe9ec 34%,#fdf1e4 66%,#fdf3f2 100%);
+    background-size:100% 250%; background-attachment:fixed;
+    animation:ormudar 32s ease-in-out infinite alternate;
+  }
+  @keyframes ormudar{to{background-position:0 100%}}
+  [data-skin="oro"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  [data-skin="oro"] .or-blob{position:absolute; border-radius:50%; filter:blur(72px)}
+  [data-skin="oro"] .ob1{width:420px;height:420px; background:#e7a9b6; opacity:.5; left:-160px; top:-130px; animation:ordrift1 28s ease-in-out infinite alternate}
+  [data-skin="oro"] .ob2{width:360px;height:360px; background:#c9a24d; opacity:.32; right:-150px; top:32%; animation:ordrift2 34s ease-in-out infinite alternate}
+  [data-skin="oro"] .ob3{width:390px;height:390px; background:#c9707f; opacity:.22; left:-140px; bottom:-160px; animation:ordrift3 31s ease-in-out infinite alternate}
+  @keyframes ordrift1{to{transform:translate(74px,58px) scale(1.16)}}
+  @keyframes ordrift2{to{transform:translate(-64px,-48px) scale(.92)}}
+  @keyframes ordrift3{to{transform:translate(60px,-64px) scale(1.14)}}
+  [data-skin="oro"] .or-chispa{
+    position:absolute; width:5px; height:5px; border-radius:50%;
+    background:#f0dcae; box-shadow:0 0 10px rgba(201,162,77,.95);
+    animation:orsubir 17s linear infinite;
+  }
+  @keyframes orsubir{
+    0%{transform:translateY(105vh) scale(.5); opacity:0}
+    12%{opacity:1} 86%{opacity:.55}
+    100%{transform:translateY(-8vh) scale(1.15); opacity:0}
+  }
+  [data-skin="oro"] .or-haz{
+    position:absolute; width:190%; height:3px; left:-45%; top:34%;
+    background:linear-gradient(90deg,transparent,rgba(201,162,77,.85),transparent);
+    filter:blur(2.5px); animation:orhaz 13s ease-in-out infinite;
+  }
+  @keyframes orhaz{0%,100%{transform:translateY(-180px) rotate(-11deg); opacity:0} 50%{transform:translateY(180px) rotate(-11deg); opacity:.85}}
+  [data-skin="oro"] .back{
+    background:var(--or-papel); border:1.5px solid transparent;
+    background-image:linear-gradient(var(--or-papel),var(--or-papel)),var(--or-filo);
+    background-origin:border-box; background-clip:padding-box,border-box;
+    box-shadow:0 8px 20px rgba(120,72,68,.13);
+  }
+  [data-skin="oro"] .back .flechita{color:#96762c}
+  [data-skin="oro"] h1{
+    font-family:var(--or-sans); font-weight:800; text-transform:uppercase;
+    letter-spacing:-.04em; font-size:clamp(30px,8.4vw,40px);
+    background:var(--or-foil); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:orfoil 8s linear infinite;
+  }
+  @keyframes orfoil{to{background-position:220% 0}}
+  [data-skin="oro"] .sub{color:var(--muted); font-weight:600}
+  [data-skin="oro"] .orn span{color:#96762c}
+  [data-skin="oro"] .navmes button{
+    background:var(--or-papel); border:1.5px solid rgba(150,118,44,.45); color:#96762c;
+  }
+  [data-skin="oro"] .month{font-family:var(--or-serif); font-weight:700; letter-spacing:.06em; text-transform:none; font-size:17px; color:var(--ink)}
+  [data-skin="oro"] .month small{color:var(--muted)}
+  [data-skin="oro"] .dow{color:var(--muted); font-weight:700}
+  [data-skin="oro"] .day{
+    border-radius:12px; background:var(--or-papel);
+    border:1.5px solid rgba(150,118,44,.22); font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  [data-skin="oro"] .day:disabled{background:none; border-color:transparent}
+  @media (hover:hover){[data-skin="oro"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); box-shadow:0 8px 16px rgba(120,72,68,.16)}}
+  [data-skin="oro"] .day.sel{background:var(--or-filo); border-color:transparent; color:#2b1d1f; font-weight:800}
+  [data-skin="oro"] h2{font-family:var(--or-serif); font-size:20px; font-weight:700; letter-spacing:0; text-transform:none; color:var(--ink)}
+  [data-skin="oro"] h2::before,[data-skin="oro"] h2::after{background:var(--or-filo); height:1.5px; opacity:.6}
+  [data-skin="oro"] .slot{
+    border-radius:12px; background:var(--or-papel);
+    border:1.5px solid rgba(150,118,44,.35); font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  @media (hover:hover){[data-skin="oro"] .slot:not(:disabled):not(.sel):hover{transform:translateY(-2px); box-shadow:0 8px 16px rgba(120,72,68,.16)}}
+  [data-skin="oro"] .slot.sel{background:var(--or-filo); border-color:transparent; color:#2b1d1f; font-weight:800}
+  [data-skin="oro"] .sel-caja{
+    background:var(--or-papel); border:1.5px solid transparent; border-radius:22px;
+    background-image:linear-gradient(var(--or-papel),var(--or-papel)),var(--or-filo);
+    background-origin:border-box; background-clip:padding-box,border-box;
+    box-shadow:0 14px 34px rgba(120,72,68,.13);
+  }
+  [data-skin="oro"] .sel-fila .p,[data-skin="oro"] .sel-tot em{color:#96762c}
+  [data-skin="oro"] .confirm{
+    position:relative; overflow:hidden;
+    background:var(--or-filo); background-size:180% 100%;
+    color:#2b1d1f; border-radius:99px; padding:19px;
+    font-family:var(--or-sans); font-size:15.5px; font-weight:800; letter-spacing:-.01em;
+    box-shadow:0 16px 34px rgba(150,118,44,.35);
+    transition:background-position .5s ease, opacity .15s ease;
+  }
+  [data-skin="oro"] .confirm.on:hover{background-position:100% 0}
+  [data-skin="oro"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);
+    transform:translateX(-130%); animation:orshine 4s ease-in-out infinite;
+  }
+  @keyframes orshine{0%,55%{transform:translateX(-130%)} 75%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="oro"] body,[data-skin="oro"] .or-blob,[data-skin="oro"] .or-haz,
+    [data-skin="oro"] .or-chispa,[data-skin="oro"] .confirm.on::after,[data-skin="oro"] h1{animation:none}
+    [data-skin="oro"] .or-chispa{display:none}
+    [data-skin="oro"] h1{background:none; color:var(--ink)}
+  }
+  [data-skin="oro"] .barbero{background:var(--or-papel); border-color:rgba(150,118,44,.35)}
+  [data-skin="oro"] .barbero.sel{background:var(--or-filo); border-color:transparent; color:#2b1d1f}
+
+  /* ============================================================
+     SKIN "PERLA" — se activa con "skin":"nacar" en la agenda.
+     Molde de studionails2: luz, rosa pastel y oro, con el velo
+     de nácar girando y el fondo mudando de tono.
+     ============================================================ */
+  .na{display:none}
+  [data-skin="nacar"] .na{display:block}
+  [data-skin="nacar"]{
+    --na-sans:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --na-serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+    --na-oro:#c9a24d; --na-oro-lt:#f0dcae; --na-oro-dk:#8d6d26;
+    --na-rosa:#f3c3d0; --na-rosa-dp:#dd8ba6;
+    --na-tornasol:conic-gradient(from 0deg,#f9cdd9,#f6e0bb 18%,#fdf1d6 32%,#f5d2e0 52%,#fadfc6 70%,#f3d9ea 86%,#f9cdd9 100%);
+    --na-oroliq:linear-gradient(104deg,#8d6d26 0%,#c9a24d 20%,#eed79f 38%,#fff4d6 48%,#d8b469 60%,#c9a24d 78%,#8d6d26 100%);
+    --na-vidrio:rgba(255,255,255,.6);
+    --na-vidrio2:rgba(255,255,255,.8);
+    --na-filo:rgba(201,162,77,.42);
+    --na-sombra:0 16px 40px rgba(150,95,110,.14);
+  }
+  [data-skin="nacar"] body{
+    font-family:var(--na-sans);
+    background:radial-gradient(130% 90% at 50% 0%,#fff6f2 0%,#fdeef0 44%,#fae6e6 100%);
+    background-attachment:fixed;
+  }
+  [data-skin="nacar"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  [data-skin="nacar"] .na-aura{position:absolute; border-radius:50%; background:var(--na-tornasol); filter:blur(82px)}
+  [data-skin="nacar"] .na1{width:min(150vw,640px); height:min(150vw,640px); left:50%; top:-16%; margin-left:min(-75vw,-320px); opacity:.78; animation:nagirar 46s linear infinite}
+  [data-skin="nacar"] .na2{width:min(120vw,500px); height:min(120vw,500px); right:-32%; top:40%; opacity:.62; animation:nagirar 62s linear infinite reverse}
+  [data-skin="nacar"] .na3{width:min(130vw,540px); height:min(130vw,540px); left:-38%; bottom:-14%; opacity:.6; animation:nagirar 54s linear infinite}
+  @keyframes nagirar{to{transform:rotate(360deg)}}
+  [data-skin="nacar"] .na-velo{
+    position:absolute; inset:0;
+    background:radial-gradient(120% 84% at 50% 10%,rgba(255,250,248,.24) 0%,rgba(253,245,243,.6) 58%,rgba(253,245,243,.82) 100%);
+  }
+  /* el fondo entero muda entre rosa, durazno y oro */
+  [data-skin="nacar"] .na-tinte{
+    position:absolute; inset:0; opacity:.55;
+    background:linear-gradient(168deg,
+      rgba(249,205,217,.75) 0%, rgba(248,220,196,.7) 24%, rgba(240,220,174,.66) 46%,
+      rgba(255,227,234,.7) 68%, rgba(243,195,208,.72) 86%, rgba(249,205,217,.75) 100%);
+    background-size:100% 340%;
+    animation:natenir 34s ease-in-out infinite alternate;
+  }
+  @keyframes natenir{to{background-position:0 100%}}
+  [data-skin="nacar"] .na-polvo{
+    position:absolute; width:4px; height:4px; border-radius:50%;
+    background:var(--na-oro); box-shadow:0 0 9px rgba(201,162,77,.85);
+    opacity:.75; animation:naflotar 22s linear infinite;
+  }
+  @keyframes naflotar{
+    0%{transform:translateY(106vh) scale(.5); opacity:0}
+    10%{opacity:.85} 88%{opacity:.4}
+    100%{transform:translateY(-8vh) translateX(24px) scale(1.1); opacity:0}
+  }
+  [data-skin="nacar"] .back{
+    background:var(--na-vidrio2); border:1px solid var(--na-filo); color:var(--ink);
+    font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+    box-shadow:var(--na-sombra);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  }
+  [data-skin="nacar"] .back .flechita{color:var(--na-oro-dk)}
+  [data-skin="nacar"] h1{
+    font-family:var(--na-sans); font-weight:600; text-transform:uppercase;
+    font-size:clamp(21px,5.6vw,27px); letter-spacing:.4em; padding-left:.4em;
+    background:var(--na-oroliq); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:naoro 9s linear infinite;
+  }
+  @keyframes naoro{to{background-position:220% 0}}
+  [data-skin="nacar"] .sub{color:var(--na-rosa-dp); letter-spacing:.4em; font-size:9.5px; font-weight:600}
+  [data-skin="nacar"] .orn span{color:var(--na-oro-dk)}
+  [data-skin="nacar"] .orn::before,[data-skin="nacar"] .orn::after{background:linear-gradient(90deg,transparent,rgba(201,162,77,.6))}
+  [data-skin="nacar"] .navmes button{background:var(--na-vidrio2); border:1px solid var(--na-filo); color:var(--na-oro-dk)}
+  [data-skin="nacar"] .month{
+    font-family:var(--na-serif); font-size:21px; font-weight:600;
+    letter-spacing:.04em; text-transform:none; color:var(--ink);
+  }
+  [data-skin="nacar"] .month small{color:var(--muted)}
+  [data-skin="nacar"] .dow{color:var(--muted); letter-spacing:.2em; font-weight:600}
+  [data-skin="nacar"] .day{
+    border-radius:12px; background:rgba(255,255,255,.6);
+    border:1px solid rgba(201,162,77,.24); color:var(--ink); font-weight:500;
+    transition:transform .15s ease, border-color .2s ease, background .2s ease;
+  }
+  [data-skin="nacar"] .day:disabled{background:none; border-color:transparent}
+  @media (hover:hover){[data-skin="nacar"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--na-filo); background:rgba(240,220,174,.6)}}
+  [data-skin="nacar"] .day.sel{background:var(--na-oroliq); border-color:transparent; color:#31241b; font-weight:700}
+  [data-skin="nacar"] h2{
+    font-family:var(--na-serif); font-size:24px; font-weight:600;
+    letter-spacing:.02em; text-transform:none; color:var(--ink);
+  }
+  [data-skin="nacar"] h2::before,[data-skin="nacar"] h2::after{background:rgba(201,162,77,.42)}
+  [data-skin="nacar"] .slot{
+    border-radius:12px; background:rgba(255,255,255,.6);
+    border:1px solid rgba(201,162,77,.36); color:var(--ink); font-weight:500;
+    transition:transform .15s ease, background .2s ease;
+  }
+  @media (hover:hover){[data-skin="nacar"] .slot:not(:disabled):not(.sel):hover{transform:translateY(-2px); background:rgba(240,220,174,.6)}}
+  [data-skin="nacar"] .slot.sel{background:var(--na-oroliq); border-color:transparent; color:#31241b; font-weight:700}
+  [data-skin="nacar"] .barbero{
+    background:var(--na-vidrio); border:1px solid rgba(201,162,77,.3); color:var(--ink);
+    font-weight:600; letter-spacing:.06em; box-shadow:var(--na-sombra);
+  }
+  [data-skin="nacar"] .barbero .ini{
+    background:rgba(255,227,234,.9); border-color:rgba(221,139,166,.5);
+    color:var(--na-rosa-dp); font-family:var(--na-serif); font-size:25px; font-weight:600;
+  }
+  [data-skin="nacar"] .barbero.sel{background:var(--na-oroliq); border-color:transparent; color:#31241b}
+  [data-skin="nacar"] .barbero.sel .ini{background:rgba(255,255,255,.6); color:var(--na-oro-dk); border-color:rgba(255,255,255,.8)}
+  [data-skin="nacar"] .sel-caja{
+    background:var(--na-vidrio2); border:1px solid var(--na-filo); border-radius:22px;
+    box-shadow:var(--na-sombra);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  [data-skin="nacar"] .sel-fila{border-bottom-color:rgba(201,162,77,.26)}
+  [data-skin="nacar"] .sel-fila .p,[data-skin="nacar"] .sel-tot em{color:var(--na-oro-dk); font-family:var(--na-serif); font-size:19px; font-weight:600}
+  [data-skin="nacar"] .sel-tot{border-top-color:rgba(201,162,77,.4)}
+  [data-skin="nacar"] .confirm{
+    position:relative; overflow:hidden;
+    background:var(--na-oroliq); background-size:190% 100%;
+    color:#31241b; border-radius:99px; padding:19px;
+    font-family:var(--na-sans); font-size:12.5px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase;
+    box-shadow:0 18px 40px rgba(141,109,38,.3);
+    transition:background-position .6s ease, opacity .15s ease;
+  }
+  [data-skin="nacar"] .confirm.on:hover{background-position:100% 0}
+  [data-skin="nacar"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.62) 50%,transparent 60%);
+    transform:translateX(-130%); animation:nashine 4.4s ease-in-out infinite;
+  }
+  @keyframes nashine{0%,58%{transform:translateX(-130%)} 78%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="nacar"] .na-aura,[data-skin="nacar"] .na-tinte,[data-skin="nacar"] .na-polvo,
+    [data-skin="nacar"] .confirm.on::after,[data-skin="nacar"] h1{animation:none}
+    [data-skin="nacar"] .na-polvo{display:none}
+    [data-skin="nacar"] h1{background:none; color:var(--ink)}
+  }
+
+  /* ============================================================
+     SKIN "DECÓ" — se activa con "skin":"barber" en la agenda.
+     Molde de barberjazz: negro con sombra, oro y Bebas Neue.
+     ============================================================ */
+  .bj{display:none}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj{display:block}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]){
+    --bj-sans:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --bj-deco:"Bebas Neue","Poppins",system-ui,sans-serif;
+    --bj-oro:#d6af58; --bj-oro-lt:#f5e2a8;
+    --bj-oroliq:linear-gradient(104deg,#8a6c25 0%,#d6af58 20%,#f5e2a8 38%,#fff8dd 48%,#e0bd6a 60%,#d6af58 78%,#8a6c25 100%);
+    --bj-vidrio:rgba(24,21,23,.72);
+    --bj-filo:rgba(214,175,88,.34);
+    --bj-filo2:rgba(214,175,88,.6);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) body{font-family:var(--bj-sans); background:#08070a}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .amb{position:fixed; inset:0; z-index:-2; overflow:hidden; pointer-events:none; background:#08070a}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-foto{
+    position:absolute; inset:0;
+    background:url("img/bj-pared.jpg?v=3ee36414") center 46%/155% no-repeat;
+    filter:blur(3px) brightness(.8);
+    transform:scale(1.06); animation:bjacercar 24s ease-out infinite alternate;
+  }
+  @keyframes bjacercar{to{transform:scale(1.14)}}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-sombra{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 70% at 50% 0%,rgba(8,7,10,.42) 0%,rgba(8,7,10,.84) 58%,rgba(8,7,10,.96) 100%),
+      linear-gradient(180deg,rgba(8,7,10,.6) 0%,rgba(8,7,10,.32) 32%,rgba(8,7,10,.75) 100%);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-rayo{
+    position:absolute; width:210%; height:2px; left:-55%; top:32%;
+    background:linear-gradient(90deg,transparent,rgba(245,226,168,.7),transparent);
+    filter:blur(2px); animation:bjcruzar 14s ease-in-out infinite;
+  }
+  @keyframes bjcruzar{0%,100%{transform:translateY(-220px) rotate(-8deg); opacity:0} 50%{transform:translateY(240px) rotate(-8deg); opacity:.9}}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-mota{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:var(--bj-oro-lt); box-shadow:0 0 9px rgba(214,175,88,.9);
+    opacity:.7; animation:bjsubir 20s linear infinite;
+  }
+  @keyframes bjsubir{
+    0%{transform:translateY(104vh) scale(.4); opacity:0}
+    12%{opacity:.85} 86%{opacity:.35}
+    100%{transform:translateY(-8vh) translateX(26px) scale(1.1); opacity:0}
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .back{
+    background:var(--bj-vidrio); border:1px solid var(--bj-filo); color:var(--ink);
+    font-family:var(--bj-deco); font-size:16px; letter-spacing:.14em;
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .back .flechita{color:var(--bj-oro)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h1{
+    font-family:var(--bj-deco); font-weight:400; text-transform:uppercase;
+    font-size:clamp(38px,10vw,50px); letter-spacing:.05em; line-height:.9;
+    background:var(--bj-oroliq); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:bjoro 9s linear infinite;
+  }
+  @keyframes bjoro{to{background-position:220% 0}}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sub{color:var(--muted); letter-spacing:.4em; font-size:9px; font-weight:600}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .orn span{color:var(--bj-oro)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .orn::before,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .orn::after{background:linear-gradient(90deg,transparent,rgba(214,175,88,.6))}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .navmes button{background:var(--bj-vidrio); border:1px solid var(--bj-filo); color:var(--bj-oro)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .month{
+    font-family:var(--bj-deco); font-size:24px; font-weight:400;
+    letter-spacing:.12em; color:var(--ink);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .month small{color:var(--muted); font-family:var(--bj-sans)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .dow{color:var(--muted); letter-spacing:.18em; font-weight:600}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .day{
+    border-radius:10px; background:rgba(255,255,255,.045);
+    border:1px solid rgba(214,175,88,.18); color:var(--ink); font-weight:500;
+    transition:transform .15s ease, border-color .2s ease, background .2s ease;
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .day:disabled{background:none; border-color:transparent}
+  @media (hover:hover){:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--bj-filo2); background:rgba(214,175,88,.14)}}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .day.sel{background:var(--bj-oroliq); border-color:transparent; color:#14100c; font-weight:700}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h2{
+    font-family:var(--bj-deco); font-size:26px; font-weight:400;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--ink);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h2::before,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h2::after{background:rgba(214,175,88,.34)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .slot{
+    border-radius:10px; background:rgba(255,255,255,.045);
+    border:1px solid rgba(214,175,88,.3); color:var(--ink); font-weight:500;
+    transition:transform .15s ease, background .2s ease;
+  }
+  @media (hover:hover){:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .slot:not(:disabled):not(.sel):hover{transform:translateY(-2px); background:rgba(214,175,88,.14)}}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .slot.sel{background:var(--bj-oroliq); border-color:transparent; color:#14100c; font-weight:700}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero{
+    background:var(--bj-vidrio); border:1px solid rgba(214,175,88,.24); color:var(--ink);
+    font-weight:600; letter-spacing:.03em; border-radius:14px;
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero .av{
+    width:62px; height:62px; border-radius:50%;
+    border:1.5px solid var(--bj-filo2); object-fit:cover;
+    box-shadow:0 6px 16px rgba(0,0,0,.6);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero .ini{
+    background:radial-gradient(120% 120% at 30% 20%,#211d1f,#0c0a0b 70%);
+    border-color:var(--bj-filo2); color:var(--bj-oro-lt);
+    font-family:var(--bj-deco); font-size:26px; letter-spacing:.03em;
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero small{color:var(--muted); letter-spacing:.14em}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero.sel{background:var(--bj-oroliq); border-color:transparent; color:#14100c}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero.sel .ini{background:rgba(20,16,12,.16); color:#14100c; border-color:rgba(20,16,12,.3)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .barbero.sel small{color:rgba(20,16,12,.7)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sel-caja{
+    background:var(--bj-vidrio); border:1px solid var(--bj-filo); border-radius:18px;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sel-fila{border-bottom-color:rgba(214,175,88,.2)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sel-fila .p,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sel-tot em{color:var(--bj-oro-lt); font-family:var(--bj-deco); font-size:22px}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .sel-tot{border-top-color:rgba(214,175,88,.32)}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .confirm{
+    position:relative; overflow:hidden;
+    background:var(--bj-oroliq); background-size:190% 100%;
+    color:#14100c; border-radius:14px; padding:18px;
+    font-family:var(--bj-deco); font-size:24px; font-weight:400; letter-spacing:.12em;
+    box-shadow:0 20px 44px rgba(154,122,44,.34);
+    transition:background-position .6s ease, opacity .15s ease;
+  }
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .confirm.on:hover{background-position:100% 0}
+  :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);
+    transform:translateX(-130%); animation:bjshine 4.2s ease-in-out infinite;
+  }
+  @keyframes bjshine{0%,56%{transform:translateX(-130%)} 76%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion: reduce){
+    :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-foto,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-rayo,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-mota,
+    :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .confirm.on::after,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h1{animation:none}
+    :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-mota,:is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) .bj-rayo{display:none}
+    :is([data-skin="barber"],[data-skin="king"],[data-skin="club"],[data-skin="acero"]) h1{background:none; color:var(--ink)}
+  }
+
+  /* ------------------------------------------------------------
+     Variante "REALEZA" — "skin":"king" (The King Barber Shop).
+     Hereda todo el DECÓ de arriba (negro, oro, vidrio) y solo
+     cambia dos cosas: la tipografía —Playfair Display + Jost,
+     la misma de su tarjeta— y el fondo, que en vez de foto son
+     oros moviéndose y cambiando de tono.
+     ------------------------------------------------------------ */
+  [data-skin="king"]{
+    --bj-sans:"Jost",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --bj-deco:"Playfair Display",Georgia,"Times New Roman",serif;
+    --bj-oro:#d8b26a; --bj-oro-lt:#f6e0b0;
+    --bj-oroliq:linear-gradient(104deg,#7d5f22 0%,#d8b26a 20%,#f6e0b0 36%,#fff6e0 47%,#f3c9a2 58%,#d8b26a 76%,#7d5f22 100%);
+    --bj-vidrio:rgba(19,16,20,.74);
+    --bj-filo:rgba(216,178,106,.32);
+    --bj-filo2:rgba(216,178,106,.62);
+  }
+  [data-skin="king"] body{background:#060507}
+  [data-skin="king"] .amb{background:#060507}
+  [data-skin="king"] .bj-foto{
+    background:
+      radial-gradient(52% 38% at 18% 20%,rgba(246,224,176,.58),transparent 62%),
+      radial-gradient(46% 34% at 84% 28%,rgba(243,201,162,.5),transparent 64%),
+      radial-gradient(62% 44% at 46% 86%,rgba(138,106,43,.7),transparent 66%);
+    background-size:180% 180%,170% 170%,200% 200%;
+    transform:none;
+    animation:kingvaiven 26s ease-in-out infinite alternate,
+              kingtono 19s ease-in-out infinite alternate;
+  }
+  @keyframes kingvaiven{
+    0%{background-position:0% 0%, 100% 0%, 50% 100%}
+    100%{background-position:100% 40%, 0% 60%, 20% 0%}
+  }
+  @keyframes kingtono{
+    0%{filter:blur(44px) hue-rotate(-9deg) saturate(1)}
+    100%{filter:blur(44px) hue-rotate(14deg) saturate(1.16)}
+  }
+  /* la Playfair no es condensada: se le quitan las mayúsculas y el
+     interletrado que necesitaba la Bebas */
+  [data-skin="king"] h1{
+    font-weight:700; text-transform:none; letter-spacing:.005em;
+    line-height:1.04; font-size:clamp(34px,9vw,46px);
+  }
+  [data-skin="king"] .back{font-weight:600; font-size:15px; letter-spacing:.02em}
+  [data-skin="king"] .month{font-weight:700; font-size:23px; letter-spacing:.01em}
+  [data-skin="king"] h2{font-weight:700; font-size:25px; text-transform:none; letter-spacing:.01em}
+  [data-skin="king"] .confirm{font-weight:700; font-size:22px; letter-spacing:.02em}
+  [data-skin="king"] .barbero .ini{font-weight:700; font-size:24px}
+  [data-skin="king"] .sel-fila .p,[data-skin="king"] .sel-tot em{font-weight:600; font-size:21px}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="king"] .bj-foto{animation:none; filter:blur(44px)}
+  }
+
+  /* ------------------------------------------------------------
+     Variante "CLUB" — "skin":"club" (RT Peluquería, Guaymas).
+     Mismo esqueleto DECÓ, pero azul marino con celeste y oro, y de
+     fondo su propia foto de la peluquería virada a marino.
+     ------------------------------------------------------------ */
+  [data-skin="club"]{
+    --bj-sans:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --bj-deco:"Prata",Georgia,"Times New Roman",serif;
+    /* azul y blanco, como su marca; el dorado solo en filos finos */
+    --bj-oro:#a9d8e8; --bj-oro-lt:#dff0f8;
+    --bj-oroliq:linear-gradient(104deg,#4d8fb0 0%,#7fc0da 16%,#a9d8e8 32%,#f4f8fb 46%,#ffffff 53%,#c9e7f2 66%,#7fc0da 84%,#4d8fb0 100%);
+    --bj-vidrio:rgba(12,31,53,.74);
+    --bj-filo:rgba(169,216,232,.26);
+    --bj-filo2:rgba(169,216,232,.55);
+  }
+  [data-skin="club"] body{background:#0c1f35}
+  [data-skin="club"] .amb{background:#0c1f35}
+  [data-skin="club"] .bj-foto{
+    background:url("img/rt-local.jpg?v=c94326db") center 36%/cover no-repeat;
+    filter:grayscale(1) blur(3px) brightness(.55) contrast(1.1);
+  }
+  [data-skin="club"] .bj-sombra{
+    background:
+      radial-gradient(120% 70% at 50% 0%,rgba(20,48,78,.62) 0%,rgba(12,31,53,.9) 58%,rgba(12,31,53,.97) 100%),
+      linear-gradient(180deg,rgba(12,31,53,.66) 0%,rgba(12,31,53,.34) 32%,rgba(12,31,53,.8) 100%);
+  }
+  [data-skin="club"] .bj-rayo{background:linear-gradient(90deg,transparent,rgba(169,216,232,.6),transparent)}
+  [data-skin="club"] .bj-mota{background:#a9d8e8; box-shadow:0 0 9px rgba(169,216,232,.9)}
+  /* la Cinzel es romana ancha: menos interletrado que la Bebas */
+  [data-skin="club"] h1{font-weight:400; font-size:clamp(28px,7.6vw,38px); letter-spacing:.05em; line-height:1.12}
+  [data-skin="club"] .back{font-weight:600; font-size:14px; letter-spacing:.08em}
+  [data-skin="club"] .month{font-weight:400; font-size:21px; letter-spacing:.06em}
+  [data-skin="club"] h2{font-weight:400; font-size:22px; letter-spacing:.08em}
+  [data-skin="club"] .confirm{font-weight:400; font-size:19px; letter-spacing:.08em}
+  [data-skin="club"] .day.sel,[data-skin="club"] .slot.sel{color:#0c1f35}
+  [data-skin="club"] .barbero .ini{font-weight:400; font-size:22px}
+  [data-skin="club"] .sel-fila .p,[data-skin="club"] .sel-tot em{font-weight:400; font-size:19px}
+
+  /* ------------------------------------------------------------
+     Variante "ACERO" — "skin":"acero" (Legado Barber 27).
+     Mismo esqueleto DECÓ pero en pizarra y cromo, con una sola
+     tipografía geométrica (Outfit) muy espaciada, como su rótulo.
+     ------------------------------------------------------------ */
+  [data-skin="acero"]{
+    --bj-sans:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --bj-deco:"Outfit",system-ui,sans-serif;
+    --bj-oro:#8fb2cc; --bj-oro-lt:#eef2f5;
+    --bj-oroliq:linear-gradient(104deg,#6f7d88 0%,#aeb9c2 16%,#e9eff3 34%,#ffffff 46%,#c3ced6 62%,#8b98a3 80%,#657280 100%);
+    --bj-vidrio:rgba(23,27,31,.74);
+    --bj-filo:rgba(200,210,218,.2);
+    --bj-filo2:rgba(200,210,218,.46);
+  }
+  [data-skin="acero"] body{background:#171b1f}
+  [data-skin="acero"] .amb{background:#171b1f}
+  [data-skin="acero"] .bj-foto{
+    background:url("img/lg-fondo-1.jpg?v=9d937a3b") 78% 34%/cover no-repeat;
+    filter:grayscale(.82) blur(3px) brightness(.5) contrast(1.1);
+  }
+  [data-skin="acero"] .bj-sombra{
+    background:
+      radial-gradient(120% 70% at 50% 0%,rgba(68,85,101,.55) 0%,rgba(23,27,31,.9) 58%,rgba(23,27,31,.97) 100%),
+      linear-gradient(180deg,rgba(23,27,31,.62) 0%,rgba(23,27,31,.3) 32%,rgba(23,27,31,.8) 100%);
+  }
+  [data-skin="acero"] .bj-rayo{background:linear-gradient(90deg,transparent,rgba(233,239,243,.6),transparent)}
+  [data-skin="acero"] .bj-mota{background:#c3ced6; box-shadow:0 0 9px rgba(200,210,218,.8)}
+  /* Outfit no es condensada: pesos ligeros y mucho interletrado, como el rótulo */
+  [data-skin="acero"] h1{font-weight:300; font-size:clamp(28px,7.4vw,38px); letter-spacing:.2em}
+  [data-skin="acero"] .back{font-weight:500; font-size:13px; letter-spacing:.16em}
+  [data-skin="acero"] .month{font-weight:400; font-size:19px; letter-spacing:.2em}
+  [data-skin="acero"] h2{font-weight:300; font-size:19px; letter-spacing:.26em}
+  [data-skin="acero"] .confirm{font-weight:600; font-size:16px; letter-spacing:.2em}
+  [data-skin="acero"] .day.sel,[data-skin="acero"] .slot.sel{color:#171b1f}
+  [data-skin="acero"] .barbero .ini{font-weight:300; font-size:22px}
+  [data-skin="acero"] .sel-fila .p,[data-skin="acero"] .sel-tot em{font-weight:400; font-size:18px}
+
+
+  /* Los hairlines del bloque DECÓ son dorados; club y acero los quieren
+     en su propio tono (celeste / cromo). */
+  :is([data-skin="club"],[data-skin="acero"]) .orn::before,
+  :is([data-skin="club"],[data-skin="acero"]) .orn::after{background:linear-gradient(90deg,transparent,var(--bj-filo2))}
+  :is([data-skin="club"],[data-skin="acero"]) h2::before,
+  :is([data-skin="club"],[data-skin="acero"]) h2::after{background:var(--bj-filo)}
+  :is([data-skin="club"],[data-skin="acero"]) .sel-caja{border-color:var(--bj-filo)}
+  :is([data-skin="club"],[data-skin="acero"]) .sel-fila{border-bottom-color:var(--bj-filo)}
+  :is([data-skin="club"],[data-skin="acero"]) .sel-tot{border-top-color:var(--bj-filo2)}
+  :is([data-skin="club"],[data-skin="acero"]) .barbero{border-color:var(--bj-filo)}
+  :is([data-skin="club"],[data-skin="acero"]) .barbero .av{border-color:var(--bj-filo2)}
+  :is([data-skin="club"],[data-skin="acero"]) .day,
+  :is([data-skin="club"],[data-skin="acero"]) .svs button,
+  :is([data-skin="club"],[data-skin="acero"]) .tel-caja,
+  :is([data-skin="club"],[data-skin="acero"]) .slot{border-color:var(--bj-filo)}
+  :is([data-skin="club"],[data-skin="acero"]) .navmes button{border-color:var(--bj-filo); color:var(--bj-oro)}
+
+  /* ============================================================
+     SKIN "ROSAS" — se activa con "skin":"rosas" en la agenda.
+     Studio Nails: rosas de todos los tonos (como su local) y el
+     dorado reservado al logo. Anidado para no tocar a los demás.
+     ============================================================ */
+  .ro{display:none}
+  [data-skin="rosas"] .ro{display:block}
+  [data-skin="rosas"]{
+    --ro-sans:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --ro-serif:"Playfair Display",Georgia,"Times New Roman",serif;
+    --ro-papel:#ffffff; --ro-rosa:#ff5fa8; --ro-dp:#d81b73; --ro-magenta:#b4126a;
+    --ro-filo:linear-gradient(135deg,#ff8ec4,#d81b73 30%,#ff5fa8 55%,#b4126a 78%,#e8368f);
+    --ro-sombra:0 14px 34px rgba(180,18,106,.14);
+  }
+  [data-skin="rosas"] body{
+    font-family:var(--ro-sans);
+    background:linear-gradient(174deg,#fff7fa 0%,#ffe0ee 26%,#ffd0e6 52%,#ffe9f3 76%,#fff7fa 100%);
+    background-size:100% 250%; background-attachment:fixed;
+    animation:romudar 32s ease-in-out infinite alternate;
+  }
+  @keyframes romudar{to{background-position:0 100%}}
+  [data-skin="rosas"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  [data-skin="rosas"] .ro-blob{position:absolute; border-radius:50%; filter:blur(72px)}
+  [data-skin="rosas"] .rb1{width:420px;height:420px; background:#e8368f; opacity:.42; left:-160px; top:-130px; animation:rodrift1 28s ease-in-out infinite alternate}
+  [data-skin="rosas"] .rb2{width:360px;height:360px; background:#ff8ec4; opacity:.5; right:-150px; top:32%; animation:rodrift2 34s ease-in-out infinite alternate}
+  [data-skin="rosas"] .rb3{width:390px;height:390px; background:#b4126a; opacity:.26; left:-140px; bottom:-160px; animation:rodrift3 31s ease-in-out infinite alternate}
+  @keyframes rodrift1{to{transform:translate(74px,58px) scale(1.16)}}
+  @keyframes rodrift2{to{transform:translate(-64px,-48px) scale(.92)}}
+  @keyframes rodrift3{to{transform:translate(60px,-64px) scale(1.14)}}
+  [data-skin="rosas"] .ro-chispa{
+    position:absolute; width:5px; height:5px; border-radius:50%;
+    background:#ffd6e8; box-shadow:0 0 10px rgba(255,95,168,.95);
+    animation:rosubir 17s linear infinite;
+  }
+  @keyframes rosubir{
+    0%{transform:translateY(105vh) scale(.5); opacity:0}
+    12%{opacity:1} 86%{opacity:.55}
+    100%{transform:translateY(-8vh) scale(1.15); opacity:0}
+  }
+  [data-skin="rosas"] .ro-haz{
+    position:absolute; width:190%; height:3px; left:-45%; top:34%;
+    background:linear-gradient(90deg,transparent,rgba(216,27,115,.7),transparent);
+    filter:blur(2.5px); animation:rohaz 13s ease-in-out infinite;
+  }
+  @keyframes rohaz{0%,100%{transform:translateY(-180px) rotate(-11deg); opacity:0} 50%{transform:translateY(180px) rotate(-11deg); opacity:.85}}
+  [data-skin="rosas"] .back{
+    background:var(--ro-papel); border:1.5px solid transparent;
+    background-image:linear-gradient(var(--ro-papel),var(--ro-papel)),var(--ro-filo);
+    background-origin:border-box; background-clip:padding-box,border-box;
+    box-shadow:var(--ro-sombra);
+  }
+  [data-skin="rosas"] .back .flechita{color:var(--ro-dp)}
+  [data-skin="rosas"] h1{
+    font-family:var(--ro-sans); font-weight:800; text-transform:uppercase;
+    letter-spacing:-.04em; font-size:clamp(30px,8.4vw,40px);
+    background:linear-gradient(104deg,#b4126a 0%,#e8368f 22%,#ff8ec4 44%,#ffd6e8 52%,#ff5fa8 66%,#d81b73 84%,#b4126a 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:rofoil 8s linear infinite;
+  }
+  @keyframes rofoil{to{background-position:220% 0}}
+  [data-skin="rosas"] .sub{color:var(--muted); font-weight:600}
+  [data-skin="rosas"] .orn span{color:var(--ro-dp)}
+  [data-skin="rosas"] .navmes button{background:var(--ro-papel); border:1.5px solid rgba(216,27,115,.4); color:var(--ro-dp)}
+  [data-skin="rosas"] .month{font-family:var(--ro-serif); font-weight:700; letter-spacing:.06em; text-transform:none; font-size:17px; color:var(--ink)}
+  [data-skin="rosas"] .month small{color:var(--muted)}
+  [data-skin="rosas"] .dow{color:var(--muted); font-weight:700}
+  [data-skin="rosas"] .day{
+    border-radius:12px; background:var(--ro-papel);
+    border:1.5px solid rgba(216,27,115,.2); font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  [data-skin="rosas"] .day:disabled{background:none; border-color:transparent}
+  @media (hover:hover){[data-skin="rosas"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); box-shadow:0 8px 16px rgba(180,18,106,.16)}}
+  [data-skin="rosas"] .day.sel{background:var(--ro-filo); border-color:transparent; color:#fff; font-weight:800}
+  [data-skin="rosas"] h2{font-family:var(--ro-serif); font-size:20px; font-weight:700; letter-spacing:0; text-transform:none; color:var(--ink)}
+  [data-skin="rosas"] h2::before,[data-skin="rosas"] h2::after{background:var(--ro-filo); height:1.5px; opacity:.6}
+  [data-skin="rosas"] .slot{
+    border-radius:12px; background:var(--ro-papel);
+    border:1.5px solid rgba(216,27,115,.32); font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  @media (hover:hover){[data-skin="rosas"] .slot:not(:disabled):not(.sel):hover{transform:translateY(-2px); box-shadow:0 8px 16px rgba(180,18,106,.16)}}
+  [data-skin="rosas"] .slot.sel{background:var(--ro-filo); border-color:transparent; color:#fff; font-weight:800}
+  [data-skin="rosas"] .barbero{background:var(--ro-papel); border-color:rgba(216,27,115,.3)}
+  [data-skin="rosas"] .barbero .ini{background:rgba(255,214,232,.9); border-color:rgba(216,27,115,.4); color:var(--ro-magenta)}
+  [data-skin="rosas"] .barbero.sel{background:var(--ro-filo); border-color:transparent; color:#fff}
+  [data-skin="rosas"] .barbero.sel .ini{background:rgba(255,255,255,.55); color:var(--ro-magenta); border-color:rgba(255,255,255,.8)}
+  [data-skin="rosas"] .sel-caja{
+    background:var(--ro-papel); border:1.5px solid transparent; border-radius:22px;
+    background-image:linear-gradient(var(--ro-papel),var(--ro-papel)),var(--ro-filo);
+    background-origin:border-box; background-clip:padding-box,border-box;
+    box-shadow:var(--ro-sombra);
+  }
+  [data-skin="rosas"] .sel-fila .p,[data-skin="rosas"] .sel-tot em{color:var(--ro-dp)}
+  [data-skin="rosas"] .confirm{
+    position:relative; overflow:hidden;
+    background:var(--ro-filo); background-size:180% 100%;
+    color:#fff; border-radius:99px; padding:19px;
+    font-family:var(--ro-sans); font-size:15.5px; font-weight:800; letter-spacing:-.01em;
+    box-shadow:0 16px 34px rgba(216,27,115,.32);
+    transition:background-position .5s ease, opacity .15s ease;
+  }
+  [data-skin="rosas"] .confirm.on:hover{background-position:100% 0}
+  [data-skin="rosas"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);
+    transform:translateX(-130%); animation:roshine 4s ease-in-out infinite;
+  }
+  @keyframes roshine{0%,55%{transform:translateX(-130%)} 75%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="rosas"] body,[data-skin="rosas"] .ro-blob,[data-skin="rosas"] .ro-haz,
+    [data-skin="rosas"] .ro-chispa,[data-skin="rosas"] .confirm.on::after,[data-skin="rosas"] h1{animation:none}
+    [data-skin="rosas"] .ro-chispa{display:none}
+    [data-skin="rosas"] h1{background:none; color:var(--ink)}
+  }
+
+  /* ============================================================
+     SKIN "GARAGE" — se activa con "skin":"garage" en la agenda.
+     Guerrero's Garage Barber: negro, ROJO y hueso, con la cortina
+     de lámina y las chispas de su tarjeta. Tipografía Rye (la del
+     logo) + Oswald. Todo anidado bajo [data-skin="garage"] para
+     no tocar a los demás negocios.
+     ============================================================ */
+  .gg{display:none}
+  [data-skin="garage"] .gg{display:block}
+  [data-skin="garage"]{
+    --gg-sans:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --gg-cond:"Oswald",'Arial Narrow',system-ui,sans-serif;
+    --gg-disp:"Rye","Rockwell",Georgia,serif;
+    --gg-hueso:#efe5d3; --gg-rojo:#c1262f; --gg-rojo-lt:#e5433a;
+    --gg-sangre:linear-gradient(102deg,#75121a 0%,#c1262f 24%,#e5433a 44%,#ff6a55 52%,#e5433a 62%,#c1262f 80%,#75121a 100%);
+    --gg-filo:rgba(229,67,58,.36);
+    --gg-panel:rgba(24,19,18,.78);
+  }
+  [data-skin="garage"] body{
+    font-family:var(--gg-sans);
+    background:linear-gradient(178deg,#12100e 0%,#070606 40%,#100d0c 70%,#070606 100%);
+    background-size:100% 240%; background-attachment:fixed;
+    animation:ggmudar 34s ease-in-out infinite alternate;
+  }
+  @keyframes ggmudar{to{background-position:0 100%}}
+  [data-skin="garage"] .amb{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  /* cortina de lámina corrugada, como la portada de la tarjeta */
+  [data-skin="garage"] .gg-cortina{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 56% at 50% 0%, rgba(193,38,47,.26), transparent 62%),
+      repeating-linear-gradient(90deg,
+        #191413 0 12px, #221b18 12px 20px, #0f0c0b 20px 30px, #221b18 30px 38px);
+    opacity:.5;
+  }
+  [data-skin="garage"] .gg-sombra{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 74% at 50% 0%, rgba(0,0,0,.32), rgba(0,0,0,.84) 72%),
+      linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.46) 40%, rgba(0,0,0,.88));
+  }
+  [data-skin="garage"] .gg-chispa{
+    position:absolute; bottom:-12px; width:2.5px; height:2.5px; border-radius:99px;
+    background:#ff8a5c; box-shadow:0 0 7px 2px rgba(255,110,60,.6);
+    opacity:0; animation:ggsubir 15s linear infinite;
+  }
+  @keyframes ggsubir{
+    0%{opacity:0; transform:translateY(0) translateX(0) scale(.7)}
+    12%{opacity:.9} 70%{opacity:.6}
+    100%{opacity:0; transform:translateY(-102vh) translateX(26px) scale(1.15)}
+  }
+  [data-skin="garage"] .gg-haz{
+    position:absolute; width:190%; height:3px; left:-45%; top:30%;
+    background:linear-gradient(90deg,transparent,rgba(229,67,58,.6),transparent);
+    filter:blur(3px); animation:gghaz 14s ease-in-out infinite;
+  }
+  @keyframes gghaz{0%,100%{transform:translateY(-200px) rotate(-9deg); opacity:0} 50%{transform:translateY(200px) rotate(-9deg); opacity:.8}}
+
+  [data-skin="garage"] .back{
+    background:var(--gg-panel); border:1px solid var(--gg-filo); color:var(--gg-hueso);
+    font-family:var(--gg-cond); letter-spacing:.12em; text-transform:uppercase;
+  }
+  [data-skin="garage"] .back .flechita{color:var(--gg-rojo-lt)}
+  [data-skin="garage"] h1{
+    font-family:var(--gg-disp); font-weight:400; text-transform:uppercase;
+    letter-spacing:.01em; font-size:clamp(26px,7.4vw,36px); line-height:1.08;
+    background:var(--gg-sangre); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:ggfoil 8s ease-in-out infinite;
+  }
+  @keyframes ggfoil{0%,100%{background-position:0 0} 50%{background-position:100% 0}}
+  [data-skin="garage"] .sub{
+    color:var(--muted); font-family:var(--gg-cond);
+    letter-spacing:.24em; text-transform:uppercase; font-size:11px;
+  }
+  [data-skin="garage"] .orn span{color:var(--gg-rojo-lt)}
+  [data-skin="garage"] .navmes button{
+    background:var(--gg-panel); border:1px solid var(--gg-filo); color:var(--gg-hueso);
+  }
+  [data-skin="garage"] .month{
+    font-family:var(--gg-cond); font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; font-size:16px; color:var(--gg-hueso);
+  }
+  [data-skin="garage"] .month small{color:var(--muted)}
+  [data-skin="garage"] .dow{
+    color:var(--muted); font-family:var(--gg-cond); font-weight:500; letter-spacing:.1em;
+  }
+  [data-skin="garage"] .day{
+    border-radius:11px; background:var(--gg-panel);
+    border:1px solid rgba(239,229,211,.13); color:var(--gg-hueso);
+    font-family:var(--gg-cond); font-weight:500;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  [data-skin="garage"] .day:disabled{background:none; border-color:transparent}
+  @media (hover:hover){[data-skin="garage"] .day:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--gg-filo)}}
+  [data-skin="garage"] .day.sel{background:var(--gg-sangre); border-color:transparent; color:#fff8f2; font-weight:600}
+  [data-skin="garage"] h2{
+    font-family:var(--gg-disp); font-weight:400; font-size:19px;
+    letter-spacing:.01em; text-transform:uppercase; color:var(--gg-hueso);
+  }
+  [data-skin="garage"] h2::before,[data-skin="garage"] h2::after{background:var(--gg-filo); height:1px; opacity:.8}
+  [data-skin="garage"] .slot{
+    border-radius:11px; background:var(--gg-panel);
+    border:1px solid rgba(239,229,211,.15); color:var(--gg-hueso);
+    font-family:var(--gg-cond); font-weight:500; letter-spacing:.06em;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  @media (hover:hover){[data-skin="garage"] .slot:not(:disabled):not(.sel):hover{transform:translateY(-2px); border-color:var(--gg-filo)}}
+  [data-skin="garage"] .slot.sel{background:var(--gg-sangre); border-color:transparent; color:#fff8f2; font-weight:600}
+  [data-skin="garage"] .barbero{background:var(--gg-panel); border-color:rgba(239,229,211,.15); color:var(--gg-hueso)}
+  [data-skin="garage"] .barbero .ini{background:rgba(193,38,47,.16); border-color:var(--gg-filo); color:var(--gg-hueso)}
+  @media (hover:hover){[data-skin="garage"] .barbero:not(.sel):hover{border-color:var(--gg-filo)}}
+  [data-skin="garage"] .barbero.sel{background:var(--gg-sangre); border-color:transparent; color:#fff8f2}
+  [data-skin="garage"] .sel-caja{
+    background:var(--gg-panel); border:1px solid var(--gg-filo); border-radius:18px;
+    box-shadow:0 18px 44px rgba(0,0,0,.5);
+  }
+  [data-skin="garage"] .sel-fila .p,[data-skin="garage"] .sel-tot em{color:var(--gg-rojo-lt)}
+  [data-skin="garage"] .confirm{
+    position:relative; overflow:hidden;
+    background:var(--gg-sangre); background-size:220% 100%;
+    color:#fff8f2; border-radius:99px; padding:18px;
+    font-family:var(--gg-cond); font-size:14px; font-weight:600;
+    letter-spacing:.16em; text-transform:uppercase;
+    box-shadow:0 14px 32px rgba(120,16,22,.45);
+    transition:background-position .5s ease, opacity .15s ease;
+  }
+  [data-skin="garage"] .confirm.on:hover{background-position:100% 0}
+  [data-skin="garage"] .confirm.on::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(104deg,transparent 34%,rgba(255,255,255,.3) 50%,transparent 66%);
+    transform:translateX(-130%); animation:ggshine 4.6s ease-in-out infinite;
+  }
+  @keyframes ggshine{0%,58%{transform:translateX(-130%)} 88%,100%{transform:translateX(130%)}}
+  @media (prefers-reduced-motion: reduce){
+    [data-skin="garage"] body,[data-skin="garage"] .gg-chispa,[data-skin="garage"] .gg-haz,
+    [data-skin="garage"] .confirm.on::after,[data-skin="garage"] h1{animation:none}
+    [data-skin="garage"] .gg-chispa{display:none}
+    [data-skin="garage"] h1{background:none; color:var(--gg-hueso)}
+  }
+
+  /* ============================================================
+     AFINADO FINAL — va hasta abajo a propósito
+     Cada skin define su propia `transition` en .day y .slot, y varias
+     solo animan el transform: por eso el color de "seleccionado"
+     entraba de golpe y se sentía tosco. Esto empata en especificidad
+     con las reglas de skin y, por ir al final, gana. Se anima lo mismo
+     que ellos animaban, más el color.
+     ============================================================ */
+  [data-skin] .day,[data-skin] .slot,[data-skin] .barbero,[data-skin] .svs button{
+    transition:background .17s ease, background-color .17s ease, color .17s ease,
+               border-color .17s ease, box-shadow .17s ease,
+               transform .14s cubic-bezier(.2,.7,.3,1.2);
+  }
+  @media (prefers-reduced-motion: reduce){
+    [data-skin] .day,[data-skin] .slot,[data-skin] .barbero,[data-skin] .svs button{
+      transition:background .1s ease, color .1s ease;
+    }
+  }

@@ -4,6 +4,7 @@ node_modules/
 *.png
 dump_*.html
 dump_*.css
+dump_*.js
 show_*.js
 check_*.js
 inspect_*.js
@@ -14,4 +15,10 @@ extract_*.js
 capture_*.js
 fix_*.js
 patch_*.js
+make_*.js
+prepare_*.js
+screenshot_*.js
+sample_*.json
+test_exact_local.html
+citas_body.html
 mitarjeta_dump.html

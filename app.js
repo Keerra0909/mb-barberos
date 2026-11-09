@@ -194,6 +194,7 @@ function verificarPin() {
 }
 
 function iniciarSesion(rol) {
+    window.iniciarSesion = iniciarSesion;
     rolActual = rol;
     const loginScreen = document.getElementById('pantalla-login');
     const mainApp = document.getElementById('main-app');
@@ -1018,18 +1019,27 @@ window.cargarCitaEnPOS = function(id) {
     const telInput = document.getElementById('cliente-telefono');
     const nomInput = document.getElementById('cliente-nombre');
     const selCliente = document.getElementById('cliente-select-existente');
-    if (telInput) telInput.value = cita.telefono;
-    if (nomInput) nomInput.value = cita.cliente;
-    if (selCliente) selCliente.value = cita.telefono;
+    if (telInput) telInput.value = (cita.telefono || '').replace(/^52/, '').slice(-10);
+    if (nomInput) nomInput.value = cita.cliente || '';
+    if (selCliente) selCliente.value = telInput ? telInput.value : '';
     buscarClienteLealtad();
 
     const selBarbero = document.getElementById('barbero');
     if (selBarbero) selBarbero.value = cita.barbero;
 
-    serviciosActuales = [cita.servicio];
+    if (cita.servicios && Array.isArray(cita.servicios) && cita.servicios.length > 0) {
+        serviciosActuales = cita.servicios.map(s => typeof s === 'string' ? s : (s.t || s.nombre));
+    } else if (cita.servicio && cita.servicio.includes(' + ')) {
+        serviciosActuales = cita.servicio.split(' + ').map(s => s.trim());
+    } else if (cita.servicio) {
+        serviciosActuales = [cita.servicio];
+    } else {
+        serviciosActuales = ['Corte de cabello'];
+    }
+
     actualizarUISeleccion();
     const montoEl = document.getElementById('monto');
-    if (montoEl) montoEl.value = preciosBase[cita.servicio] || 220;
+    if (montoEl) montoEl.value = cita.monto || calcularTotalServicios(serviciosActuales);
 
     cita.estado = 'En Proceso';
     guardarDatos();

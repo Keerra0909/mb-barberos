@@ -1,0 +1,423 @@
+﻿{
+    "n":  "Barber Studio MB La Quemada",
+    "w":  "525581066554",
+    "card":  "/barberstudiomb",
+    "paso":  30,
+    "skin":  "plata",
+    "brand":  {
+                  "bg1":  "#0a0b0c",
+                  "bg2":  "#000000",
+                  "ink":  "#f3f5f7",
+                  "muted":  "#8b9299",
+                  "accent":  "#c9a248",
+                  "btn":  "rgba(10,11,12,.72)",
+                  "line":  "rgba(198,204,210,.24)",
+                  "chip":  "rgba(232,205,138,.10)",
+                  "sel":  "#e6ebef",
+                  "selink":  "#0a0b0c"
+              },
+    "dias":  {
+                 "0":  null,
+                 "1":  {
+                           "desde":  "11:00",
+                           "hasta":  "18:30"
+                       },
+                 "2":  {
+                           "desde":  "11:00",
+                           "hasta":  "18:30"
+                       },
+                 "3":  {
+                           "desde":  "10:00",
+                           "hasta":  "18:00"
+                       },
+                 "4":  {
+                           "desde":  "11:00",
+                           "hasta":  "18:30"
+                       },
+                 "5":  {
+                           "desde":  "11:00",
+                           "hasta":  "18:30"
+                       },
+                 "6":  {
+                           "desde":  "10:00",
+                           "hasta":  "16:30"
+                       }
+             },
+    "panel":  true,
+    "tituloBarberos":  "Elige tu barbero",
+    "barberos":  [
+                     {
+                         "id":  "carlos",
+                         "n":  "Carlos",
+                         "rol":  "Barbero",
+                         "foto":  "/eq/barberstudiomb-quemada-carlos.jpg?v=1790716677",
+                         "dias":  {
+                                      "0":  null,
+                                      "1":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:30"
+                                            },
+                                      "2":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:30"
+                                            },
+                                      "3":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:30"
+                                            },
+                                      "4":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:30"
+                                            },
+                                      "5":  {
+                                                "desde":  "11:00",
+                                                "hasta":  "18:30"
+                                            },
+                                      "6":  null
+                                  },
+                         "w":  "525537184088",
+                         "off":  true,
+                         "tieneClave":  true
+                     },
+                     {
+                         "id":  "eq",
+                         "n":  "Sebas aprendis",
+                         "foto":  "/eq/barberstudiomb-quemada-eq.jpg?v=1790716729",
+                         "w":  "525548152963",
+                         "off":  true,
+                         "tieneClave":  true
+                     }
+                 ],
+    "servicios":  [
+                      {
+                          "t":  "Corte de cabello",
+                          "p":  "$220",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte a tu estilo, con máquina y tijera.",
+                                        "Perfilado de contornos y acabado.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Corte de barba (ritual)",
+                          "p":  "$220",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Ritual completo de barba.",
+                                        "Toalla caliente, navaja y bálsamo.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Corte y barba",
+                          "p":  "$380",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte completo.",
+                                        "Barba perfilada con navaja.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Tinte de barba",
+                          "p":  "$120",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Cubre canas y empareja el tono.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Servicio express",
+                          "p":  "$120",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Retoque o limpieza de contornos.",
+                                        "Para llegar entre corte y corte.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Servicio luxury",
+                          "p":  "$550",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "La experiencia completa de la casa.",
+                                        "Corte, barba y facial sin prisa.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Grecas",
+                          "p":  "$80",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Diseño a mano alzada.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Perfilado de cejas",
+                          "p":  "$80",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Perfilado y limpieza de cejas.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Limpieza facial",
+                          "p":  "$180",
+                          "dur":  "30 min",
+                          "min":  30,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Limpieza profunda con productos rejuvenecedores.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial y corte",
+                          "p":  "$330",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte completo más limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial, corte y barba",
+                          "p":  "$480",
+                          "dur":  "1 hora 30 min",
+                          "min":  90,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Corte, barba y limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      },
+                      {
+                          "t":  "Facial y barba",
+                          "p":  "$330",
+                          "dur":  "1 hora",
+                          "min":  60,
+                          "prep":  0,
+                          "quien":  [
+                                        "carlos",
+                                        "eq"
+                                    ],
+                          "cat":  "",
+                          "insignia":  "",
+                          "precios":  [
+
+                                      ],
+                          "items":  [
+                                        "Barba al ritual más limpieza facial.",
+                                        "Incluye black mask, bebida de cortesía, música a tu elección y masaje"
+                                    ]
+                      }
+                  ],
+    "modulos":  {
+                    "agendaPro":  false,
+                    "equipo":  true,
+                    "accesos":  true,
+                    "pagos":  false,
+                    "recordatorios":  true,
+                    "sync":  true,
+                    "editor":  true,
+                    "clientes":  false,
+                    "sellos":  true
+                },
+    "sucursales":  [
+                       {
+                           "s":  "barberstudiomb-morena",
+                           "n":  "La Morena"
+                       },
+                       {
+                           "s":  "barberstudiomb-quemada",
+                           "n":  "La Quemada"
+                       }
+                   ],
+    "walletColor":  "#0a0b0c",
+    "cerrados":  [
+                     {
+                         "f":  "2026-12-25",
+                         "b":  "carlos"
+                     },
+                     {
+                         "f":  "2027-01-01",
+                         "b":  "carlos"
+                     }
+                 ],
+    "cliente":  {
+                    "mover":  true,
+                    "aviso":  0
+                },
+    "formulario":  {
+                       "servicio":  true,
+                       "nombre":  true,
+                       "tel":  true,
+                       "cierre":  "directo"
+                   },
+    "avisos":  {
+                   "rec":  1,
+                   "auto":  true,
+                   "negocio":  {
+                                   "on":  true,
+                                   "quien":  "sistema",
+                                   "tels":  [
+
+                                            ]
+                               },
+                   "textos":  {
+                                  "confirmacion":  "Hola[ {nombre}]! Aquí {negocio}. Tu servicio quedó reservado: {fecha}, {hora}[ con {persona}][ · {servicio}]. Si algo cambia, contéstanos por aquí."
+                              }
+               },
+    "walletLogo":  "/eq/barberstudiomb-quemada-wallet.png?v=1787086038",
+    "fidelidad":  {
+                      "premios":  [
+                                      {
+                                          "cuesta":  8,
+                                          "que":  "Corte gratis"
+                                      }
+                                  ],
+                      "meta":  8,
+                      "premio":  "Corte gratis",
+                      "quien":  "negocio"
+                  },
+    "bienvenida":  true,
+    "walletDiseno":  {
+                         "icono":  "tijeras",
+                         "color":  "#e6ebef",
+                         "fondo":  "marca",
+                         "foto":  true,
+                         "n":  8,
+                         "v":  1787952391,
+                         "textos":  true
+                     },
+    "walletNombre":  "Barber Studio MB",
+    "edit":  {
+                 "ord-e334":  "0,2,1"
+             },
+    "icalOn":  true,
+    "gcalOn":  true,
+    "avisosVivos":  true
+}
